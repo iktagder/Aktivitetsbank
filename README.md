@@ -1,5 +1,12 @@
 # Aktivitetsbank for videregående skoler
 
-# `json-server db.json`
 
-Starter API.
+## Kommandoer
+
+## `json-server db.json`
+
+Starter mock-API.
+
+## `elm-app start`
+
+Starter webapplikasjon.
