@@ -4,6 +4,8 @@ import Html exposing (Html, div, img, text)
 import Material as Material
 import Material.Icon as Icon
 import Material.Layout as Layout
+import Modules.Aktivitet as Aktivitet
+import Material.Helpers as Helpers
 
 
 -- MODEL
@@ -11,34 +13,20 @@ import Material.Layout as Layout
 
 type alias Model =
     { mdl : Material.Model
-    , aktiviteter : List Aktivitet
+    , aktiviteter : Aktivitet.Model
     }
 
 
-type alias Aktivitet =
-    { navn : String
-    , beskrivelse : String
-    , omfang : Int
-    , skole : String
-    , aktivitetstype : String
-    , deltakere : List Deltaker
-    }
-
-
-type alias Deltaker =
-    { programomrade : String
-    , trinn : String
-    , fag : String
-    , timer : String
-    , kompetansemal : String
+model : Model
+model =
+    { mdl = Material.model
+    , aktiviteter = Aktivitet.model
     }
 
 
 init : String -> ( Model, Cmd Msg )
-init path =
-    ( { mdl = Material.model
-      , aktiviteter = []
-      }
+init x =
+    ( model
     , Cmd.none
     )
 
@@ -48,16 +36,32 @@ init path =
 
 
 type Msg
-    = NoOp
-    | Mdl (Material.Msg Msg)
+    = Mdl (Material.Msg Msg)
+    | AktivitetMsg Aktivitet.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    ( model, Cmd.none )
+    case msg of
+        Mdl m ->
+            Material.update Mdl m model
+
+        AktivitetMsg aktivitetMsg ->
+            Helpers.lift .aktiviteter
+                (\m x -> { m | aktiviteter = x })
+                AktivitetMsg
+                Aktivitet.update
+                aktivitetMsg
+                model
 
 
 
+{--let
+                ( aktiviteter, aktivitetCmd ) =
+                    Aktivitet.update aktivitetMsg model.aktiviteter
+            in
+                ( { model | aktiviteter = aktiviteter }, Cmd.map AktivitetMsg aktivitetCmd )
+--}
 -- VIEW
 
 
@@ -97,7 +101,8 @@ viewHeader model =
 -}
 viewMain : Model -> List (Html Msg)
 viewMain model =
-    []
+    [ Html.map AktivitetMsg (Aktivitet.view model.aktiviteter)
+    ]
 
 
 subscriptions : Model -> Sub Msg

@@ -3,10 +3,10 @@
 
 ## Kommandoer
 
-## `json-server db.json`
+### `json-server db.json`
 
 Starter mock-API.
 
-## `elm-app start`
+### `elm-app start`
 
 Starter webapplikasjon.
