@@ -4,8 +4,9 @@ import Html exposing (Html, div, img, text)
 import Material as Material
 import Material.Icon as Icon
 import Material.Layout as Layout
-import Modules.Aktivitet as Aktivitet
+import Pages.AktivitetsListe as Aktiviteter
 import Material.Helpers as Helpers
+import Material.Grid as Grid
 
 
 -- MODEL
@@ -13,19 +14,21 @@ import Material.Helpers as Helpers
 
 type alias Model =
     { mdl : Material.Model
-    , aktiviteter : Aktivitet.Model
+    , aktiviteter : Aktiviteter.Model
+    , valgtAktivitet : Maybe Aktiviteter.Aktivitet
     }
 
 
 model : Model
 model =
     { mdl = Material.model
-    , aktiviteter = Aktivitet.model
+    , aktiviteter = Aktiviteter.model
+    , valgtAktivitet = Nothing
     }
 
 
 init : String -> ( Model, Cmd Msg )
-init x =
+init ikkeibruk =
     ( model
     , Cmd.none
     )
@@ -37,7 +40,7 @@ init x =
 
 type Msg
     = Mdl (Material.Msg Msg)
-    | AktivitetMsg Aktivitet.Msg
+    | AktiviteterMsg Aktiviteter.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -46,13 +49,14 @@ update msg model =
         Mdl m ->
             Material.update Mdl m model
 
-        AktivitetMsg aktivitetMsg ->
-            Helpers.lift .aktiviteter
-                (\m x -> { m | aktiviteter = x })
-                AktivitetMsg
-                Aktivitet.update
-                aktivitetMsg
-                model
+        AktiviteterMsg aktiviteterMsg ->
+            let
+                ( aktiviteter_, cmd, valgtAktivitet_ ) =
+                    Aktiviteter.update aktiviteterMsg model.aktiviteter
+            in
+                ( { model | aktiviteter = aktiviteter_, valgtAktivitet = valgtAktivitet_ }
+                , Cmd.map AktiviteterMsg cmd
+                )
 
 
 
@@ -88,7 +92,7 @@ viewHeader model =
         , Layout.navigation
             [{--Options.onClick <| NavigateTo RouteInnlogging --}
             ]
-            [ Layout.link [] [ Icon.view "face" [ Icon.size18 ], text " Innlogging" ]
+            [ Layout.link [] [ Icon.view "face" [ Icon.size18 ], text " adm\\oae" ]
             ]
         ]
     ]
@@ -101,7 +105,12 @@ viewHeader model =
 -}
 viewMain : Model -> List (Html Msg)
 viewMain model =
-    [ Html.map AktivitetMsg (Aktivitet.view model.aktiviteter)
+    [ Html.map AktiviteterMsg (Aktiviteter.view model.aktiviteter)
+    , Grid.grid []
+        [ Grid.cell [ Grid.size Grid.Desktop 10, Grid.offset Grid.Desktop 2 ]
+            [ text <| toString model.valgtAktivitet
+            ]
+        ]
     ]
 
 
