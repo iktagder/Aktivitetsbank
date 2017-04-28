@@ -1,0 +1,33 @@
+﻿{
+  "iisSettings": {
+    "windowsAuthentication": true,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "http://localhost:5100/",
+      "sslPort": 0
+    }
+  },
+  "profiles": {
+    "IIS Express": {
+      "commandName": "IISExpress",
+      "launchBrowser": true,
+      "launchUrl": "api/employees",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "VAF.AD.API": "http://localhost:5000/",
+        "VAF.AD.API.PATH": "api/" 
+      }
+    },
+    "VAF.Aktivitetsbank.API": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "api/employees",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "VAF.AD.API": "http://localhost:5000/",
+        "VAF.AD.API.PATH": "api/" 
+      },
+      "applicationUrl": "http://localhost:57486"
+    }
+  }
+}
