@@ -11,11 +11,11 @@
     "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,
-      "launchUrl": "api/employees",
+      "launchUrl": "api/AktivitetsbankMetadata",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "VAF.AD.API": "http://localhost:5000/",
-        "VAF.AD.API.PATH": "api/" 
+        "VAF.AD.API.PATH": "api/"
       }
     },
     "VAF.Aktivitetsbank.API": {

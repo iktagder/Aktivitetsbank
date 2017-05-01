@@ -4,7 +4,7 @@ using System.Text;
 
 namespace VAF.Aktivitetsbank.Application.Queries
 {
-    public class EmployeesQuery : IQuery
+    public class AktivitetsbankMetadataQuery : IQuery
     {
     }
 }

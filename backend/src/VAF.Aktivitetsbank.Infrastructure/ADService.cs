@@ -1,24 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using VAF.Aktivitetsbank.Application;
 using VAF.Aktivitetsbank.Application.Handlers;
+using VAF.Aktivitetsbank.Data;
 
 namespace VAF.Aktivitetsbank.Infrastructure
 {
     public class AdService : IAdService
     {
         private readonly IAdClient _adClient;
+        private readonly AktivitetsbankContext _context;
 
-        public AdService(IAdClient adClient)
+        public AdService(IAdClient adClient, AktivitetsbankContext context)
         {
             _adClient = adClient;
+            _context = context;
         }
         public IList<Employee> GetEmployees()
         {
-            //return (IList<Employee>) _employees.Select(x => new Employee() {x.FirstName, x.LastName, x.AgressoResourceId});
             return _employees;
         }
 

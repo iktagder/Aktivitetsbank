@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -17,8 +18,11 @@ using Swashbuckle.AspNetCore.Swagger;
 using VAF.Aktivitetsbank.Application;
 using VAF.Aktivitetsbank.Application.Commands;
 using VAF.Aktivitetsbank.Application.Handlers;
+using VAF.Aktivitetsbank.Application.Handlers.Dtos;
 using VAF.Aktivitetsbank.Application.Queries;
 using VAF.Aktivitetsbank.API.Authorization;
+using VAF.Aktivitetsbank.Data;
+using VAF.Aktivitetsbank.Data.Entiteter;
 using VAF.Aktivitetsbank.Domain;
 using VAF.Aktivitetsbank.Infrastructure;
 using Employee = VAF.Aktivitetsbank.Application.Handlers.Employee;
@@ -74,15 +78,16 @@ namespace VAF.Aktivitetsbank.API
             {
                 services.AddSingleton<IAuthorizationHandler, PhoneAdminAuthHandler>();
             }
+            services.AddDbContext<AktivitetsbankContext>(
+                options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
-            //services.AddMvc();
             services.AddMvc(opts =>
             {
                 opts.Filters.Add(new CustomAuthorize(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build()));
-                var policy = new AuthorizationPolicyBuilder()
-                    .RequireAuthenticatedUser()
-                    .Build();
-                opts.Filters.Add(new AuthorizeFilter(policy));
+                //var policy = new AuthorizationPolicyBuilder()
+                //    .RequireAuthenticatedUser()
+                //    .Build();
+                //opts.Filters.Add(new AuthorizeFilter(policy));
             });
             services.AddCors();
 
@@ -99,11 +104,12 @@ namespace VAF.Aktivitetsbank.API
             builder.RegisterType<EventDispatcher>().As<IEventDispatcher>();
             builder.RegisterType<NotificationQueueHandler>().As<IEventHandler<NumberChangedEvent>>();
 
-            builder.RegisterType < EmployeesQueryHandler>().As<IQueryHandler<EmployeesQuery, IList<Employee>>>();
+            builder.RegisterType < AktivitetsbankMetadataQueryHandler>().As<IQueryHandler<AktivitetsbankMetadataQuery, AktivitetsbankMetadata>>();
             builder.RegisterType < EmployeesSearchQueryHandler>().As<IQueryHandler<EmployeesSearchQuery, IList<EmployeeListItem>>>();
             builder.RegisterType < EmployeeQueryHandler>().As<IQueryHandler<EmployeeQuery, Employee>>();
             builder.RegisterType<PhoneNumberCommandHandler>().As<ICommandHandler<UpdatePhoneNumberCommand>>();
             builder.RegisterType<AdService>().As<IAdService>();
+            builder.RegisterType<AktivitetsbankService>().As<IAktivitetsbankService>();
             builder.RegisterType<AdClient>().As<IAdClient>();
             builder.RegisterType<RabbitMqNotificationService>().As<INotificationService<NumberChangedEvent>>();
 
@@ -153,6 +159,15 @@ namespace VAF.Aktivitetsbank.API
                 app.UseCors(builder =>
                     builder.WithOrigins("http://localhost:8080").AllowAnyMethod().AllowAnyHeader().AllowCredentials());
             }
+            AutoMapper.Mapper.Initialize(cfg =>
+            {
+                cfg.CreateMap<Skole, SkoleDto>();
+                cfg.CreateMap<Trinn, TrinnDto>();
+                cfg.CreateMap<Fag, FagDto>();
+                cfg.CreateMap<Aktivitetstype, AktivitetstypeDto>();
+                cfg.CreateMap<Utdanningsprogram, UtdanningsprogramDto>();
+
+            });
             
             app.UseMvc();
 
