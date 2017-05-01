@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace VAF.Aktivitetsbank.Data.Entiteter
@@ -15,11 +16,13 @@ namespace VAF.Aktivitetsbank.Data.Entiteter
         public Guid SkoleId { get; set; }
         [Required]
         public string Type { get; set; }
+        public List<Deltaker> Deltakere { get; set; }
     }
 
     public class Deltaker
     {
         public Guid Id { get; set; }
+        public Guid AktivitetId { get; set; }
         public Guid UtdanningsprogramId { get; set; } //Beskrevet som programområde?
         public Guid TrinnId { get; set; }
         public Guid FagId { get; set; }

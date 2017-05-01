@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using VAF.Aktivitetsbank.Data.Entiteter;
@@ -8,6 +9,54 @@ namespace VAF.Aktivitetsbank.Data.UI
 {
     public static class SeedAktivitetsbank
     {
+        public static void SeedAktiviteterOgDeltakere()
+        {
+            var factory = new AktivitetsbankContextFactory();
+            var context = factory.Create();
+            var aktivitet = new Aktivitet
+            {
+                Id = Guid.NewGuid(),
+                Navn = "Aktivitetsdag",
+                Beskrivelse = "En dag med aktiviteter",
+                OmfangTimer = 4,
+                //SkoleId = Guid.Parse(""),
+                SkoleId = context.SkoleSet.FirstOrDefault(x => x.Navn.Equals("Mandal")).Id,
+                Type = "Type 1",
+                Deltakere = new List<Deltaker>
+                {
+                    new Deltaker
+                    {
+                        Id = Guid.NewGuid(),
+                        FagId = context.FagSet.FirstOrDefault(x => x.Navn.Equals("Norsk")).Id,
+                        TrinnId = context.TrinnSet.FirstOrDefault(x => x.Navn.Equals("Vg1")).Id,
+                        UtdanningsprogramId = context.UtdanningsprogramSet.FirstOrDefault(x => x.Navn.Equals("Idrettsfag")).Id,
+                        Timer = 2,
+                        Kompetansemaal = "Et kompetansemål",
+                    },
+                    new Deltaker
+                    {
+                        Id = Guid.NewGuid(),
+                        FagId = context.FagSet.FirstOrDefault(x => x.Navn.Equals("Fysikk")).Id,
+                        TrinnId = context.TrinnSet.FirstOrDefault(x => x.Navn.Equals("Vg1")).Id,
+                        UtdanningsprogramId = context.UtdanningsprogramSet.FirstOrDefault(x => x.Navn.Equals("Idrettsfag")).Id,
+                        Timer = 2,
+                        Kompetansemaal = "Et kompetansemål 2",
+                    }
+                }
+            };
+            var aktivitet2 = new Aktivitet
+            {
+                Id = Guid.NewGuid(),
+                Navn = "Testaktivitet",
+                Beskrivelse = "Matematikk ute",
+                OmfangTimer = 8,
+                SkoleId = context.SkoleSet.FirstOrDefault(x => x.Navn.Equals("Tangen")).Id,
+                Type = "Type 4"
+            };
+            context.AktivitetSet.Add(aktivitet);
+            context.AktivitetSet.Add(aktivitet2);
+            context.SaveChanges();
+        }
         public static void SeedUtdanningsprogram()
         {
             var factory = new AktivitetsbankContextFactory();

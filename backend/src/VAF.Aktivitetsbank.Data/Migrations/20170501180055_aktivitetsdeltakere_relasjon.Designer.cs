@@ -8,9 +8,10 @@ using VAF.Aktivitetsbank.Data;
 namespace VAF.Aktivitetsbank.Data.Migrations
 {
     [DbContext(typeof(AktivitetsbankContext))]
-    partial class AktivitetsbankContextModelSnapshot : ModelSnapshot
+    [Migration("20170501180055_aktivitetsdeltakere_relasjon")]
+    partial class aktivitetsdeltakere_relasjon
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
                 .HasAnnotation("ProductVersion", "1.1.1")

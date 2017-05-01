@@ -7,6 +7,11 @@ namespace VAF.Aktivitetsbank.Data.UI
         static void Main(string[] args)
         {
             Console.WriteLine("Seeding av database");
+
+            //Console.WriteLine("Seeding av aktiviteter");
+            //SeedAktivitetsbank.SeedAktiviteterOgDeltakere();
+            //Console.WriteLine("Skrevet aktiviteter og deltakere");
+
             //Console.WriteLine("Seeding av fag");
             //SeedAktivitetsbank.SeedFag();
             //Console.WriteLine("Skrevet fag til db");
