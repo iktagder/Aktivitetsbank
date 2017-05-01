@@ -37,5 +37,12 @@ namespace VAF.Aktivitetsbank.Infrastructure
             metadata.Utdanningsprogrammer = utdanningsProgrammerMapped;
             return metadata;
         }
+
+        public IList<AktivitetDto> HentAktiviteter(string queryQueryTerm)
+        {
+            var aktiviteter = _context.AktivitetSet.ToList();
+            var aktiviteterMapped = Mapper.Map<IList<AktivitetDto>>(aktiviteter);
+            return aktiviteterMapped;
+        }
     }
 }

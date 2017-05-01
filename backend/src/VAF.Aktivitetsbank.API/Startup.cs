@@ -105,7 +105,7 @@ namespace VAF.Aktivitetsbank.API
             builder.RegisterType<NotificationQueueHandler>().As<IEventHandler<NumberChangedEvent>>();
 
             builder.RegisterType < AktivitetsbankMetadataQueryHandler>().As<IQueryHandler<AktivitetsbankMetadataQuery, AktivitetsbankMetadata>>();
-            builder.RegisterType < EmployeesSearchQueryHandler>().As<IQueryHandler<EmployeesSearchQuery, IList<EmployeeListItem>>>();
+            builder.RegisterType < AktivitetSearchQueryHandler>().As<IQueryHandler<AktivitetSearchQuery, IList<AktivitetDto>>>();
             builder.RegisterType < EmployeeQueryHandler>().As<IQueryHandler<EmployeeQuery, Employee>>();
             builder.RegisterType<PhoneNumberCommandHandler>().As<ICommandHandler<UpdatePhoneNumberCommand>>();
             builder.RegisterType<AdService>().As<IAdService>();
@@ -166,6 +166,8 @@ namespace VAF.Aktivitetsbank.API
                 cfg.CreateMap<Fag, FagDto>();
                 cfg.CreateMap<Aktivitetstype, AktivitetstypeDto>();
                 cfg.CreateMap<Utdanningsprogram, UtdanningsprogramDto>();
+                cfg.CreateMap<Aktivitet, AktivitetDto>();
+                cfg.CreateMap<Deltaker, DeltakerDto>();
 
             });
             

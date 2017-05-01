@@ -5,26 +5,28 @@ using Microsoft.AspNetCore.Mvc;
 using VAF.Aktivitetsbank.Application;
 using VAF.Aktivitetsbank.Application.Commands;
 using VAF.Aktivitetsbank.Application.Handlers;
+using VAF.Aktivitetsbank.Application.Handlers.Dtos;
 using VAF.Aktivitetsbank.Application.Queries;
 
 namespace VAF.Aktivitetsbank.API.Controllers
 {
     [Route("api/[controller]")]
-    public class SearchEmployeesController : Controller
+    public class AktivitetController : Controller
     {
         private readonly IQueryDispatcher _queryDispatcher;
         private readonly ICommandDispatcher _commandDispatcher;
 
-        public SearchEmployeesController(IQueryDispatcher queryDispatcher, ICommandDispatcher commandDispatcher)
+        public AktivitetController(IQueryDispatcher queryDispatcher, ICommandDispatcher commandDispatcher)
         {
             _queryDispatcher = queryDispatcher;
             _commandDispatcher = commandDispatcher;
         }
 
-        [HttpGet("{query}")]
-        public IEnumerable<EmployeeListItem> Get(string query)
+        //[HttpGet("{query}")]
+        [HttpGet]
+        public IEnumerable<AktivitetDto> Get()
         {
-            return _queryDispatcher.Query<EmployeesSearchQuery, IList<EmployeeListItem>>(new EmployeesSearchQuery(query)).ToList();
+            return _queryDispatcher.Query<AktivitetSearchQuery, IList<AktivitetDto>>(new AktivitetSearchQuery("")).ToList();
         }
 
     }
