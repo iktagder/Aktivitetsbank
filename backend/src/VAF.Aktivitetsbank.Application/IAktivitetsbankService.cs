@@ -10,5 +10,6 @@ namespace VAF.Aktivitetsbank.Application
         IList<AktivitetDto> HentAktiviteter(string queryQueryTerm);
         IList<DeltakerDto> HentDeltakere(Guid queryAktivitetId);
         AktivitetDto HentAktivitet(Guid queryId);
+        DeltakerDto HentDeltaker(Guid queryAktivitetId, Guid queryDeltakerId);
     }
 }

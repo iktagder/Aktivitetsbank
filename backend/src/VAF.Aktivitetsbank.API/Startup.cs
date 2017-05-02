@@ -108,6 +108,7 @@ namespace VAF.Aktivitetsbank.API
             builder.RegisterType < AktivitetSearchQueryHandler>().As<IQueryHandler<AktivitetSearchQuery, IList<AktivitetDto>>>();
             builder.RegisterType < AktivitetQueryHandler>().As<IQueryHandler<AktivitetQuery, AktivitetDto>>();
             builder.RegisterType < DeltakereSearchQueryHandler>().As<IQueryHandler<DeltakereSearchQuery, IList<DeltakerDto>>>();
+            builder.RegisterType < DeltakerQueryHandler>().As<IQueryHandler<DeltakerQuery, DeltakerDto>>();
             builder.RegisterType < EmployeeQueryHandler>().As<IQueryHandler<EmployeeQuery, Employee>>();
             builder.RegisterType<PhoneNumberCommandHandler>().As<ICommandHandler<UpdatePhoneNumberCommand>>();
             builder.RegisterType<AdService>().As<IAdService>();

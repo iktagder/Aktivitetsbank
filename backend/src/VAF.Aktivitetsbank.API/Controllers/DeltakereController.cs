@@ -36,6 +36,12 @@ namespace VAF.Aktivitetsbank.API.Controllers
             _logger.LogInformation("Lister ut deltakere for aktivitet");
             return _queryDispatcher.Query<DeltakereSearchQuery, IList<DeltakerDto>>(new DeltakereSearchQuery(aktivitetId)).ToList();
         }
+        [HttpGet("{aktivitetId}/deltakere/{deltakerId}")]
+        public DeltakerDto Get(Guid aktivitetId, Guid deltakerId)
+        {
+            _logger.LogInformation("Henter deltaker");
+            return _queryDispatcher.Query<DeltakerQuery, DeltakerDto>(new DeltakerQuery(aktivitetId, deltakerId));
+        }
 
     }
 }

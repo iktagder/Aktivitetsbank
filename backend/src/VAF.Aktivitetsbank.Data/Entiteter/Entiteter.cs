@@ -24,6 +24,7 @@ namespace VAF.Aktivitetsbank.Data.Entiteter
     {
         public Guid Id { get; set; }
         public Guid AktivitetId { get; set; }
+        public Aktivitet Aktivitet { get; set; }
         public Guid UtdanningsprogramId { get; set; } //Beskrevet som programområde?
         public Utdanningsprogram Utdanningsprogram { get; set; }
         public Guid TrinnId { get; set; }
