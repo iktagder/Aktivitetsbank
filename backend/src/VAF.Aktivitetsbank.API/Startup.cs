@@ -25,7 +25,6 @@ using VAF.Aktivitetsbank.Data;
 using VAF.Aktivitetsbank.Data.Entiteter;
 using VAF.Aktivitetsbank.Domain;
 using VAF.Aktivitetsbank.Infrastructure;
-using Employee = VAF.Aktivitetsbank.Application.Handlers.Employee;
 
 namespace VAF.Aktivitetsbank.API
 {
@@ -109,13 +108,9 @@ namespace VAF.Aktivitetsbank.API
             builder.RegisterType < AktivitetQueryHandler>().As<IQueryHandler<AktivitetQuery, AktivitetDto>>();
             builder.RegisterType < DeltakereSearchQueryHandler>().As<IQueryHandler<DeltakereSearchQuery, IList<DeltakerDto>>>();
             builder.RegisterType < DeltakerQueryHandler>().As<IQueryHandler<DeltakerQuery, DeltakerDto>>();
-            builder.RegisterType < EmployeeQueryHandler>().As<IQueryHandler<EmployeeQuery, Employee>>();
-            builder.RegisterType<PhoneNumberCommandHandler>().As<ICommandHandler<UpdatePhoneNumberCommand>>();
             builder.RegisterType<OpprettAktivitetCommandHandler>().As<ICommandHandler<OpprettAktivitetCommand>>();
             builder.RegisterType<OpprettDeltakerCommandHandler>().As<ICommandHandler<OpprettDeltakerCommand>>();
-            builder.RegisterType<AdService>().As<IAdService>();
             builder.RegisterType<AktivitetsbankService>().As<IAktivitetsbankService>();
-            builder.RegisterType<AdClient>().As<IAdClient>();
             builder.RegisterType<RabbitMqNotificationService>().As<INotificationService<NumberChangedEvent>>();
 
 
