@@ -5,6 +5,35 @@ type alias Taco =
     { currentTime : Time
     , userInfo : UserInformation
     }
+type alias Skole =
+    { id : String
+    , navn : String
+    , kode : String
+    }
+type alias Fag =
+    { id : String
+    , navn : String
+    }
+type alias Trinn =
+    { id : String
+    , navn : String
+    }
+type alias Utdanningsprogram =
+    { id : String
+    , overordnetUtdanningsprogramId : String
+    , navn : String
+    }
+type alias AppMetadata =
+    { skoler : List Skole
+    , fagListe : List Fag
+    , trinnListe : List Trinn
+    , aktivitetstyper : List AktivitetsType
+    , utdanningsprogrammer : List Utdanningsprogram
+    }
+type alias AktivitetsType =
+    { id : String
+    , navn : String
+    }
 
 
 type Route
@@ -12,6 +41,7 @@ type Route
     | RouteLederForesporsel
     | RouteTilgangsadministrasjon
     | RouteTelefonskjema
+    | RouteAktivitetsListe
     | NotFoundRoute
 
 type TacoUpdate

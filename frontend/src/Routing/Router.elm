@@ -5,9 +5,8 @@ import Navigation exposing (Location)
 import Html exposing (..)
 import Html.Attributes exposing (href)
 import Types exposing (Route(..), TacoUpdate(..), Taco, SharedMsg(..))
-import Routing.Helpers exposing (parseLocation, reverseRoute, fromTabToRoute)
-import Pages.AnsattPortal.AnsattPortal as AnsattPortal
-import Pages.Telefonskjema.Telefonskjema as Telefonskjema
+import Routing.Helpers exposing (parseLocation, reverseRoute)
+import Pages.Aktiviteter.Aktiviteter as Aktiviteter
 import Material
 import Material.Layout as Layout
 import Material.Snackbar as Snackbar
@@ -41,8 +40,7 @@ type alias Model =
     , selectedTab : Int
     , snackbar : Snackbar.Model (Maybe Msg)
     , route : Route
-    , ansattPortalModel : AnsattPortal.Model
-    , telefonskjemaModel : Telefonskjema.Model
+    , aktiviteterModel : Aktiviteter.Model
     }
 
 
@@ -50,29 +48,23 @@ type Msg
     = Mdl (Material.Msg Msg)
     | Snackbar (Snackbar.Msg (Maybe Msg))
     | UrlChange Location
-    | SelectTab Int
     | NavigateTo Route
-    | AnsattPortalMsg AnsattPortal.Msg
-    | TelefonskjemaMsg Telefonskjema.Msg
+    | AktiviteterMsg Aktiviteter.Msg
 
 
 init : Location -> String -> ( Model, Cmd Msg )
 init location apiEndpoint =
     let
-        ( telefonskjemaModel, telefonskjemaCmd ) =
-            Telefonskjema.init apiEndpoint
-
-        ( ansattPortalModel, ansattPortalCmd ) =
-            AnsattPortal.init
+        ( aktiviteterModel, aktiviteterCmd ) =
+            Aktiviteter.init apiEndpoint
     in
         ( { mdl = Material.model
           , selectedTab = 0
           , snackbar = Snackbar.model
-          , ansattPortalModel = ansattPortalModel
-          , telefonskjemaModel = telefonskjemaModel
+          , aktiviteterModel = aktiviteterModel
           , route = parseLocation location
           }
-        , Cmd.map AnsattPortalMsg ansattPortalCmd
+        , Cmd.map AktiviteterMsg aktiviteterCmd
         )
 
 
@@ -85,9 +77,6 @@ update msg model =
                     Material.update Mdl msg_ model
             in
                 ( mdlModel, mdlCmd, NoUpdate )
-
-        SelectTab k ->
-            ( { model | selectedTab = k }, calculateNavigateUrlMessage k, NoUpdate )
 
         Snackbar msg_ ->
             let
@@ -114,42 +103,22 @@ update msg model =
             , NoUpdate
             )
 
-        AnsattPortalMsg ansattPortalMsg ->
-            updateAnsattPortal model ansattPortalMsg
-
-        TelefonskjemaMsg telefonskjemaMsg ->
-            updateTelefonskjema model telefonskjemaMsg
-
-calculateNavigateUrlMessage : Int -> Cmd Msg
-calculateNavigateUrlMessage tabIndex =
-    fromTabToRoute tabIndex
-        |> reverseRoute
-        |> Navigation.newUrl
+        AktiviteterMsg aktiviteterMsg ->
+            updateAktiviteter model aktiviteterMsg
 
 
-updateAnsattPortal : Model -> AnsattPortal.Msg -> ( Model, Cmd Msg, TacoUpdate )
-updateAnsattPortal model ansattPortalMsg =
+updateAktiviteter : Model -> Aktiviteter.Msg -> ( Model, Cmd Msg, TacoUpdate )
+updateAktiviteter model aktiviteterMsg =
     let
-        ( nextAnsattPortalModel, ansattPortalCmd, sharedMsg ) =
-            AnsattPortal.update ansattPortalMsg model.ansattPortalModel
+        ( nextAktiviteterModel, aktiviteterCmd, sharedMsg ) =
+            Aktiviteter.update aktiviteterMsg model.aktiviteterModel
     in
-        ( { model | ansattPortalModel = nextAnsattPortalModel }
-        , Cmd.map AnsattPortalMsg ansattPortalCmd
+        ( { model | aktiviteterModel = nextAktiviteterModel }
+        , Cmd.map AktiviteterMsg aktiviteterCmd
         , NoUpdate
         )
         |> addSharedMsgToUpdate sharedMsg
 
-updateTelefonskjema : Model -> Telefonskjema.Msg -> ( Model, Cmd Msg, TacoUpdate )
-updateTelefonskjema model telefonskjemaMsg =
-    let
-        ( nextTelefonskjemaModel, telefonskjemaCmd, sharedMsg ) =
-            Telefonskjema.update telefonskjemaMsg model.telefonskjemaModel
-    in
-        ( { model | telefonskjemaModel = nextTelefonskjemaModel }
-        , Cmd.map TelefonskjemaMsg telefonskjemaCmd
-        , NoUpdate
-        )
-        |> addSharedMsgToUpdate sharedMsg
 
 addSharedMsgToUpdate : SharedMsg -> (Model, Cmd Msg, TacoUpdate) -> (Model, Cmd Msg, TacoUpdate)
 addSharedMsgToUpdate sharedMsg (model, msg, tacoUpdate) =
@@ -170,9 +139,6 @@ addSharedMsgToUpdate sharedMsg (model, msg, tacoUpdate) =
         NoSharedMsg ->
           (model, msg, tacoUpdate)
 
-
-
-
 view : Taco -> Model -> Html Msg
 view taco model =
     div [] <|
@@ -180,10 +146,7 @@ view taco model =
         , Layout.render Mdl
             model.mdl
             [ Layout.selectedTab model.selectedTab
-            , Layout.onSelectTab SelectTab
             , Layout.fixedHeader
-              -- , Layout.fixedDrawer
-              -- , Layout.fixedTabs
             , Options.css "display" "flex !important"
             , Options.css "flex-direction" "row"
             , Options.css "align-items" "center"
@@ -226,17 +189,10 @@ type alias MenuItem =
 
 
 
---todo-refactor
-
-
-tabTitles : List (Html Msg)
-tabTitles =
-    [ text "Telefonskjema", text "Ansatt tilgang", text "Tilgangs forespørsler", text "Tilgangs administrasjon" ]
-
-
 menuItems : List MenuItem
 menuItems =
-    [ { text = "Telefonskjema", iconName = "dashboard", route = RouteTelefonskjema }
+    [ { text = "Aktivitetsliste", iconName = "dashboard", route = RouteAktivitetsListe }
+    , { text = "Telefonskjema", iconName = "dashboard", route = RouteTelefonskjema }
     , { text = "Ansatt", iconName = "dashboard", route = RouteAnsattPortal }
     , { text = "Tilgangsforespørsler", iconName = "dashboard", route = RouteLederForesporsel }
     , { text = "Tilgangsadministrasjon", iconName = "dashboard", route = RouteTilgangsadministrasjon }
@@ -305,13 +261,15 @@ drawerHeader model =
 pageView : Taco -> Model -> Html Msg
 pageView taco model =
     case model.route of
+        RouteAktivitetsListe ->
+            Aktiviteter.view taco model.aktiviteterModel
+                |> Html.map AktiviteterMsg
+
         RouteTelefonskjema ->
-            Telefonskjema.view taco model.telefonskjemaModel
-                |> Html.map TelefonskjemaMsg
+            h1 [] [ text "aktivitetsliste" ]
 
         RouteAnsattPortal ->
-            AnsattPortal.view taco model.ansattPortalModel
-                |> Html.map AnsattPortalMsg
+            h1 [] [ text "aktivitetsliste" ]
 
         RouteLederForesporsel ->
             h1 [] [ text "Forespørsel" ]
@@ -342,7 +300,7 @@ helpDialog model =
                     model.mdl
                     [ Button.ripple
                     ]
-                    [ text "Close" ]
+                    [ text "Aktiviteter" ]
                 ]
             ]
         ]
