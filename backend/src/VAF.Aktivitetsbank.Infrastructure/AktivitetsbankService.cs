@@ -53,5 +53,12 @@ namespace VAF.Aktivitetsbank.Infrastructure
             var deltakereMapped = Mapper.Map<IList<DeltakerDto>>(deltakere);
             return deltakereMapped;
         }
+
+        public AktivitetDto HentAktivitet(Guid queryId)
+        {
+            var aktivitet = _context.AktivitetSet.Where(x => x.Id.Equals(queryId)).Include(x => x.Skole).FirstOrDefault();
+            var aktivitetMapped = Mapper.Map<AktivitetDto>(aktivitet);
+            return aktivitetMapped;
+        }
     }
 }

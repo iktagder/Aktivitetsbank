@@ -9,5 +9,6 @@ namespace VAF.Aktivitetsbank.Application
         AktivitetsbankMetadata HenteAlleMetadata();
         IList<AktivitetDto> HentAktiviteter(string queryQueryTerm);
         IList<DeltakerDto> HentDeltakere(Guid queryAktivitetId);
+        AktivitetDto HentAktivitet(Guid queryId);
     }
 }

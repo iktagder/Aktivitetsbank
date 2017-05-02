@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -28,12 +29,18 @@ namespace VAF.Aktivitetsbank.API.Controllers
             _options = options.Value;
         }
 
-        //[HttpGet("{query}")]
         [HttpGet]
         public IEnumerable<AktivitetDto> Get()
         {
             _logger.LogInformation("Lister ut aktiviteter");
             return _queryDispatcher.Query<AktivitetSearchQuery, IList<AktivitetDto>>(new AktivitetSearchQuery("")).ToList();
+        }
+
+        [HttpGet("{id}")]
+        public AktivitetDto GetAktivitet(Guid id)
+        {
+            _logger.LogInformation("Aktivitet detalj");
+            return _queryDispatcher.Query<AktivitetQuery, AktivitetDto>(new AktivitetQuery(id));
         }
 
     }
