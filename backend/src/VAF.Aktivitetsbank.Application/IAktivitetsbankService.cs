@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using VAF.Aktivitetsbank.Application.Handlers.Dtos;
 
 namespace VAF.Aktivitetsbank.Application
@@ -7,5 +8,6 @@ namespace VAF.Aktivitetsbank.Application
     {
         AktivitetsbankMetadata HenteAlleMetadata();
         IList<AktivitetDto> HentAktiviteter(string queryQueryTerm);
+        IList<DeltakerDto> HentDeltakere(Guid queryAktivitetId);
     }
 }

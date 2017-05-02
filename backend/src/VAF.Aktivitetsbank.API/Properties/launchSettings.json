@@ -11,7 +11,7 @@
     "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,
-      "launchUrl": "api/Aktivitet",
+      "launchUrl": "api/Aktiviteter",
       //"launchUrl": "api/AktivitetsbankMetadata",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",

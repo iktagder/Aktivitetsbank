@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
@@ -44,6 +45,13 @@ namespace VAF.Aktivitetsbank.Infrastructure
             var aktiviteter = _context.AktivitetSet.Include(x => x.Skole).ToList();
             var aktiviteterMapped = Mapper.Map<IList<AktivitetDto>>(aktiviteter);
             return aktiviteterMapped;
+        }
+
+        public IList<DeltakerDto> HentDeltakere(Guid queryAktivitetId)
+        {
+            var deltakere = _context.DeltakerSet.ToList();
+            var deltakereMapped = Mapper.Map<IList<DeltakerDto>>(deltakere);
+            return deltakereMapped;
         }
     }
 }
