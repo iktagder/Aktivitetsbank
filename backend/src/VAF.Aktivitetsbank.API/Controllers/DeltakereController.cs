@@ -42,6 +42,41 @@ namespace VAF.Aktivitetsbank.API.Controllers
             _logger.LogInformation("Henter deltaker");
             return _queryDispatcher.Query<DeltakerQuery, DeltakerDto>(new DeltakerQuery(aktivitetId, deltakerId));
         }
+        //[AllowAnonymous]
+        [HttpOptions("{aktivitetId}/opprettDeltaker")]
+        public IActionResult GetOptions()
+        {
+            Response.Headers.Add("Allow", "GET, OPTIONS, POST");
+            return Ok();
+        }
+
+        [HttpPost("{aktivitetId}/opprettDeltaker")]
+        public IActionResult OpprettDeltaker(Guid aktivitetId, [FromBody] OpprettDeltakerDto opprettDeltakerDto)
+        {
+            if (opprettDeltakerDto == null || opprettDeltakerDto.AktivitetId != aktivitetId)
+            {
+                _logger.LogError("Feil data ved oppretting av deltaker. Mangler eller feil i input data.");
+                return BadRequest();
+            }
+            if (!ModelState.IsValid)
+            {
+                _logger.LogError("Feil data ved oppretting av deltaker. Feil i input data.", ModelState);
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                _commandDispatcher.Execute(new OpprettDeltakerCommand(opprettDeltakerDto));
+                return new NoContentResult();
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                _logger.LogError("Feil i oppretting av deltaker. Serverfeil.", e);
+                return new StatusCodeResult(500);
+            }
+        }
 
     }
 }

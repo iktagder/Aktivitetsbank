@@ -83,5 +83,20 @@ namespace VAF.Aktivitetsbank.Infrastructure
             );
             _context.SaveChanges();
         }
+
+        public void OpprettDeltaker(OpprettDeltakerDto commandOpprettDeltakerDto)
+        {
+            var deltaker = _context.DeltakerSet.Add(new Deltaker
+            {
+                Id = commandOpprettDeltakerDto.Id,
+                AktivitetId = commandOpprettDeltakerDto.AktivitetId,
+                FagId = commandOpprettDeltakerDto.FagId,
+                TrinnId = commandOpprettDeltakerDto.TrinnId,
+                UtdanningsprogramId = commandOpprettDeltakerDto.UtdanningsprogramId,
+                Timer = commandOpprettDeltakerDto.Timer,
+                Kompetansemaal = commandOpprettDeltakerDto.Kompetansemaal
+            });
+            _context.SaveChanges();
+        }
     }
 }

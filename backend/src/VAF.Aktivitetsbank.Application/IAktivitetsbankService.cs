@@ -12,5 +12,6 @@ namespace VAF.Aktivitetsbank.Application
         AktivitetDto HentAktivitet(Guid queryId);
         DeltakerDto HentDeltaker(Guid queryAktivitetId, Guid queryDeltakerId);
         void OpprettAktivitet(OpprettAktivitetDto commandOpprettAktivitetDto);
+        void OpprettDeltaker(OpprettDeltakerDto commandOpprettDeltakerDto);
     }
 }
