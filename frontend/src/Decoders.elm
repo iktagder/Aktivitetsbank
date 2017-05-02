@@ -98,3 +98,19 @@ decodeAppMetadata =
         |> Json.Decode.Pipeline.required "trinnListe" (Json.list decodeTrinn)
         |> Json.Decode.Pipeline.required "aktivitetstyper" (Json.list decodeAktivitetsType)
         |> Json.Decode.Pipeline.required "utdanningsprogrammer" (Json.list decodeUtdanningsprogram)
+
+decodeAktivitet : Json.Decoder Aktivitet
+decodeAktivitet =
+    Json.Decode.Pipeline.decode Aktivitet
+        |> Json.Decode.Pipeline.required "id" (Json.string)
+        |> Json.Decode.Pipeline.required "navn" (Json.string)
+        |> Json.Decode.Pipeline.required "beskrivelse" (Json.string)
+        |> Json.Decode.Pipeline.required "omfangTimer" (Json.int)
+        |> Json.Decode.Pipeline.required "skoleId" (Json.string)
+        |> Json.Decode.Pipeline.required "skoleNavn" (Json.string)
+        |> Json.Decode.Pipeline.required "type" (Json.string)
+
+
+decodeAktivitetListe : Json.Decoder (List Aktivitet)
+decodeAktivitetListe =
+    Json.list decodeAktivitet

@@ -35,6 +35,15 @@ type alias AktivitetsType =
     , navn : String
     }
 
+type alias Aktivitet =
+    { id : String
+    , navn : String
+    , beskrivelse : String
+    , omfangTimer : Int
+    , skoleId : String
+    , skoleNavn : String
+    , aktivitetsType : String
+    }
 
 type Route
     = RouteAnsattPortal

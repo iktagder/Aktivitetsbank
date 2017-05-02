@@ -21,7 +21,7 @@ type alias Model =
     { mdl : Material.Model
     , apiEndpoint : String
     , statusText : String
-    -- , searchAnsattResponse : WebData (List AnsattSearchItem)
+    , aktivitetListe : WebData (List Aktivitet)
     , appMetadata : WebData AppMetadata
     }
 
@@ -30,6 +30,7 @@ type alias Model =
 type Msg
     = Mdl (Material.Msg Msg)
     | AppMetadataResponse (WebData AppMetadata)
+    | AktivitetListeResponse (WebData (List Aktivitet))
 
 
 init : String -> ( Model, Cmd Msg )
@@ -37,10 +38,10 @@ init apiEndpoint =
     ( { mdl = Material.model
       , apiEndpoint = apiEndpoint
       , statusText = ""
-      -- , searchAnsattResponse = RemoteData.NotAsked
+      , aktivitetListe = RemoteData.NotAsked
       , appMetadata = RemoteData.NotAsked
       }
-    , fetchAppMetadata apiEndpoint
+    , Cmd.batch [fetchAppMetadata apiEndpoint, fetchAktivitetListe apiEndpoint]
     )
 
 fetchAppMetadata : String -> Cmd Msg
@@ -63,6 +64,24 @@ fetchAppMetadata endPoint =
         |> Cmd.map AppMetadataResponse
 
 
+fetchAktivitetListe : String -> Cmd Msg
+fetchAktivitetListe endPoint =
+    let
+      queryUrl =
+        endPoint ++ "aktiviteter"
+      req =  Http.request
+        { method = "GET"
+        , headers = []
+        , url = queryUrl
+        , body = Http.emptyBody
+        , expect = Http.expectJson Decoders.decodeAktivitetListe
+        , timeout = Nothing
+        , withCredentials = True
+        }
+    in
+        req
+        |> RemoteData.sendRequest
+        |> Cmd.map AktivitetListeResponse
 
 update : Msg -> Model -> ( Model, Cmd Msg, SharedMsg )
 update msg model =
@@ -77,6 +96,8 @@ update msg model =
             ({ model | appMetadata = response}, Cmd.none, NoSharedMsg)
             -- (Debug.log "metadata-response" { model | appMetadata = response}, Cmd.none, NoSharedMsg)
 
+        AktivitetListeResponse response ->
+            (Debug.log "aktivitet-liste-response" { model | aktivitetListe = response}, Cmd.none, NoSharedMsg)
 
 
 view : Taco -> Model -> Html Msg
@@ -95,8 +116,8 @@ view taco model =
                 , Elevation.e2
                 , Options.css "padding" "16px 32px"
                 , Options.css "display" "flex"
-                , Options.css "flex-direction" "column"
-                , Options.css "align-items" "left"
+                -- , Options.css "flex-direction" "column"
+                -- , Options.css "align-items" "left"
                 ]
                 [ viewMainContent model
                 ]
@@ -104,7 +125,7 @@ view taco model =
 
 viewMainContent : Model -> Html Msg
 viewMainContent model =
-          div [][ text "main content"
+          Options.div [css "width" "100%"][ visAktivitetListe model
                 ]
 showText : (List (Html.Attribute m) -> List (Html msg) -> a) -> Options.Property c m -> String -> a
 showText elementType displayStyle text_ =
@@ -114,3 +135,50 @@ showText elementType displayStyle text_ =
 white : Options.Property a b
 white =
     Color.text Color.white
+
+
+visAktivitetListe : Model -> Html Msg
+visAktivitetListe model =
+    case model.aktivitetListe of
+        NotAsked ->
+            text "Venter på henting av liste.."
+
+        Loading ->
+            Options.div [] [
+            Loading.spinner [ Loading.active True]
+            ]
+
+        Failure err ->
+            text "Feil ved henting av data"
+
+        Success data ->
+            visAktivitetListeSuksess model data
+
+
+visAktivitetListeSuksess : Model -> List Aktivitet -> Html Msg
+visAktivitetListeSuksess model aktiviteter =
+        Lists.ul [css "width" "100%"]
+
+            (aktiviteter
+            |> List.map (visAktivitet model)
+            )
+
+
+visAktivitet : Model -> Aktivitet -> Html Msg
+visAktivitet model aktivitet =
+    let
+      selectButton model k ansattId =
+            Button.render Mdl [k] model.mdl
+              [ Button.raised
+              -- , Button.accent |> when (Set.member k model.toggles)
+              -- , Options.onClick (SelectAnsatt ansattId)
+              ]
+              [ text "Detaljer" ]
+    in
+      Lists.li [ Lists.withSubtitle ] -- NB! Required on every Lists.li containing subtitle.
+          [ Lists.content []
+              [ text aktivitet.navn
+              , Lists.subtitle [css "width" "80%"] [ text aktivitet.beskrivelse ]
+              ]
+            , selectButton model 5 aktivitet.id
+          ]
