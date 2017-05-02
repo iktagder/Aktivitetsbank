@@ -6,8 +6,11 @@ namespace VAF.Aktivitetsbank.Application.Handlers.Dtos
     {
         public Guid Id { get; set; }
         public Guid UtdanningsprogramId { get; set; } //Beskrevet som programområde?
+        public string UtdanningsprogramNavn { get; set; }
         public Guid TrinnId { get; set; }
+        public string TrinnNavn { get; set; }
         public Guid FagId { get; set; }
+        public string FagNavn { get; set; }
         public int Timer { get; set; }
         public string Kompetansemaal { get; set; }
     }

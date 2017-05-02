@@ -25,8 +25,11 @@ namespace VAF.Aktivitetsbank.Data.Entiteter
         public Guid Id { get; set; }
         public Guid AktivitetId { get; set; }
         public Guid UtdanningsprogramId { get; set; } //Beskrevet som programområde?
+        public Utdanningsprogram Utdanningsprogram { get; set; }
         public Guid TrinnId { get; set; }
+        public Trinn Trinn { get; set; }
         public Guid FagId { get; set; }
+        public Fag Fag { get; set; }
         public int Timer { get; set; }
         [Required]
         public string Kompetansemaal { get; set; }
@@ -47,6 +50,7 @@ namespace VAF.Aktivitetsbank.Data.Entiteter
         public Guid? OverordnetUtdanningsprogramId { get; set; }
         [Required]
         public string Navn { get; set; }
+        public List<Deltaker> Deltakere { get; set; }
     }
 
     public class Fag
@@ -54,12 +58,14 @@ namespace VAF.Aktivitetsbank.Data.Entiteter
         public Guid Id { get; set; }
         [Required]
         public string Navn { get; set; }
+        public List<Deltaker> Deltakere { get; set; }
     }
     public class Trinn
     {
         public Guid Id { get; set; }
         [Required]
         public string Navn { get; set; }
+        public List<Deltaker> Deltakere { get; set; }
     }
     public class Aktivitetstype
     {

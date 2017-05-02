@@ -49,7 +49,7 @@ namespace VAF.Aktivitetsbank.Infrastructure
 
         public IList<DeltakerDto> HentDeltakere(Guid queryAktivitetId)
         {
-            var deltakere = _context.DeltakerSet.ToList();
+            var deltakere = _context.DeltakerSet.Include(x => x.Utdanningsprogram).Include(x => x.Fag).Include(x => x.Trinn).ToList();
             var deltakereMapped = Mapper.Map<IList<DeltakerDto>>(deltakere);
             return deltakereMapped;
         }
