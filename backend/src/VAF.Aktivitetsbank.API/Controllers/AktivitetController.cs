@@ -43,5 +43,40 @@ namespace VAF.Aktivitetsbank.API.Controllers
             return _queryDispatcher.Query<AktivitetQuery, AktivitetDto>(new AktivitetQuery(id));
         }
 
+        //[AllowAnonymous]
+        [HttpOptions("opprettAktivitet")]
+        public IActionResult GetOptions()
+        {
+            Response.Headers.Add("Allow", "GET, OPTIONS, POST");
+            return Ok();
+        }
+
+        [HttpPost("opprettAktivitet")]
+        public IActionResult OpprettAktivitet([FromBody] OpprettAktivitetDto opprettAktivitetDto)
+        {
+            if (opprettAktivitetDto == null)
+            {
+                _logger.LogError("Feil data ved oppretting av aktivitet. Mangler input data.");
+                return BadRequest();
+            }
+            if (!ModelState.IsValid)
+            {
+                _logger.LogError("Feil data ved oppretting av aktivitet. Feil i input data.", ModelState);
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                _commandDispatcher.Execute(new OpprettAktivitetCommand(opprettAktivitetDto));
+                return new NoContentResult();
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                _logger.LogError("Feil i oppretting av aktivitet. Serverfeil.", e);
+                return new StatusCodeResult(500);
+            }
+        }
     }
 }

@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using VAF.Aktivitetsbank.Application;
 using VAF.Aktivitetsbank.Application.Handlers.Dtos;
 using VAF.Aktivitetsbank.Data;
+using VAF.Aktivitetsbank.Data.Entiteter;
 
 namespace VAF.Aktivitetsbank.Infrastructure
 {
@@ -66,6 +67,21 @@ namespace VAF.Aktivitetsbank.Infrastructure
             var deltaker = _context.DeltakerSet.Where(x => x.AktivitetId.Equals(queryAktivitetId) && x.Id.Equals(queryDeltakerId)).Include(x => x.Utdanningsprogram).Include(x => x.Fag).Include(x => x.Trinn).Include(x => x.Aktivitet).FirstOrDefault();
             var deltakerMapped = Mapper.Map<DeltakerDto>(deltaker);
             return deltakerMapped;
+        }
+
+        public void OpprettAktivitet(OpprettAktivitetDto commandOpprettAktivitetDto)
+        {
+            var aktivitet = _context.AktivitetSet.Add(new Aktivitet
+                {
+                    Id = commandOpprettAktivitetDto.Id,
+                    Navn = commandOpprettAktivitetDto.Navn,
+                    Beskrivelse = commandOpprettAktivitetDto.Beskrivelse,
+                    OmfangTimer = commandOpprettAktivitetDto.OmfangTimer,
+                    SkoleId = commandOpprettAktivitetDto.SkoleId,
+                    Type = commandOpprettAktivitetDto.Type
+                }
+            );
+            _context.SaveChanges();
         }
     }
 }
