@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using VAF.Aktivitetsbank.Application;
 using VAF.Aktivitetsbank.Application.Handlers.Dtos;
 using VAF.Aktivitetsbank.Data;
@@ -40,7 +41,7 @@ namespace VAF.Aktivitetsbank.Infrastructure
 
         public IList<AktivitetDto> HentAktiviteter(string queryQueryTerm)
         {
-            var aktiviteter = _context.AktivitetSet.ToList();
+            var aktiviteter = _context.AktivitetSet.Include(x => x.Skole).ToList();
             var aktiviteterMapped = Mapper.Map<IList<AktivitetDto>>(aktiviteter);
             return aktiviteterMapped;
         }
