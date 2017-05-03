@@ -23,6 +23,9 @@ reverseRoute route =
         RouteTilgangsadministrasjon ->
             "#/tilgangsadministrasjon"
 
+        RouteAktivitetOpprett ->
+            "#/opprettaktivitet"
+
         RouteAktivitetsDetalj id ->
             "#/aktiviteter/" ++ id
 
@@ -39,6 +42,7 @@ routeParser =
         , Url.map RouteTilgangsadministrasjon (Url.s "tilgangsadministrasjon")
         , Url.map RouteTelefonskjema (Url.s "telefonskjema")
         , Url.map RouteAktivitetsListe (Url.s "aktiviteter")
+        , Url.map RouteAktivitetOpprett (Url.s "opprettaktivitet")
         , Url.map RouteAktivitetsDetalj (Url.s "aktiviteter" </> Url.string)
         ]
 

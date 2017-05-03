@@ -68,6 +68,7 @@ type Route
     | RouteTelefonskjema
     | RouteAktivitetsListe
     | RouteAktivitetsDetalj String
+    | RouteAktivitetOpprett
     | NotFoundRoute
 
 
@@ -79,8 +80,8 @@ type TacoUpdate
 
 type SharedMsg
     = CreateSnackbarToast String
-    | NoSharedMsg 
-    | NavigateToAktivitet String 
+    | NoSharedMsg
+    | NavigateToAktivitet String
 
 
 type alias UserInformation =
