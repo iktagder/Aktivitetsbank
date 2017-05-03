@@ -111,7 +111,25 @@ decodeAktivitet =
         |> Json.Decode.Pipeline.required "aktivitetstypeId" (Json.string)
         |> Json.Decode.Pipeline.required "aktivitetstypeNavn" (Json.string)
 
+encodeOpprettNyAktivitet : Aktivitet -> Json.Encode.Value
+encodeOpprettNyAktivitet model =
+    let
+        encodings =
+            [ ( "navn", Json.Encode.string model.navn )
+            , ( "beskrivelse", Json.Encode.string model.beskrivelse )
+            , ( "omfangTimer", Json.Encode.int model.omfangTimer )
+            , ( "skoleId", Json.Encode.string model.skoleId )
+            , ( "aktivitetsTypeId", Json.Encode.string model.aktivitetsTypeId )
+            ]
+    in
+        encodings
+            |> Json.Encode.object
 
 decodeAktivitetListe : Json.Decoder (List Aktivitet)
 decodeAktivitetListe =
     Json.list decodeAktivitet
+
+decodeNyAktivitet : Json.Decoder NyAktivitet
+decodeNyAktivitet =
+    Json.Decode.Pipeline.decode NyAktivitet
+        |> Json.Decode.Pipeline.required "id" (Json.string)

@@ -43,6 +43,9 @@ type alias AppMetadata =
     , utdanningsprogrammer : List Utdanningsprogram
     }
 
+type alias NyAktivitet =
+    { id : String
+    }
 
 type alias AktivitetsType =
     { id : String

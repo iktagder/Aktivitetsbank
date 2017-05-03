@@ -4,6 +4,7 @@ import Html exposing (Html, text, div, span, p, a)
 import Material
 import Material.Grid as Grid exposing (grid, size, cell, Device(..))
 import Material.Elevation as Elevation
+import Material.Button as Button
 import Material.Textfield as Textfield
 import Material.Options as Options exposing (when, css, cs, Style, onClick)
 import Material.Typography as Typo
@@ -13,6 +14,7 @@ import Types exposing (..)
 import Http exposing (Error)
 import Decoders exposing (..)
 import Dropdown
+import Json.Decode
 
 
 type alias Model =
@@ -35,6 +37,11 @@ type Msg
     | SkoleDropdown (Dropdown.Msg Skole)
     | OnSelectAktivitetstype (Maybe AktivitetsType)
     | AktivitetstypeDropdown (Dropdown.Msg AktivitetsType)
+    | EndretAktivitetsNavn String
+    | EndretAktivitetsBeskrivelse String
+    | EndretAktivitetsOmfangTimer String
+    | OpprettNyAktivitet
+    | NyAktivitetRespons (Result Error NyAktivitet)
 
 
 dropdownConfigSkole : Dropdown.Config Msg Skole
@@ -107,6 +114,28 @@ fetchAppMetadata endPoint =
             |> RemoteData.sendRequest
             |> Cmd.map AppMetadataResponse
 
+postOpprettNyAktivitet : String -> Aktivitet -> ((Result Error NyAktivitet) -> msg) -> Cmd msg
+postOpprettNyAktivitet endPoint aktivitet responseMsg =
+    let
+        url =
+            endPoint ++ "aktiviteter/opprettAktivitet"
+
+        body =
+            encodeOpprettNyAktivitet aktivitet |> Http.jsonBody
+
+        req =
+            Http.request
+                { method = "POST"
+                , headers = []
+                , url = url
+                , body = body
+                , expect = Http.expectJson decodeNyAktivitet
+                , timeout = Nothing
+                , withCredentials = True
+                }
+    in
+        req
+            |> Http.send responseMsg
 
 update : Msg -> Model -> ( Model, Cmd Msg, SharedMsg )
 update msg model =
@@ -122,7 +151,18 @@ update msg model =
             ( { model | appMetadata = response }, Cmd.none, NoSharedMsg )
 
         OnSelectSkole skole ->
-            ( { model | valgtSkole = skole }, Cmd.none, NoSharedMsg )
+            let
+              gammelAktivitet = model.aktivitet
+              nySkoleId =
+                case skole of
+                    Just data ->
+                        data.id
+                    Nothing ->
+                        "00"
+              oppdatertAktivitet =
+                    {gammelAktivitet | skoleId = nySkoleId}
+            in
+            ( { model | valgtSkole = skole, aktivitet = oppdatertAktivitet }, Cmd.none, NoSharedMsg )
 
         SkoleDropdown skole ->
             let
@@ -132,7 +172,18 @@ update msg model =
                 ( { model | dropdownStateSkole = updated }, cmd, NoSharedMsg )
 
         OnSelectAktivitetstype aktivitetstype ->
-            ( { model | valgtAktivitetstype = aktivitetstype }, Cmd.none, NoSharedMsg )
+            let
+              gammelAktivitet = model.aktivitet
+              nyAktivitetId =
+                case aktivitetstype of
+                    Just data ->
+                        data.id
+                    Nothing ->
+                        "00"
+              oppdatertAktivitet =
+                    {gammelAktivitet | aktivitetsTypeId = nyAktivitetId}
+            in
+            ( { model | valgtAktivitetstype = aktivitetstype, aktivitet = oppdatertAktivitet }, Cmd.none, NoSharedMsg )
 
         AktivitetstypeDropdown aktivitetstype ->
             let
@@ -140,6 +191,47 @@ update msg model =
                     Dropdown.update dropdownConfigAktivitetstype aktivitetstype model.dropdownStateAktivitetstype
             in
                 ( { model | dropdownStateAktivitetstype = updated }, cmd, NoSharedMsg )
+
+        EndretAktivitetsNavn endretNavn ->
+            let
+              gammelAktivitet = model.aktivitet
+              oppdatertAktivitet =
+                    {gammelAktivitet | navn = endretNavn}
+            in
+                ( Debug.log "endretNavn:" { model | aktivitet = oppdatertAktivitet }, Cmd.none, NoSharedMsg )
+
+        EndretAktivitetsBeskrivelse endretBeskrivelse ->
+            let
+              gammelAktivitet = model.aktivitet
+              oppdatertAktivitet =
+                    {gammelAktivitet | beskrivelse = endretBeskrivelse}
+            in
+                ( { model | aktivitet = oppdatertAktivitet }, Cmd.none, NoSharedMsg )
+
+        EndretAktivitetsOmfangTimer endretOmfangTimer ->
+            let
+              gammelAktivitet = model.aktivitet
+              oppdatertAktivitet =
+                    {gammelAktivitet | omfangTimer = Result.withDefault 0 (String.toInt endretOmfangTimer)}
+            in
+                ( { model | aktivitet = oppdatertAktivitet }, Cmd.none, NoSharedMsg )
+
+        OpprettNyAktivitet ->
+            (model, postOpprettNyAktivitet model.apiEndpoint model.aktivitet NyAktivitetRespons, NoSharedMsg)
+
+        NyAktivitetRespons (Ok nyId) ->
+            let
+               tmp = Debug.log "ny aktivitet" nyId
+            in
+               (model, Cmd.none, NoSharedMsg)
+
+        NyAktivitetRespons (Err error) ->
+            let
+               tmp = Debug.log "ny aktivitet - error" error
+            in
+               (model, Cmd.none, NoSharedMsg)
+
+
 
 showText : (List (Html.Attribute m) -> List (Html msg) -> a) -> Options.Property c m -> String -> a
 showText elementType displayStyle text_ =
@@ -232,6 +324,7 @@ opprettAktivitet model aktivitet =
             , Textfield.floatingLabel
             , Textfield.text_
             , Textfield.value <| aktivitet.navn
+            , Options.onInput EndretAktivitetsNavn
             ]
             []
         , Textfield.render Mdl
@@ -243,6 +336,7 @@ opprettAktivitet model aktivitet =
             , Textfield.textarea
             , Textfield.rows 6
             , Textfield.value <| aktivitet.beskrivelse
+            , Options.onInput EndretAktivitetsBeskrivelse
             , cs "text-area"
             ]
             []
@@ -253,10 +347,22 @@ opprettAktivitet model aktivitet =
             , Textfield.floatingLabel
             , Textfield.text_
             , Textfield.value <| toString aktivitet.omfangTimer
+            , Options.onInput EndretAktivitetsOmfangTimer
             ]
             []
         , showText p Typo.menu "Skole"
         , visSkole model
         , showText p Typo.menu "Aktivitetstype"
         , visAktivitetstype model
+        , Button.render Mdl
+            [ 10, 1 ]
+            model.mdl
+            [ Button.ripple
+            , Button.colored
+            , Button.raised
+          , Options.onClick (OpprettNyAktivitet)
+            -- , css "margin-left" "1em"
+            -- , Options.onClick (SearchAnsatt "Test")
+            ]
+            [ text "Lagre" ]
         ]
