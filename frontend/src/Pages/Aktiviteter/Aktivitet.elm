@@ -31,13 +31,13 @@ type Msg
     = Mdl (Material.Msg Msg)
     | AppMetadataResponse (WebData AppMetadata)
     | AktivitetResponse (WebData Aktivitet)
-    | OnSelect (Maybe Skole)
-    | SkoleValg (Dropdown.Msg Skole)
+    | OnSelectSkole (Maybe Skole)
+    | SkoleDropdown (Dropdown.Msg Skole)
 
 
-dropdownConfig : Dropdown.Config Msg Skole
-dropdownConfig =
-    Dropdown.newConfig OnSelect .navn
+dropdownConfigSkole : Dropdown.Config Msg Skole
+dropdownConfigSkole =
+    Dropdown.newConfig OnSelectSkole .navn
         |> Dropdown.withItemClass "border-bottom border-silver p1 gray"
         |> Dropdown.withMenuClass "border border-gray"
         |> Dropdown.withMenuStyles [ ( "background", "white" ) ]
@@ -122,13 +122,13 @@ update msg model =
         AktivitetResponse response ->
             ( Debug.log "aktivitet-item-response" { model | aktivitet = response }, Cmd.none, NoSharedMsg )
 
-        OnSelect skole ->
+        OnSelectSkole skole ->
             ( { model | valgtSkole = skole }, Cmd.none, NoSharedMsg )
 
-        SkoleValg skole ->
+        SkoleDropdown skole ->
             let
                 ( updated, cmd ) =
-                    Dropdown.update dropdownConfig skole model.dropdownState
+                    Dropdown.update dropdownConfigSkole skole model.dropdownState
             in
                 ( { model | dropdownState = updated }, cmd, NoSharedMsg )
 
@@ -197,7 +197,7 @@ visSkole model =
 visSkoleDropdown : Maybe Skole -> List Skole -> Dropdown.State -> Html Msg
 visSkoleDropdown selectedSkoleId model dropdownState =
     span []
-        [ Html.map SkoleValg (Dropdown.view dropdownConfig dropdownState model selectedSkoleId)
+        [ Html.map SkoleDropdown (Dropdown.view dropdownConfigSkole dropdownState model selectedSkoleId)
         ]
 
 
