@@ -6,6 +6,7 @@ import Material.Grid as Grid exposing (grid, size, cell, Device(..))
 import Material.Elevation as Elevation
 import Material.Color as Color
 import Material.Button as Button
+import Material.Icon as Icon
 import Material.Options as Options exposing (when, css, cs, Style, onClick)
 import Material.Typography as Typo
 import Material.List as Lists
@@ -31,6 +32,7 @@ type Msg
     | AppMetadataResponse (WebData AppMetadata)
     | AktivitetListeResponse (WebData (List Aktivitet))
     | VisAktivitetDetalj String
+    | OpprettAktivitet
 
 
 init : String -> ( Model, Cmd Msg )
@@ -109,25 +111,30 @@ update msg model =
         VisAktivitetDetalj id ->
             ( model, Cmd.none, NavigateToAktivitet id )
 
+        OpprettAktivitet ->
+            ( model, Cmd.none, NoSharedMsg )
+
 
 view : Taco -> Model -> Html Msg
 view taco model =
     grid []
         [ cell
             [ size All 12
-            , Elevation.e0
-            , Options.css "align-items" "top"
-            , Options.cs "mdl-grid"
             ]
-            [ Options.styled p [ Typo.display2 ] [ text "Aktiviteter" ]
+            [ Button.render Mdl
+                [ 0 ]
+                model.mdl
+                [ Button.fab
+                , Button.ripple
+                , Options.onClick OpprettAktivitet
+                , Options.css "float" "right"
+                ]
+                [ Icon.i "add" ]
+            , Options.span [ Typo.display2 ] [ text "Aktiviteter" ]
             ]
         , cell
             [ size All 12
             , Elevation.e2
-            , Options.css "padding" "16px 32px"
-            , Options.css "display" "flex"
-              -- , Options.css "flex-direction" "column"
-              -- , Options.css "align-items" "left"
             ]
             [ viewMainContent model
             ]
