@@ -24,6 +24,8 @@ type alias Model =
     , appMetadata : WebData AppMetadata
     , valgtSkole : Maybe Skole
     , dropdownStateSkole : Dropdown.State
+    , valgtAktivitetstype : Maybe AktivitetsType
+    , dropdownStateAktivitetstype : Dropdown.State
     }
 
 
@@ -33,6 +35,8 @@ type Msg
     | AktivitetResponse (WebData Aktivitet)
     | OnSelectSkole (Maybe Skole)
     | SkoleDropdown (Dropdown.Msg Skole)
+    | OnSelectAktivitetstype (Maybe AktivitetsType)
+    | AktivitetstypeDropdown (Dropdown.Msg AktivitetsType)
 
 
 dropdownConfigSkole : Dropdown.Config Msg Skole
@@ -47,6 +51,17 @@ dropdownConfigSkole =
         |> Dropdown.withSelectedStyles [ ( "color", "black" ) ]
         |> Dropdown.withTriggerClass "col-4 border bg-white p1"
 
+dropdownConfigAktivitetstype : Dropdown.Config Msg AktivitetsType
+dropdownConfigAktivitetstype =
+    Dropdown.newConfig OnSelectAktivitetstype .navn
+        |> Dropdown.withItemClass "border-bottom border-silver p1 gray"
+        |> Dropdown.withMenuClass "border border-gray"
+        |> Dropdown.withMenuStyles [ ( "background", "white" ) ]
+        |> Dropdown.withPrompt "Velg aktivitetstype"
+        |> Dropdown.withPromptClass "silver"
+        |> Dropdown.withSelectedClass "bold"
+        |> Dropdown.withSelectedStyles [ ( "color", "black" ) ]
+        |> Dropdown.withTriggerClass "col-4 border bg-white p1"
 
 init : String -> ( Model, Cmd Msg )
 init apiEndpoint =
@@ -57,6 +72,8 @@ init apiEndpoint =
       , appMetadata = RemoteData.NotAsked
       , valgtSkole = Nothing
       , dropdownStateSkole = Dropdown.newState "1"
+      , valgtAktivitetstype = Nothing
+      , dropdownStateAktivitetstype = Dropdown.newState "1"
       }
     , Cmd.none
     )
@@ -121,15 +138,15 @@ update msg model =
 
         AktivitetResponse response ->
             let
-              valgtSkole =
+              (valgtSkole, valgtAktivitetstype) =
                 case response of
                   Success aktivitet ->
-                    Just {id = aktivitet.skoleId, navn = aktivitet.skoleNavn, kode = ""}
+                    (Just {id = aktivitet.skoleId, navn = aktivitet.skoleNavn, kode = ""}, Just {id = aktivitet.aktivitetsTypeId, navn = aktivitet.aktivitetsTypeNavn})
                   _ ->
-                    Nothing
+                    (Nothing, Nothing)
             in
 
-            ( Debug.log "aktivitet-item-response" { model | aktivitet = response, valgtSkole = valgtSkole }, Cmd.none, NoSharedMsg )
+            ( Debug.log "aktivitet-item-response" { model | aktivitet = response, valgtSkole = valgtSkole, valgtAktivitetstype = valgtAktivitetstype }, Cmd.none, NoSharedMsg )
 
         OnSelectSkole skole ->
             ( { model | valgtSkole = skole }, Cmd.none, NoSharedMsg )
@@ -141,6 +158,19 @@ update msg model =
             in
                 ( { model | dropdownStateSkole = updated }, cmd, NoSharedMsg )
 
+        OnSelectAktivitetstype aktivitetstype ->
+            ( { model | valgtAktivitetstype = aktivitetstype }, Cmd.none, NoSharedMsg )
+
+        AktivitetstypeDropdown aktivitetstype ->
+            let
+                ( updated, cmd ) =
+                    Dropdown.update dropdownConfigAktivitetstype aktivitetstype model.dropdownStateAktivitetstype
+            in
+                ( { model | dropdownStateAktivitetstype = updated }, cmd, NoSharedMsg )
+
+showText : (List (Html.Attribute m) -> List (Html msg) -> a) -> Options.Property c m -> String -> a
+showText elementType displayStyle text_ =
+    Options.styled elementType [ displayStyle, Typo.left ] [ text text_ ]
 
 view : Taco -> Model -> Html Msg
 view taco model =
@@ -209,6 +239,30 @@ visSkoleDropdown selectedSkoleId model dropdownStateSkole =
         [ Html.map SkoleDropdown (Dropdown.view dropdownConfigSkole dropdownStateSkole model selectedSkoleId)
         ]
 
+visAktivitetstype : Model -> Html Msg
+visAktivitetstype model =
+    case model.appMetadata of
+        NotAsked ->
+            text "Initialising."
+
+        Loading ->
+            text "Loading."
+
+        Failure err ->
+            text ("Error: " ++ toString err)
+
+        Success data ->
+            visAktivitetstypeDropdown
+                model.valgtAktivitetstype
+                data.aktivitetstyper
+                model.dropdownStateAktivitetstype
+
+
+visAktivitetstypeDropdown : Maybe AktivitetsType -> List AktivitetsType -> Dropdown.State -> Html Msg
+visAktivitetstypeDropdown selectedAktivitetstypeId model dropdownStateAktivitetstype =
+    span []
+        [ Html.map AktivitetstypeDropdown (Dropdown.view dropdownConfigAktivitetstype dropdownStateAktivitetstype model selectedAktivitetstypeId)
+        ]
 
 visAktivitetSuksess : Model -> Aktivitet -> Html Msg
 visAktivitetSuksess model aktivitet =
@@ -245,14 +299,8 @@ visAktivitetSuksess model aktivitet =
             , Textfield.value <| toString aktivitet.omfangTimer
             ]
             []
-        , Textfield.render Mdl
-            [ 4 ]
-            model.mdl
-            [ Textfield.label "Type"
-            , Textfield.floatingLabel
-            , Textfield.text_
-            , Textfield.value <| aktivitet.aktivitetsType
-            ]
-            []
+        , showText p Typo.menu "Skole"
         , visSkole model
+        , showText p Typo.menu "Aktivitetstype"
+        , visAktivitetstype model
         ]

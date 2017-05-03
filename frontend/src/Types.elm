@@ -57,7 +57,8 @@ type alias Aktivitet =
     , omfangTimer : Int
     , skoleId : String
     , skoleNavn : String
-    , aktivitetsType : String
+    , aktivitetsTypeId : String
+    , aktivitetsTypeNavn : String
     }
 
 

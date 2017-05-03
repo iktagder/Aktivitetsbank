@@ -109,6 +109,7 @@ decodeAktivitet =
         |> Json.Decode.Pipeline.required "skoleId" (Json.string)
         |> Json.Decode.Pipeline.required "skoleNavn" (Json.string)
         |> Json.Decode.Pipeline.required "aktivitetstypeId" (Json.string)
+        |> Json.Decode.Pipeline.required "aktivitetstypeNavn" (Json.string)
 
 
 decodeAktivitetListe : Json.Decoder (List Aktivitet)
