@@ -58,6 +58,7 @@ namespace VAF.Aktivitetsbank.API.Controllers
                 _logger.LogError("Feil data ved oppretting av deltaker. Mangler eller feil i input data.");
                 return BadRequest();
             }
+            opprettDeltakerDto.Id = Guid.NewGuid();
             if (!ModelState.IsValid)
             {
                 _logger.LogError("Feil data ved oppretting av deltaker. Feil i input data.", ModelState);
@@ -67,7 +68,8 @@ namespace VAF.Aktivitetsbank.API.Controllers
             try
             {
                 _commandDispatcher.Execute(new OpprettDeltakerCommand(opprettDeltakerDto));
-                return new NoContentResult();
+                //return new NoContentResult();
+                return new CreatedAtRouteResult("opprettDeltaker", new {id = opprettDeltakerDto.Id});
 
             }
             catch (Exception e)

@@ -59,6 +59,7 @@ namespace VAF.Aktivitetsbank.API.Controllers
                 _logger.LogError("Feil data ved oppretting av aktivitet. Mangler input data.");
                 return BadRequest();
             }
+            opprettAktivitetDto.Id = Guid.NewGuid();
             if (!ModelState.IsValid)
             {
                 _logger.LogError("Feil data ved oppretting av aktivitet. Feil i input data.", ModelState);
@@ -68,13 +69,41 @@ namespace VAF.Aktivitetsbank.API.Controllers
             try
             {
                 _commandDispatcher.Execute(new OpprettAktivitetCommand(opprettAktivitetDto));
-                return new NoContentResult();
+                //return new NoContentResult();
+                return new CreatedAtRouteResult("opprettaktivitet", new {id = opprettAktivitetDto.Id});
 
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
                 _logger.LogError("Feil i oppretting av aktivitet. Serverfeil.", e);
+                return new StatusCodeResult(500);
+            }
+        }
+        [HttpPut("{id}")]
+        public IActionResult EndreAktivitet(Guid id, [FromBody] EndreAktivitetDto endreAktivitetDto)
+        {
+            if (endreAktivitetDto == null || endreAktivitetDto.Id != id)
+            {
+                _logger.LogError("Feil data ved endring av aktivitet. Mangler input data.");
+                return BadRequest();
+            }
+            if (!ModelState.IsValid)
+            {
+                _logger.LogError("Feil data ved endring av aktivitet. Feil i input data.", ModelState);
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                _commandDispatcher.Execute(new EndreAktivitetCommand(endreAktivitetDto));
+                return new NoContentResult();
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                _logger.LogError("Feil i endring av aktivitet. Serverfeil.", e);
                 return new StatusCodeResult(500);
             }
         }

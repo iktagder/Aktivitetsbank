@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using VAF.Aktivitetsbank.Application;
 using VAF.Aktivitetsbank.Application.Handlers.Dtos;
 using VAF.Aktivitetsbank.Data;
@@ -13,10 +14,12 @@ namespace VAF.Aktivitetsbank.Infrastructure
     public class AktivitetsbankService : IAktivitetsbankService
     {
         private readonly AktivitetsbankContext _context;
+        private readonly ILogger<AktivitetsbankService> _logger;
 
-        public AktivitetsbankService(AktivitetsbankContext context)
+        public AktivitetsbankService(AktivitetsbankContext context, ILogger<AktivitetsbankService> logger )
         {
             _context = context;
+            _logger = logger;
         }
         public AktivitetsbankMetadata HenteAlleMetadata()
         {
@@ -97,6 +100,32 @@ namespace VAF.Aktivitetsbank.Infrastructure
                 Kompetansemaal = commandOpprettDeltakerDto.Kompetansemaal
             });
             _context.SaveChanges();
+        }
+
+        public void EndreAktivitet(EndreAktivitetDto commandEndreAktivitetDto)
+        {
+            try
+            {
+                var gammelAktivitet = _context.AktivitetSet.Find(commandEndreAktivitetDto.Id);
+                if (gammelAktivitet != null)
+                {
+                    gammelAktivitet.Navn = commandEndreAktivitetDto.Navn;
+                    gammelAktivitet.Beskrivelse = commandEndreAktivitetDto.Beskrivelse;
+                    gammelAktivitet.OmfangTimer = commandEndreAktivitetDto.OmfangTimer;
+                    gammelAktivitet.SkoleId = commandEndreAktivitetDto.SkoleId;
+                    gammelAktivitet.AktivitetstypeId = commandEndreAktivitetDto.AktivitetstypeId;
+                    _context.SaveChanges();
+                }
+                else
+                {
+                    _logger.LogError("Kunne ikke lagre endret aktivitet til databasen.", commandEndreAktivitetDto); 
+                }
+
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("Kunne ikke lagre endret aktivitet til databasen.", e); 
+            }
         }
     }
 }
