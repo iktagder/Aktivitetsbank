@@ -108,7 +108,7 @@ decodeAktivitet =
         |> Json.Decode.Pipeline.required "omfangTimer" (Json.int)
         |> Json.Decode.Pipeline.required "skoleId" (Json.string)
         |> Json.Decode.Pipeline.required "skoleNavn" (Json.string)
-        |> Json.Decode.Pipeline.required "type" (Json.string)
+        |> Json.Decode.Pipeline.required "aktivitetstypeId" (Json.string)
 
 
 decodeAktivitetListe : Json.Decoder (List Aktivitet)
