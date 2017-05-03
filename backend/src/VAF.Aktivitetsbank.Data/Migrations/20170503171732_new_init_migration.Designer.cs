@@ -8,8 +8,8 @@ using VAF.Aktivitetsbank.Data;
 namespace VAF.Aktivitetsbank.Data.Migrations
 {
     [DbContext(typeof(AktivitetsbankContext))]
-    [Migration("20170502060405_aktivitet_skole_navigasjon")]
-    partial class aktivitet_skole_navigasjon
+    [Migration("20170503171732_new_init_migration")]
+    partial class new_init_migration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -22,6 +22,8 @@ namespace VAF.Aktivitetsbank.Data.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<Guid>("AktivitetstypeId");
+
                     b.Property<string>("Beskrivelse")
                         .IsRequired();
 
@@ -33,10 +35,9 @@ namespace VAF.Aktivitetsbank.Data.Migrations
 
                     b.Property<Guid>("SkoleId");
 
-                    b.Property<string>("Type")
-                        .IsRequired();
-
                     b.HasKey("Id");
+
+                    b.HasIndex("AktivitetstypeId");
 
                     b.HasIndex("SkoleId");
 
@@ -77,6 +78,12 @@ namespace VAF.Aktivitetsbank.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AktivitetId");
+
+                    b.HasIndex("FagId");
+
+                    b.HasIndex("TrinnId");
+
+                    b.HasIndex("UtdanningsprogramId");
 
                     b.ToTable("Deltaker");
                 });
@@ -140,6 +147,11 @@ namespace VAF.Aktivitetsbank.Data.Migrations
 
             modelBuilder.Entity("VAF.Aktivitetsbank.Data.Entiteter.Aktivitet", b =>
                 {
+                    b.HasOne("VAF.Aktivitetsbank.Data.Entiteter.Aktivitetstype")
+                        .WithMany("Aktiviteter")
+                        .HasForeignKey("AktivitetstypeId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.HasOne("VAF.Aktivitetsbank.Data.Entiteter.Skole", "Skole")
                         .WithMany("Aktiviteter")
                         .HasForeignKey("SkoleId")
@@ -148,9 +160,24 @@ namespace VAF.Aktivitetsbank.Data.Migrations
 
             modelBuilder.Entity("VAF.Aktivitetsbank.Data.Entiteter.Deltaker", b =>
                 {
-                    b.HasOne("VAF.Aktivitetsbank.Data.Entiteter.Aktivitet")
+                    b.HasOne("VAF.Aktivitetsbank.Data.Entiteter.Aktivitet", "Aktivitet")
                         .WithMany("Deltakere")
                         .HasForeignKey("AktivitetId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("VAF.Aktivitetsbank.Data.Entiteter.Fag", "Fag")
+                        .WithMany("Deltakere")
+                        .HasForeignKey("FagId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("VAF.Aktivitetsbank.Data.Entiteter.Trinn", "Trinn")
+                        .WithMany("Deltakere")
+                        .HasForeignKey("TrinnId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("VAF.Aktivitetsbank.Data.Entiteter.Utdanningsprogram", "Utdanningsprogram")
+                        .WithMany("Deltakere")
+                        .HasForeignKey("UtdanningsprogramId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
         }

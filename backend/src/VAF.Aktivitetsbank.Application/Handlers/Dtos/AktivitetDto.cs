@@ -10,6 +10,7 @@ namespace VAF.Aktivitetsbank.Application.Handlers.Dtos
         public int OmfangTimer { get; set; }
         public Guid SkoleId { get; set; }
         public string SkoleNavn { get; set; }
-        public string Type { get; set; }
+        public Guid AktivitetstypeId { get; set; }
+        public string AktivitetstypeNavn { get; set; }
     }
 }

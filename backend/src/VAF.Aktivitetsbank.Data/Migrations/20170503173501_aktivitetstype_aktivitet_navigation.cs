@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace VAF.Aktivitetsbank.Data.Migrations
 {
-    public partial class deltaker_aktivitet_navigasjon : Migration
+    public partial class aktivitetstype_aktivitet_navigation : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

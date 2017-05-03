@@ -16,7 +16,8 @@ namespace VAF.Aktivitetsbank.Data.Entiteter
         public Guid SkoleId { get; set; }
         public Skole Skole { get; set; }
         [Required]
-        public string Type { get; set; }
+        public Guid AktivitetstypeId { get; set; }
+        public Aktivitetstype Aktivitetstype { get; set; }
         public List<Deltaker> Deltakere { get; set; }
     }
 
@@ -73,5 +74,6 @@ namespace VAF.Aktivitetsbank.Data.Entiteter
         public Guid Id { get; set; }
         [Required]
         public string Navn { get; set; }
+        public List<Aktivitet> Aktiviteter { get; set; }
     }
 }

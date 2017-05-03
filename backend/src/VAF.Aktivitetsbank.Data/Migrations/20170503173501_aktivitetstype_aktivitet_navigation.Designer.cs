@@ -8,8 +8,8 @@ using VAF.Aktivitetsbank.Data;
 namespace VAF.Aktivitetsbank.Data.Migrations
 {
     [DbContext(typeof(AktivitetsbankContext))]
-    [Migration("20170502084203_deltaker_aktivitet_navigasjon")]
-    partial class deltaker_aktivitet_navigasjon
+    [Migration("20170503173501_aktivitetstype_aktivitet_navigation")]
+    partial class aktivitetstype_aktivitet_navigation
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -22,6 +22,8 @@ namespace VAF.Aktivitetsbank.Data.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<Guid>("AktivitetstypeId");
+
                     b.Property<string>("Beskrivelse")
                         .IsRequired();
 
@@ -33,10 +35,9 @@ namespace VAF.Aktivitetsbank.Data.Migrations
 
                     b.Property<Guid>("SkoleId");
 
-                    b.Property<string>("Type")
-                        .IsRequired();
-
                     b.HasKey("Id");
+
+                    b.HasIndex("AktivitetstypeId");
 
                     b.HasIndex("SkoleId");
 
@@ -146,6 +147,11 @@ namespace VAF.Aktivitetsbank.Data.Migrations
 
             modelBuilder.Entity("VAF.Aktivitetsbank.Data.Entiteter.Aktivitet", b =>
                 {
+                    b.HasOne("VAF.Aktivitetsbank.Data.Entiteter.Aktivitetstype", "Aktivitetstype")
+                        .WithMany("Aktiviteter")
+                        .HasForeignKey("AktivitetstypeId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.HasOne("VAF.Aktivitetsbank.Data.Entiteter.Skole", "Skole")
                         .WithMany("Aktiviteter")
                         .HasForeignKey("SkoleId")

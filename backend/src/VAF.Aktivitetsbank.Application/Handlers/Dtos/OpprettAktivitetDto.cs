@@ -18,7 +18,6 @@ namespace VAF.Aktivitetsbank.Application.Handlers.Dtos
         [Required]
         public Guid SkoleId { get; set; }
         [Required]
-        [StringLength(15, ErrorMessage = "Navn må være mindre enn 15 tegn.")]
-        public string Type { get; set; }
+        public Guid AktivitetstypeId { get; set; }
     }
 }

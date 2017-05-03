@@ -17,11 +17,11 @@ namespace VAF.Aktivitetsbank.Data.UI
             {
                 Id = Guid.NewGuid(),
                 Navn = "Aktivitetsdag",
-                Beskrivelse = "En dag med aktiviteter",
+                Beskrivelse = "Med generell studiekompetanse kan du søke de fleste studier ved høyskoler og universiteter. Men noen studier har spesielle opptakskrav.",
                 OmfangTimer = 4,
                 //SkoleId = Guid.Parse(""),
                 SkoleId = context.SkoleSet.FirstOrDefault(x => x.Navn.Equals("Mandal")).Id,
-                Type = "Type 1",
+                AktivitetstypeId = context.AktivitetstypeSet.FirstOrDefault(x => x.Navn.Equals("Eksamen")).Id,
                 Deltakere = new List<Deltaker>
                 {
                     new Deltaker
@@ -48,10 +48,10 @@ namespace VAF.Aktivitetsbank.Data.UI
             {
                 Id = Guid.NewGuid(),
                 Navn = "Testaktivitet",
-                Beskrivelse = "Matematikk ute",
+                Beskrivelse = "Realfagskrav: Noen studier krever at du har visse realfag. Eksempler på slike studier er ingeniør-, realfags- og medisinske studier. Du finner opptakskravene til høyskole- og universitetsstudier på samordnaopptak.no.",
                 OmfangTimer = 8,
                 SkoleId = context.SkoleSet.FirstOrDefault(x => x.Navn.Equals("Tangen")).Id,
-                Type = "Type 4"
+                AktivitetstypeId = context.AktivitetstypeSet.FirstOrDefault(x => x.Navn.Equals("Lesedag")).Id,
             };
             context.AktivitetSet.Add(aktivitet);
             context.AktivitetSet.Add(aktivitet2);

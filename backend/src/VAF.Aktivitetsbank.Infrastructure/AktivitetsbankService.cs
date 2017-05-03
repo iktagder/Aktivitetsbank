@@ -43,7 +43,7 @@ namespace VAF.Aktivitetsbank.Infrastructure
 
         public IList<AktivitetDto> HentAktiviteter(string queryQueryTerm)
         {
-            var aktiviteter = _context.AktivitetSet.Include(x => x.Skole).ToList();
+            var aktiviteter = _context.AktivitetSet.Include(x => x.Skole).Include(x => x.Aktivitetstype).ToList();
             var aktiviteterMapped = Mapper.Map<IList<AktivitetDto>>(aktiviteter);
             return aktiviteterMapped;
         }
@@ -57,7 +57,7 @@ namespace VAF.Aktivitetsbank.Infrastructure
 
         public AktivitetDto HentAktivitet(Guid queryId)
         {
-            var aktivitet = _context.AktivitetSet.Where(x => x.Id.Equals(queryId)).Include(x => x.Skole).FirstOrDefault();
+            var aktivitet = _context.AktivitetSet.Where(x => x.Id.Equals(queryId)).Include(x => x.Skole).Include(x => x.Aktivitetstype).FirstOrDefault();
             var aktivitetMapped = Mapper.Map<AktivitetDto>(aktivitet);
             return aktivitetMapped;
         }
@@ -78,7 +78,7 @@ namespace VAF.Aktivitetsbank.Infrastructure
                     Beskrivelse = commandOpprettAktivitetDto.Beskrivelse,
                     OmfangTimer = commandOpprettAktivitetDto.OmfangTimer,
                     SkoleId = commandOpprettAktivitetDto.SkoleId,
-                    Type = commandOpprettAktivitetDto.Type
+                    AktivitetstypeId = commandOpprettAktivitetDto.AktivitetstypeId
                 }
             );
             _context.SaveChanges();

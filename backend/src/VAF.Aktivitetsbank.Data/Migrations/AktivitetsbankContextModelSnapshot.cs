@@ -21,6 +21,8 @@ namespace VAF.Aktivitetsbank.Data.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<Guid>("AktivitetstypeId");
+
                     b.Property<string>("Beskrivelse")
                         .IsRequired();
 
@@ -32,10 +34,9 @@ namespace VAF.Aktivitetsbank.Data.Migrations
 
                     b.Property<Guid>("SkoleId");
 
-                    b.Property<string>("Type")
-                        .IsRequired();
-
                     b.HasKey("Id");
+
+                    b.HasIndex("AktivitetstypeId");
 
                     b.HasIndex("SkoleId");
 
@@ -145,6 +146,11 @@ namespace VAF.Aktivitetsbank.Data.Migrations
 
             modelBuilder.Entity("VAF.Aktivitetsbank.Data.Entiteter.Aktivitet", b =>
                 {
+                    b.HasOne("VAF.Aktivitetsbank.Data.Entiteter.Aktivitetstype", "Aktivitetstype")
+                        .WithMany("Aktiviteter")
+                        .HasForeignKey("AktivitetstypeId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.HasOne("VAF.Aktivitetsbank.Data.Entiteter.Skole", "Skole")
                         .WithMany("Aktiviteter")
                         .HasForeignKey("SkoleId")
