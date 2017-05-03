@@ -6,8 +6,10 @@ import Types exposing (..)
 import Time exposing (Time)
 import RemoteData exposing (RemoteData(..))
 import Routing.Router as Router
+import Routing.Helpers as RouterHelpers
 import Http
 import Decoders
+
 
 main : Program Flags Model Msg
 main =
@@ -18,18 +20,23 @@ main =
         , subscriptions = \_ -> Time.every Time.minute TimeChange
         }
 
+
 type alias Model =
     { appState : AppState
     , location : Location
     }
+
+
 type AppState
     = NotReady Flags
     | Ready Taco Router.Model
+
 
 type alias Flags =
     { currentTime : Time
     , apiEndpoint : String
     }
+
 
 type Msg
     = UrlChange Location
@@ -41,31 +48,40 @@ type Msg
 init : Flags -> Location -> ( Model, Cmd Msg )
 init flags location =
     let
-      endPoint = Debug.log "endpoint: " flags.apiEndpoint
+        endPoint =
+            Debug.log "endpoint: " flags.apiEndpoint
     in
-    ( { appState = NotReady flags
-      , location = location
-      }
-      , fetchUserInformation endPoint
-    )
+        ( { appState = NotReady flags
+          , location = location
+          }
+        , Cmd.batch
+            [ fetchUserInformation endPoint
+            , Cmd.map RouterMsg (Router.getInitialCommand (RouterHelpers.parseLocation location) endPoint)
+            ]
+        )
+
 
 fetchUserInformation : String -> Cmd Msg
 fetchUserInformation endPoint =
     let
-      url = endPoint ++ "user"
-      req =  Http.request
-        { method = "GET"
-        , headers = []
-        , url = url
-        , body = Http.emptyBody
-        , expect = Http.expectJson Decoders.decodeUserInformation
-        , timeout = Nothing
-        , withCredentials = True
-        }
+        url =
+            endPoint ++ "user"
+
+        req =
+            Http.request
+                { method = "GET"
+                , headers = []
+                , url = url
+                , body = Http.emptyBody
+                , expect = Http.expectJson Decoders.decodeUserInformation
+                , timeout = Nothing
+                , withCredentials = True
+                }
     in
-      req
-      |> RemoteData.sendRequest
-      |> Cmd.map HandleUserInformationResponse
+        req
+            |> RemoteData.sendRequest
+            |> Cmd.map HandleUserInformationResponse
+
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
@@ -87,7 +103,7 @@ updateTime : Model -> Time -> ( Model, Cmd Msg )
 updateTime model time =
     case model.appState of
         NotReady oldModel ->
-            ( { model | appState = NotReady {oldModel | currentTime = time } }
+            ( { model | appState = NotReady { oldModel | currentTime = time } }
             , Cmd.none
             )
 
@@ -146,6 +162,7 @@ updateUserInfo model webData =
         _ ->
             ( model, Cmd.none )
 
+
 updateTaco : Taco -> TacoUpdate -> Taco
 updateTaco taco tacoUpdate =
     case tacoUpdate of
@@ -157,6 +174,7 @@ updateTaco taco tacoUpdate =
 
         NoUpdate ->
             taco
+
 
 view : Model -> Html Msg
 view model =

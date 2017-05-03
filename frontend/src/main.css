@@ -7,3 +7,11 @@ body {
   height		: 400px;
   font-size	: 11px;
 }
+
+.editer-aktivitet {
+  cursor: pointer;
+}
+
+.text-area{
+  width:  100%;
+}

@@ -9,7 +9,7 @@ reverseRoute : Route -> String
 reverseRoute route =
     case route of
         RouteAktivitetsListe ->
-            "#/aktivitetsliste"
+            "#/aktiviteter"
 
         RouteTelefonskjema ->
             "#/telefonskjema"
@@ -22,20 +22,25 @@ reverseRoute route =
 
         RouteTilgangsadministrasjon ->
             "#/tilgangsadministrasjon"
+
+        RouteAktivitetsDetalj id ->
+            "#/aktiviteter/" ++ id
+
         _ ->
             "#/"
 
 
 routeParser : Url.Parser (Route -> a) a
 routeParser =
-  Url.oneOf
-    [ Url.map RouteAktivitetsListe Url.top
-    , Url.map RouteAnsattPortal (Url.s "ansatt-portal")
-    , Url.map RouteLederForesporsel (Url.s "leder-foresporsel")
-    , Url.map RouteTilgangsadministrasjon (Url.s "tilgangsadministrasjon")
-    , Url.map RouteTelefonskjema (Url.s "telefonskjema")
-    , Url.map RouteAktivitetsListe (Url.s "aktivitetsliste")
-    ]
+    Url.oneOf
+        [ Url.map RouteAktivitetsListe Url.top
+        , Url.map RouteAnsattPortal (Url.s "ansatt-portal")
+        , Url.map RouteLederForesporsel (Url.s "leder-foresporsel")
+        , Url.map RouteTilgangsadministrasjon (Url.s "tilgangsadministrasjon")
+        , Url.map RouteTelefonskjema (Url.s "telefonskjema")
+        , Url.map RouteAktivitetsListe (Url.s "aktiviteter")
+        , Url.map RouteAktivitetsDetalj (Url.s "aktiviteter" </> Url.string)
+        ]
 
 
 parseLocation : Location -> Route
@@ -43,6 +48,8 @@ parseLocation location =
     location
         |> Url.parseHash routeParser
         |> Maybe.withDefault NotFoundRoute
+
+
 
 -- fromTabToRoute : Int -> Route
 -- fromTabToRoute tabIndex =
