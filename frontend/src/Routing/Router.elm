@@ -220,6 +220,9 @@ addSharedMsgToUpdate sharedMsg ( model, msg, tacoUpdate ) =
         NavigateToAktivitet id ->
             ( model, Navigation.newUrl <| reverseRoute (RouteAktivitetsDetalj id), tacoUpdate )
 
+        NavigerTilAktivitetOpprett ->
+            ( model, Navigation.newUrl <| reverseRoute RouteAktivitetOpprett, tacoUpdate )
+
         NoSharedMsg ->
             ( model, msg, tacoUpdate )
 

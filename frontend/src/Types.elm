@@ -82,6 +82,7 @@ type SharedMsg
     = CreateSnackbarToast String
     | NoSharedMsg
     | NavigateToAktivitet String
+    | NavigerTilAktivitetOpprett
 
 
 type alias UserInformation =

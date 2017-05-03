@@ -112,7 +112,7 @@ update msg model =
             ( model, Cmd.none, NavigateToAktivitet id )
 
         OpprettAktivitet ->
-            ( model, Cmd.none, NoSharedMsg )
+            ( model, Cmd.none, NavigerTilAktivitetOpprett )
 
 
 view : Taco -> Model -> Html Msg
