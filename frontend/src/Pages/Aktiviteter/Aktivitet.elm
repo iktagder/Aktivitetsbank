@@ -120,7 +120,16 @@ update msg model =
             ( { model | appMetadata = response }, Cmd.none, NoSharedMsg )
 
         AktivitetResponse response ->
-            ( Debug.log "aktivitet-item-response" { model | aktivitet = response }, Cmd.none, NoSharedMsg )
+            let
+              valgtSkole =
+                case response of
+                  Success aktivitet ->
+                    Just {id = aktivitet.skoleId, navn = aktivitet.skoleNavn, kode = ""}
+                  _ ->
+                    Nothing
+            in
+
+            ( Debug.log "aktivitet-item-response" { model | aktivitet = response, valgtSkole = valgtSkole }, Cmd.none, NoSharedMsg )
 
         OnSelectSkole skole ->
             ( { model | valgtSkole = skole }, Cmd.none, NoSharedMsg )
