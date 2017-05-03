@@ -23,7 +23,7 @@ type alias Model =
     , aktivitet : WebData Aktivitet
     , appMetadata : WebData AppMetadata
     , valgtSkole : Maybe Skole
-    , dropdownState : Dropdown.State
+    , dropdownStateSkole : Dropdown.State
     }
 
 
@@ -56,7 +56,7 @@ init apiEndpoint =
       , aktivitet = RemoteData.NotAsked
       , appMetadata = RemoteData.NotAsked
       , valgtSkole = Nothing
-      , dropdownState = Dropdown.newState "1"
+      , dropdownStateSkole = Dropdown.newState "1"
       }
     , Cmd.none
     )
@@ -137,9 +137,9 @@ update msg model =
         SkoleDropdown skole ->
             let
                 ( updated, cmd ) =
-                    Dropdown.update dropdownConfigSkole skole model.dropdownState
+                    Dropdown.update dropdownConfigSkole skole model.dropdownStateSkole
             in
-                ( { model | dropdownState = updated }, cmd, NoSharedMsg )
+                ( { model | dropdownStateSkole = updated }, cmd, NoSharedMsg )
 
 
 view : Taco -> Model -> Html Msg
@@ -200,13 +200,13 @@ visSkole model =
             visSkoleDropdown
                 model.valgtSkole
                 data.skoler
-                model.dropdownState
+                model.dropdownStateSkole
 
 
 visSkoleDropdown : Maybe Skole -> List Skole -> Dropdown.State -> Html Msg
-visSkoleDropdown selectedSkoleId model dropdownState =
+visSkoleDropdown selectedSkoleId model dropdownStateSkole =
     span []
-        [ Html.map SkoleDropdown (Dropdown.view dropdownConfigSkole dropdownState model selectedSkoleId)
+        [ Html.map SkoleDropdown (Dropdown.view dropdownConfigSkole dropdownStateSkole model selectedSkoleId)
         ]
 
 
