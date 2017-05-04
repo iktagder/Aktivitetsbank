@@ -261,7 +261,7 @@ viewHeader taco model =
         [ Color.background <| Color.color Color.Grey Color.S100
         , Color.text <| Color.color Color.Grey Color.S900
         ]
-        [ Layout.title [] [ text "VAF - Telefonskjema" ]
+        [ Layout.title [] [ text "VAF - Aktivitetsbank" ]
         , Layout.spacer
         , Layout.navigation []
             [ Layout.link

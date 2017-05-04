@@ -5,6 +5,7 @@ import Material
 import Material.Grid as Grid exposing (grid, size, cell, Device(..))
 import Material.Elevation as Elevation
 import Material.Textfield as Textfield
+import Material.Icon as Icon
 import Material.List as Lists
 import Material.Button as Button
 import Material.Color as Color
@@ -210,11 +211,17 @@ view taco model =
     grid []
         [ cell
             [ size All 12
-            , Elevation.e0
-            , Options.css "align-items" "top"
-            , Options.cs "mdl-grid"
             ]
-            [ Options.styled p [ Typo.display2 ] [ text "Aktivitet" ]
+            [ Button.render Mdl
+                [ 0 ]
+                model.mdl
+                [ Button.fab
+                , Button.ripple
+                -- , Options.onClick OpprettAktivitet
+                , Options.css "float" "right"
+                ]
+                [ Icon.i "content_copy" ]
+            , Options.span [ Typo.headline ] [ text "Aktivitet detaljer" ]
             ]
         , cell
             [ size All 12
@@ -234,7 +241,8 @@ view taco model =
               -- , Options.css "flex-direction" "column"
               -- , Options.css "align-items" "left"
             ]
-            [ visAktivitetDeltakere model
+            [ showText p Typo.headline "Deltakere"
+            , visAktivitetDeltakere model
             ]
         ]
 
