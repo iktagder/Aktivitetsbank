@@ -223,7 +223,7 @@ update msg model =
             let
                tmp = Debug.log "ny aktivitet" nyId
             in
-               (model, Cmd.none, NoSharedMsg)
+               (model, Cmd.none, NavigateToAktivitet nyId.id)
 
         NyAktivitetRespons (Err error) ->
             let
