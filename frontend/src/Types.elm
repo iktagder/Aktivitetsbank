@@ -105,6 +105,7 @@ type SharedMsg
     | NavigateToAktivitet String
     | NavigerTilAktivitetOpprett
     | NavigerTilDeltakerOpprett String
+    | NavigerTilHjem
 
 
 type alias UserInformation =

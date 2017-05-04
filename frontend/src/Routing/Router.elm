@@ -262,6 +262,9 @@ addSharedMsgToUpdate sharedMsg ( model, msg, tacoUpdate ) =
         NavigerTilDeltakerOpprett id ->
             ( model, Navigation.newUrl <| reverseRoute (RouteDeltakerOpprett id), tacoUpdate )
 
+        NavigerTilHjem ->
+            ( model, Navigation.newUrl <| reverseRoute (RouteAktivitetsListe), tacoUpdate )
+
         NoSharedMsg ->
             ( model, msg, tacoUpdate )
 
@@ -279,7 +282,8 @@ view taco model =
             , Options.css "align-items" "center"
             ]
             { header = [ viewHeader taco model ]
-            , drawer = [ drawerHeader model, viewDrawer model ]
+            , drawer = []
+            -- , drawer = [ drawerHeader model, viewDrawer model ]
             , tabs =
                 ( [], [] )
                 -- , tabs = ( tabTitles, [] )
