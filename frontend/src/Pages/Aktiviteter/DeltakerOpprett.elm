@@ -24,13 +24,21 @@ type alias Model =
     , appMetadata : WebData AppMetadata
     -- , valgtSkole : Maybe Skole
     , deltaker : Deltaker
-    -- , dropdownStateSkole : Dropdown.State
+    , dropdownStateUtdanningsprogram : Dropdown.State
+    , dropdownStateTrinn : Dropdown.State
+    , dropdownStateFag : Dropdown.State
     }
 
 
 type Msg
     = Mdl (Material.Msg Msg)
     | AppMetadataResponse (WebData AppMetadata)
+    | OnSelectUtdanningsprogram (Maybe Utdanningsprogram)
+    | OnSelectTrinn (Maybe Trinn)
+    | OnSelectFag (Maybe Fag)
+    | UtdanningsprogramDropdown (Dropdown.Msg Utdanningsprogram)
+    | TrinnDropdown (Dropdown.Msg Trinn)
+    | FagDropdown (Dropdown.Msg Fag)
     -- | OnSelectSkole (Maybe Skole)
     -- | SkoleDropdown (Dropdown.Msg Skole)
     -- | OnSelectAktivitetstype (Maybe AktivitetsType)
@@ -48,7 +56,9 @@ init apiEndpoint =
       , statusText = ""
       , appMetadata = RemoteData.NotAsked
       -- , valgtSkole = Nothing
-      -- , dropdownStateSkole = Dropdown.newState "1"
+      , dropdownStateUtdanningsprogram = Dropdown.newState "1"
+      , dropdownStateTrinn = Dropdown.newState "1"
+      , dropdownStateFag = Dropdown.newState "1"
       -- , valgtAktivitetstype = Nothing
       -- , dropdownStateAktivitetstype = Dropdown.newState "1"
       , deltaker =
@@ -103,6 +113,51 @@ update msg model =
         AppMetadataResponse response ->
             ( { model | appMetadata = response }, Cmd.none, NoSharedMsg )
 
+        OnSelectUtdanningsprogram skole ->
+            (  model, Cmd.none, NoSharedMsg )
+            -- let
+            --     gammelAktivitet =
+            --         model.aktivitet
+
+            --     nySkoleId =
+            --         case skole of
+            --             Just data ->
+            --                 data.id
+
+            --             Nothing ->
+            --                 "00"
+
+            --     oppdatertAktivitet =
+            --         { gammelAktivitet | skoleId = nySkoleId }
+            -- in
+            --     ( { model | valgtSkole = skole, aktivitet = oppdatertAktivitet }, Cmd.none, NoSharedMsg )
+        OnSelectTrinn trinn ->
+            (  model, Cmd.none, NoSharedMsg )
+
+        OnSelectFag fag ->
+            (  model, Cmd.none, NoSharedMsg )
+
+        UtdanningsprogramDropdown utdanningsprogram ->
+            let
+                ( updated, cmd ) =
+                    Dropdown.update dropdownConfigUtdanningsprogram utdanningsprogram model.dropdownStateUtdanningsprogram
+            in
+                ( { model | dropdownStateUtdanningsprogram = updated }, cmd, NoSharedMsg )
+
+        TrinnDropdown trinn ->
+            let
+                ( updated, cmd ) =
+                    Dropdown.update dropdownConfigTrinn trinn model.dropdownStateTrinn
+            in
+                ( { model | dropdownStateTrinn = updated }, cmd, NoSharedMsg )
+
+        FagDropdown fag ->
+            let
+                ( updated, cmd ) =
+                    Dropdown.update dropdownConfigFag fag model.dropdownStateFag
+            in
+                ( { model | dropdownStateFag = updated }, cmd, NoSharedMsg )
+
 showText : (List (Html.Attribute m) -> List (Html msg) -> a) -> Options.Property c m -> String -> a
 showText elementType displayStyle text_ =
     Options.styled elementType [ displayStyle, Typo.left ] [ text text_ ]
@@ -113,21 +168,71 @@ vis taco model =
     grid []
         [ cell
             [ size All 12
-            , Elevation.e0
-            , Options.css "align-items" "top"
-            , Options.cs "mdl-grid"
             ]
-            [ Options.styled p [ Typo.display2 ] [ text "Opprett deltaker" ]
+            [ Options.span [ Typo.headline ] [ text "Opprett deltaker" ]
             ]
         , cell
             [ size All 12
             , Elevation.e2
-            , Options.css "padding" "16px 32px"
-            , Options.css "display" "flex"
-              -- , Options.css "flex-direction" "column"
-              -- , Options.css "align-items" "left"
             ]
             [
             -- [ visOpprettDeltaker model model.deltaker
             ]
         ]
+    -- grid []
+    --     [ cell
+    --         [ size All 12
+    --         , Elevation.e0
+    --         , Options.css "align-items" "top"
+    --         , Options.cs "mdl-grid"
+    --         ]
+    --         [ Options.styled p [ Typo.display2 ] [ text "Opprett deltaker" ]
+    --         ]
+    --     , cell
+    --         [ size All 12
+    --         , Elevation.e2
+    --         , Options.css "padding" "16px 32px"
+    --         , Options.css "display" "flex"
+    --           -- , Options.css "flex-direction" "column"
+    --           -- , Options.css "align-items" "left"
+    --         ]
+    --         [
+    --         -- [ visOpprettDeltaker model model.deltaker
+    --         ]
+    --     ]
+
+dropdownConfigUtdanningsprogram : Dropdown.Config Msg Utdanningsprogram
+dropdownConfigUtdanningsprogram =
+    Dropdown.newConfig OnSelectUtdanningsprogram .navn
+        |> Dropdown.withItemClass "border-bottom border-silver p1 gray"
+        |> Dropdown.withMenuClass "border border-gray dropdown"
+        |> Dropdown.withMenuStyles [ ( "background", "white" ) ]
+        |> Dropdown.withPrompt "Velg utdanningsprogram"
+        |> Dropdown.withPromptClass "silver"
+        |> Dropdown.withSelectedClass "bold"
+        |> Dropdown.withSelectedStyles [ ( "color", "black" ) ]
+        |> Dropdown.withTriggerClass "col-4 border bg-white p1"
+
+dropdownConfigTrinn : Dropdown.Config Msg Trinn
+dropdownConfigTrinn =
+    Dropdown.newConfig OnSelectTrinn .navn
+        |> Dropdown.withItemClass "border-bottom border-silver p1 gray"
+        |> Dropdown.withMenuClass "border border-gray dropdown"
+        |> Dropdown.withMenuStyles [ ( "background", "white" ) ]
+        |> Dropdown.withPrompt "Velg trinn"
+        |> Dropdown.withPromptClass "silver"
+        |> Dropdown.withSelectedClass "bold"
+        |> Dropdown.withSelectedStyles [ ( "color", "black" ) ]
+        |> Dropdown.withTriggerClass "col-4 border bg-white p1"
+
+dropdownConfigFag : Dropdown.Config Msg Fag
+dropdownConfigFag =
+    Dropdown.newConfig OnSelectFag .navn
+        |> Dropdown.withItemClass "border-bottom border-silver p1 gray"
+        |> Dropdown.withMenuClass "border border-gray dropdown"
+        |> Dropdown.withMenuStyles [ ( "background", "white" ) ]
+        |> Dropdown.withPrompt "Velg fag"
+        |> Dropdown.withPromptClass "silver"
+        |> Dropdown.withSelectedClass "bold"
+        |> Dropdown.withSelectedStyles [ ( "color", "black" ) ]
+        |> Dropdown.withTriggerClass "col-4 border bg-white p1"
