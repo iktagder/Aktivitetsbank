@@ -238,11 +238,21 @@ view taco model =
             , Elevation.e2
             , Options.css "padding" "16px 32px"
             , Options.css "display" "flex"
-              -- , Options.css "flex-direction" "column"
+              , Options.css "flex-direction" "column"
               -- , Options.css "align-items" "left"
             ]
             [ showText p Typo.headline "Deltakere"
             , visAktivitetDeltakere model
+            , Button.render Mdl
+                [ 0, 4, 2 ]
+                model.mdl
+                [ Button.fab
+                , Button.ripple
+                -- , Options.onClick OpprettAktivitet
+                , Options.css "float" "left"
+                ]
+                [ Icon.i "add" ]
+            , Options.span [ Typo.menu ] [ text "Legg til deltaker" ]
             ]
         ]
 
