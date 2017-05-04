@@ -9,6 +9,7 @@ import Routing.Helpers exposing (parseLocation, reverseRoute)
 import Pages.Aktiviteter.Aktiviteter as Aktiviteter
 import Pages.Aktiviteter.Aktivitet as Aktivitet
 import Pages.Aktiviteter.AktivitetOpprett as AktivitetOpprett
+import Pages.Aktiviteter.DeltakerOpprett as DeltakerOpprett
 import Material
 import Material.Layout as Layout
 import Material.Snackbar as Snackbar
@@ -45,6 +46,7 @@ type alias Model =
     , aktiviteterModel : Aktiviteter.Model
     , aktivitetModel : Aktivitet.Model
     , aktivitetOpprettModel : AktivitetOpprett.Model
+    , deltakerOpprettModel : DeltakerOpprett.Model
     , apiEndpoint : String
     }
 
@@ -57,6 +59,7 @@ type Msg
     | AktiviteterMsg Aktiviteter.Msg
     | AktivitetMsg Aktivitet.Msg
     | AktivitetOpprettMsg AktivitetOpprett.Msg
+    | DeltakerOpprettMsg DeltakerOpprett.Msg
 
 
 init : Location -> String -> ( Model, Cmd Msg )
@@ -71,6 +74,9 @@ init location apiEndpoint =
         ( aktivitetOpprettModel, aktivitetOpprettCmd ) =
             AktivitetOpprett.init apiEndpoint
 
+        ( deltakerOpprettModel, deltakerOpprettCmd ) =
+            DeltakerOpprett.init apiEndpoint
+
         route =
             parseLocation location
     in
@@ -82,6 +88,7 @@ init location apiEndpoint =
           , aktivitetModel = aktivitetModel
           , apiEndpoint = apiEndpoint
           , aktivitetOpprettModel = aktivitetOpprettModel
+          , deltakerOpprettModel = deltakerOpprettModel
           }
         , Cmd.none
         )
@@ -135,6 +142,9 @@ update msg model =
         AktivitetOpprettMsg aktivitetOpprettMsg ->
             updateAktivitetOpprett model aktivitetOpprettMsg
 
+        DeltakerOpprettMsg deltakerOpprettMsg ->
+            updateDeltakerOpprett model deltakerOpprettMsg
+
 
 getInitialCommand : Route -> String -> Cmd Msg
 getInitialCommand route endpoint =
@@ -158,6 +168,9 @@ getInitialCommand route endpoint =
 
         RouteAktivitetOpprett ->
             Cmd.map AktivitetOpprettMsg <| AktivitetOpprett.fetchAppMetadata endpoint
+
+        RouteDeltakerOpprett _ ->
+            Cmd.map DeltakerOpprettMsg <| DeltakerOpprett.fetchAppMetadata endpoint
 
         _ ->
             Cmd.none
@@ -201,6 +214,18 @@ updateAktivitetOpprett model aktivitetOpprettMsg =
         )
             |> addSharedMsgToUpdate sharedMsg
 
+updateDeltakerOpprett : Model -> DeltakerOpprett.Msg -> ( Model, Cmd Msg, TacoUpdate )
+updateDeltakerOpprett model deltakerOpprettMsg =
+    let
+        ( nextDeltakerOpprettModel, deltakerOpprettCmd, sharedMsg ) =
+            DeltakerOpprett.update deltakerOpprettMsg model.deltakerOpprettModel
+    in
+        ( { model | deltakerOpprettModel = nextDeltakerOpprettModel }
+        , Cmd.map DeltakerOpprettMsg deltakerOpprettCmd
+        , NoUpdate
+        )
+            |> addSharedMsgToUpdate sharedMsg
+
 
 addSharedMsgToUpdate : SharedMsg -> ( Model, Cmd Msg, TacoUpdate ) -> ( Model, Cmd Msg, TacoUpdate )
 addSharedMsgToUpdate sharedMsg ( model, msg, tacoUpdate ) =
@@ -223,6 +248,9 @@ addSharedMsgToUpdate sharedMsg ( model, msg, tacoUpdate ) =
 
         NavigerTilAktivitetOpprett ->
             ( model, Navigation.newUrl <| reverseRoute RouteAktivitetOpprett, tacoUpdate )
+
+        NavigerTilDeltakerOpprett id ->
+            ( model, Navigation.newUrl <| reverseRoute (RouteDeltakerOpprett id), tacoUpdate )
 
         NoSharedMsg ->
             ( model, msg, tacoUpdate )
@@ -361,6 +389,10 @@ pageView taco model =
         RouteAktivitetOpprett ->
             AktivitetOpprett.view taco model.aktivitetOpprettModel
                 |> Html.map AktivitetOpprettMsg
+
+        RouteDeltakerOpprett _->
+            DeltakerOpprett.vis taco model.deltakerOpprettModel
+                |> Html.map DeltakerOpprettMsg
 
         RouteTelefonskjema ->
             h1 [] [ text "aktivitetsliste" ]

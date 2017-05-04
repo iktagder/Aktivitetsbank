@@ -44,6 +44,7 @@ type Msg
     | SkoleDropdown (Dropdown.Msg Skole)
     | OnSelectAktivitetstype (Maybe AktivitetsType)
     | AktivitetstypeDropdown (Dropdown.Msg AktivitetsType)
+    | VisDeltakerOpprett
 
 
 dropdownConfigSkole : Dropdown.Config Msg Skole
@@ -167,6 +168,17 @@ update msg model =
         VisAktivitetDeltakerDetalj id ->
             ( model, Cmd.none, NoSharedMsg )
 
+        VisDeltakerOpprett ->
+            let
+              sharedMsg =
+                case model.aktivitet of
+                    Success aktivitet ->
+                        NavigerTilDeltakerOpprett aktivitet.id
+                    _ ->
+                        NoSharedMsg
+            in
+              ( model, Cmd.none, sharedMsg)
+
         AktivitetDeltakereResponse response ->
             ( { model |  deltakere = Debug.log "Deltakere:" response }, Cmd.none, NoSharedMsg )
 
@@ -248,7 +260,7 @@ view taco model =
                 model.mdl
                 [ Button.fab
                 , Button.ripple
-                -- , Options.onClick OpprettAktivitet
+                , Options.onClick VisDeltakerOpprett
                 , Options.css "float" "left"
                 ]
                 [ Icon.i "add" ]

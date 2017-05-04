@@ -86,6 +86,7 @@ type Route
     | RouteAktivitetsListe
     | RouteAktivitetsDetalj String
     | RouteAktivitetOpprett
+    | RouteDeltakerOpprett String
     | NotFoundRoute
 
 
@@ -100,6 +101,7 @@ type SharedMsg
     | NoSharedMsg
     | NavigateToAktivitet String
     | NavigerTilAktivitetOpprett
+    | NavigerTilDeltakerOpprett String
 
 
 type alias UserInformation =
