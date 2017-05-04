@@ -1,5 +1,6 @@
 require('./main.css');
 require('file?name=/images/elm.png!../images/elm.png');
+require('ace-css/css/ace.css');
 
 var Elm = require('./Main.elm');
 
