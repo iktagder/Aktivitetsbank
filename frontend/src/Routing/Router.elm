@@ -98,7 +98,7 @@ init location apiEndpoint =
           , aktivitetOpprettModel = aktivitetOpprettModel
           , deltakerOpprettModel = deltakerOpprettModel
           }
-        , Cmd.none
+        , Cmd.map AktiviteterMsg aktiviteterCmd
         )
 
 
@@ -153,7 +153,6 @@ update msg model =
         DeltakerOpprettMsg deltakerOpprettMsg ->
             updateDeltakerOpprett model deltakerOpprettMsg
 
-
 getInitialCommand : Route -> String -> Cmd Msg
 getInitialCommand route endpoint =
     case route of
@@ -165,12 +164,12 @@ getInitialCommand route endpoint =
                     , Aktivitet.fetchAppMetadata endpoint
                     ]
 
-        RouteAktivitetsListe ->
-            Cmd.map AktiviteterMsg <|
-                Cmd.batch
-                    [ Aktiviteter.fetchAktivitetListe endpoint
-                    , Aktiviteter.fetchAppMetadata endpoint
-                    ]
+        -- RouteAktivitetsListe ->
+        --     Cmd.map AktiviteterMsg <|
+        --         Cmd.batch
+        --             [ Aktiviteter.fetchAktivitetListe endpoint
+        --             , Aktiviteter.fetchAppMetadata endpoint
+        --             ]
 
         RouteAktivitetOpprett ->
             Cmd.map AktivitetOpprettMsg <| AktivitetOpprett.fetchAppMetadata endpoint

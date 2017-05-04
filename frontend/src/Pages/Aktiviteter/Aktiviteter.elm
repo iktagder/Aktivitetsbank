@@ -380,7 +380,9 @@ visAktivitetListe : Model -> Html Msg
 visAktivitetListe model =
     case model.aktivitetListe of
         NotAsked ->
-            text "Venter på henting av liste.."
+            Options.div []
+                [ Loading.spinner [ Loading.active True ]
+                ]
 
         Loading ->
             Options.div []

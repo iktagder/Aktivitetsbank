@@ -59,7 +59,7 @@ init flags location =
           }
         , Cmd.batch
             [ fetchUserInformation endPoint
-            , Cmd.map RouterMsg (Router.getInitialCommand (RouterHelpers.parseLocation location) endPoint)
+            -- , Cmd.map RouterMsg (Router.getInitialCommand (RouterHelpers.parseLocation location) endPoint)
             ]
         )
 
@@ -132,7 +132,10 @@ updateRouter model routerMsg =
                 )
 
         NotReady _ ->
-            Debug.crash "Ooops. We got a sub-component message even though it wasn't supposed to be initialized?!?!?"
+        let
+          tmp = Debug.log "Ooops. We got a sub-component message even though it wasn't supposed to be initialized?" model
+        in
+          (model, Cmd.none)
 
 
 updateUserInfo : Model -> RemoteData.WebData UserInformation -> ( Model, Cmd Msg )
