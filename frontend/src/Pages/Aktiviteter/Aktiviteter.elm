@@ -208,7 +208,7 @@ visAktivitet model aktivitet =
                 , css "height" "36px"
                 , css "margin-right" "2rem"
                 ]
-                [ text "A" ]
+                [ text <| String.left 1 aktivitet.aktivitetsTypeNavn ]
             , Lists.content []
                 [ Options.span [] [ text <| aktivitet.navn ++ " - " ++ aktivitet.skoleNavn ++ " (" ++ (toString aktivitet.omfangTimer) ++ " skoletimer )" ]
                 , Lists.subtitle [ css "width" "80%" ] [ text aktivitet.beskrivelse ]
