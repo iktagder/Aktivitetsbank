@@ -30,6 +30,7 @@ type alias Model =
     , appMetadata : WebData AppMetadata
     , visFilter : Bool
     , aktivitetsTypefilter : Dict.Dict Int String
+    , skoleFilter : Dict.Dict Int String
     , navnFilter : String
     }
 
@@ -43,6 +44,7 @@ type Msg
     | VisFilter
     | FiltrerPaNavn String
     | FiltrerPaType String Int
+    | FiltrerPaSkole String Int
 
 
 init : String -> ( Model, Cmd Msg )
@@ -56,6 +58,7 @@ init apiEndpoint =
       , filtertAktivitetListe = []
       , aktivitetsTypefilter = Dict.empty
       , navnFilter = ""
+      , skoleFilter = Dict.empty
       }
     , Cmd.batch [ fetchAppMetadata apiEndpoint, fetchAktivitetListe apiEndpoint ]
     )
@@ -134,7 +137,7 @@ update msg model =
         FiltrerPaNavn navn ->
             ( { model
                 | navnFilter = navn
-                , filtertAktivitetListe = filterAktivitetList model navn model.aktivitetsTypefilter
+                , filtertAktivitetListe = filterAktivitetList model navn model.aktivitetsTypefilter model.skoleFilter
               }
             , Cmd.none
             , NoSharedMsg
@@ -149,16 +152,32 @@ update msg model =
                         Dict.insert index typeId model.aktivitetsTypefilter
             in
                 ( { model
-                    | filtertAktivitetListe = filterAktivitetList model model.navnFilter newAktivitetsTypefilter
+                    | filtertAktivitetListe = filterAktivitetList model model.navnFilter newAktivitetsTypefilter model.skoleFilter
                     , aktivitetsTypefilter = newAktivitetsTypefilter
                   }
                 , Cmd.none
                 , NoSharedMsg
                 )
 
+        FiltrerPaSkole skoleId index ->
+            let
+                newSkoleFilter =
+                    if Dict.member index model.skoleFilter then
+                        Dict.remove index model.skoleFilter
+                    else
+                        Dict.insert index skoleId model.skoleFilter
+            in
+                ( { model
+                    | filtertAktivitetListe = filterAktivitetList model model.navnFilter model.aktivitetsTypefilter newSkoleFilter
+                    , skoleFilter = newSkoleFilter
+                  }
+                , Cmd.none
+                , NoSharedMsg
+                )
 
-filterAktivitetList : Model -> String -> Dict.Dict Int String -> List Aktivitet
-filterAktivitetList model navn aktivitetsType =
+
+filterAktivitetList : Model -> String -> Dict.Dict Int String -> Dict.Dict Int String -> List Aktivitet
+filterAktivitetList model navn aktivitetsType skole =
     (getAktivitetListe model)
         |> List.filter
             (\aktivitet ->
@@ -173,6 +192,13 @@ filterAktivitetList model navn aktivitetsType =
                     True
                 else
                     String.contains (String.toLower navn) (String.toLower aktivitet.navn)
+            )
+        |> List.filter
+            (\aktivitet ->
+                if Dict.isEmpty skole then
+                    True
+                else
+                    List.member aktivitet.skoleId (Dict.values skole)
             )
 
 
@@ -271,14 +297,12 @@ visFilter model =
             , Options.onInput (FiltrerPaNavn)
             ]
             []
-        , Options.div [ Typo.caption ]
-            [ text "Aktivitetstyper" ]
-        , visAktivitetsTypeFilter model
+        , visAvansertFilter model
         ]
 
 
-visAktivitetsTypeFilter : Model -> Html Msg
-visAktivitetsTypeFilter model =
+visAvansertFilter : Model -> Html Msg
+visAvansertFilter model =
     case model.appMetadata of
         NotAsked ->
             text "Venter på henting av metadata.."
@@ -292,15 +316,23 @@ visAktivitetsTypeFilter model =
             text "Feil ved henting av data"
 
         Success data ->
-            visAktivitetsTypeFilterSuksess model data
+            visAvansertFilterSuksess model data
 
 
-visAktivitetsTypeFilterSuksess : Model -> AppMetadata -> Html Msg
-visAktivitetsTypeFilterSuksess model data =
+visAvansertFilterSuksess : Model -> AppMetadata -> Html Msg
+visAvansertFilterSuksess model data =
     Options.div []
-        (data.aktivitetstyper
-            |> List.indexedMap (\index item -> visAktivitetTypeFilter model item index)
-        )
+        [ text "Aktivitetstyper"
+        , Options.div []
+            (data.aktivitetstyper
+                |> List.indexedMap (\index item -> visAktivitetTypeFilter model item index)
+            )
+        , text "Skoler"
+        , Options.div []
+            (data.skoler
+                |> List.indexedMap (\index item -> visSkoleTypeFilter model item index)
+            )
+        ]
 
 
 visAktivitetTypeFilter : Model -> AktivitetsType -> Int -> Html Msg
@@ -313,6 +345,18 @@ visAktivitetTypeFilter model type_ index =
         , Toggles.value (Dict.member index model.aktivitetsTypefilter)
         ]
         [ text type_.navn ]
+
+
+visSkoleTypeFilter : Model -> Skole -> Int -> Html Msg
+visSkoleTypeFilter model skole index =
+    Toggles.checkbox Mdl
+        [ 9, index ]
+        model.mdl
+        [ Options.onToggle (FiltrerPaSkole skole.id index)
+        , Toggles.ripple
+        , Toggles.value (Dict.member index model.skoleFilter)
+        ]
+        [ text skole.navn ]
 
 
 viewMainContent : Model -> Html Msg
