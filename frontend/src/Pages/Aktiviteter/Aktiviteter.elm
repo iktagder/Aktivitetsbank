@@ -10,12 +10,15 @@ import Material.Icon as Icon
 import Material.Options as Options exposing (when, css, cs, Style, onClick)
 import Material.Typography as Typo
 import Material.List as Lists
+import Material.Textfield as Textfield
+import Material.Toggles as Toggles
 import Material.Spinner as Loading
 import Material.Typography as Typography
 import RemoteData exposing (WebData, RemoteData(..))
 import Types exposing (..)
 import Http exposing (Error)
 import Decoders exposing (..)
+import Array
 
 
 type alias Model =
@@ -23,7 +26,10 @@ type alias Model =
     , apiEndpoint : String
     , statusText : String
     , aktivitetListe : WebData (List Aktivitet)
+    , filtertAktivitetListe : Maybe (List Aktivitet)
     , appMetadata : WebData AppMetadata
+    , visFilter : Bool
+    , aktivitetsTypefilter : Array.Array Bool
     }
 
 
@@ -33,6 +39,9 @@ type Msg
     | AktivitetListeResponse (WebData (List Aktivitet))
     | VisAktivitetDetalj String
     | OpprettAktivitet
+    | VisFilter
+    | FiltrerPaNavn String
+    | FiltrerPaType String Int
 
 
 init : String -> ( Model, Cmd Msg )
@@ -42,6 +51,9 @@ init apiEndpoint =
       , statusText = ""
       , aktivitetListe = RemoteData.NotAsked
       , appMetadata = RemoteData.NotAsked
+      , visFilter = False
+      , filtertAktivitetListe = Nothing
+      , aktivitetsTypefilter = Array.fromList []
       }
     , Cmd.batch [ fetchAppMetadata apiEndpoint, fetchAktivitetListe apiEndpoint ]
     )
@@ -114,6 +126,25 @@ update msg model =
         OpprettAktivitet ->
             ( model, Cmd.none, NavigerTilAktivitetOpprett )
 
+        VisFilter ->
+            ( { model | visFilter = not model.visFilter, filtertAktivitetListe = Just (getAktivitetListe model) }, Cmd.none, NoSharedMsg )
+
+        FiltrerPaNavn navn ->
+            ( { model | filtertAktivitetListe = Just (getAktivitetListe model |> List.filter (\aktivitet -> String.contains (String.toLower navn) (String.toLower aktivitet.navn))) }, Cmd.none, NoSharedMsg )
+
+        FiltrerPaType typeId index ->
+            ( { model | filtertAktivitetListe = Just (getAktivitetListe model |> List.filter (\aktivitet -> aktivitet.aktivitetsTypeId == typeId)) }, Cmd.none, NoSharedMsg )
+
+
+getAktivitetListe : Model -> List Aktivitet
+getAktivitetListe model =
+    case model.aktivitetListe of
+        Success data ->
+            data
+
+        _ ->
+            []
+
 
 view : Taco -> Model -> Html Msg
 view taco model =
@@ -128,17 +159,120 @@ view taco model =
                 , Button.ripple
                 , Options.onClick OpprettAktivitet
                 , Options.css "float" "right"
+                , Options.css "margin-left" "3px"
                 ]
                 [ Icon.i "add" ]
-            , Options.span [ Typo.display2 ] [ text "Aktiviteter" ]
+            , Button.render Mdl
+                [ 1 ]
+                model.mdl
+                [ Button.fab
+                , Button.ripple
+                , Options.onClick VisFilter
+                , Options.css "float" "right"
+                ]
+                [ Icon.i "search" ]
+            , Options.span [ Typo.title ]
+                [ text "Aktiviteter" ]
             ]
+        , getFilterCell model
         , cell
-            [ size All 12
+            [ size All (getAntallAktivietCeller model)
             , Elevation.e2
             ]
             [ viewMainContent model
             ]
         ]
+
+
+getAntallAktivietCeller : Model -> Int
+getAntallAktivietCeller model =
+    if model.visFilter then
+        9
+    else
+        12
+
+
+getFilterCell : Model -> Grid.Cell Msg
+getFilterCell model =
+    case
+        model.visFilter
+    of
+        True ->
+            cell
+                [ size All 3
+                , Elevation.e2
+                ]
+                [ visFilter model
+                ]
+
+        _ ->
+            cell
+                []
+                []
+
+
+visFilter : Model -> Html Msg
+visFilter model =
+    Options.div
+        [ css "margin-top"
+            "5px"
+        , css
+            "margin-left"
+            "5px"
+        ]
+        [ Options.div [ Typo.title ]
+            [ text "Filtrer" ]
+        , Textfield.render Mdl
+            [ 1 ]
+            model.mdl
+            [ Textfield.label "Navn"
+            , Textfield.floatingLabel
+            , Textfield.text_
+            , Options.onInput (FiltrerPaNavn)
+            ]
+            []
+        , Options.div [ Typo.caption ]
+            [ text "Aktivitetstyper" ]
+        , visAktivitetsTypeFilter model
+        ]
+
+
+visAktivitetsTypeFilter : Model -> Html Msg
+visAktivitetsTypeFilter model =
+    case model.appMetadata of
+        NotAsked ->
+            text "Venter på henting av metadata.."
+
+        Loading ->
+            Options.div []
+                [ Loading.spinner [ Loading.active True ]
+                ]
+
+        Failure err ->
+            text "Feil ved henting av data"
+
+        Success data ->
+            visAktivitetsTypeFilterSuksess model data
+
+
+visAktivitetsTypeFilterSuksess : Model -> AppMetadata -> Html Msg
+visAktivitetsTypeFilterSuksess model data =
+    Options.div []
+        (data.aktivitetstyper
+            |> List.indexedMap (\index item -> visAktivitetTypeFilter model item index)
+        )
+
+
+visAktivitetTypeFilter : Model -> AktivitetsType -> Int -> Html Msg
+visAktivitetTypeFilter model type_ index =
+    Toggles.checkbox Mdl
+        [ 5, index ]
+        model.mdl
+        [ Options.onToggle (FiltrerPaType type_.id index)
+        , Toggles.ripple
+        , Toggles.value False
+        ]
+        [ text type_.navn ]
 
 
 viewMainContent : Model -> Html Msg
@@ -179,9 +313,24 @@ visAktivitetListe model =
 visAktivitetListeSuksess : Model -> List Aktivitet -> Html Msg
 visAktivitetListeSuksess model aktiviteter =
     Lists.ul [ css "width" "100%" ]
-        (aktiviteter
+        (getAktiviteter model aktiviteter
             |> List.map (visAktivitet model)
         )
+
+
+getAktiviteter : Model -> List Aktivitet -> List Aktivitet
+getAktiviteter model aktiviteter =
+    case model.visFilter of
+        True ->
+            case model.filtertAktivitetListe of
+                Just value ->
+                    value
+
+                _ ->
+                    []
+
+        False ->
+            aktiviteter
 
 
 visAktivitet : Model -> Aktivitet -> Html Msg
