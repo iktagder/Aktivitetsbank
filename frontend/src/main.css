@@ -15,3 +15,8 @@ body {
 .text-area{
   width:  100%;
 }
+
+.dropdown{
+  width: 33.33333% !important;
+  z-index: 100000;
+}

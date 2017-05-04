@@ -48,7 +48,7 @@ dropdownConfigSkole : Dropdown.Config Msg Skole
 dropdownConfigSkole =
     Dropdown.newConfig OnSelectSkole .navn
         |> Dropdown.withItemClass "border-bottom border-silver p1 gray"
-        |> Dropdown.withMenuClass "border border-gray"
+        |> Dropdown.withMenuClass "border border-gray dropdown"
         |> Dropdown.withMenuStyles [ ( "background", "white" ) ]
         |> Dropdown.withPrompt "Velg skole"
         |> Dropdown.withPromptClass "silver"
@@ -56,17 +56,19 @@ dropdownConfigSkole =
         |> Dropdown.withSelectedStyles [ ( "color", "black" ) ]
         |> Dropdown.withTriggerClass "col-4 border bg-white p1"
 
+
 dropdownConfigAktivitetstype : Dropdown.Config Msg AktivitetsType
 dropdownConfigAktivitetstype =
     Dropdown.newConfig OnSelectAktivitetstype .navn
         |> Dropdown.withItemClass "border-bottom border-silver p1 gray"
-        |> Dropdown.withMenuClass "border border-gray"
+        |> Dropdown.withMenuClass "border border-gray dropdown"
         |> Dropdown.withMenuStyles [ ( "background", "white" ) ]
         |> Dropdown.withPrompt "Velg aktivitetstype"
         |> Dropdown.withPromptClass "silver"
         |> Dropdown.withSelectedClass "bold"
         |> Dropdown.withSelectedStyles [ ( "color", "black" ) ]
         |> Dropdown.withTriggerClass "col-4 border bg-white p1"
+
 
 init : String -> ( Model, Cmd Msg )
 init apiEndpoint =
@@ -86,7 +88,7 @@ init apiEndpoint =
             , skoleId = "1"
             , skoleNavn = ""
             , aktivitetsTypeId = ""
-            , aktivitetsTypeNavn =""
+            , aktivitetsTypeNavn = ""
             }
       }
     , Cmd.none
@@ -114,7 +116,8 @@ fetchAppMetadata endPoint =
             |> RemoteData.sendRequest
             |> Cmd.map AppMetadataResponse
 
-postOpprettNyAktivitet : String -> Aktivitet -> ((Result Error NyAktivitet) -> msg) -> Cmd msg
+
+postOpprettNyAktivitet : String -> Aktivitet -> (Result Error NyAktivitet -> msg) -> Cmd msg
 postOpprettNyAktivitet endPoint aktivitet responseMsg =
     let
         url =
@@ -137,6 +140,7 @@ postOpprettNyAktivitet endPoint aktivitet responseMsg =
         req
             |> Http.send responseMsg
 
+
 update : Msg -> Model -> ( Model, Cmd Msg, SharedMsg )
 update msg model =
     case msg of
@@ -152,17 +156,21 @@ update msg model =
 
         OnSelectSkole skole ->
             let
-              gammelAktivitet = model.aktivitet
-              nySkoleId =
-                case skole of
-                    Just data ->
-                        data.id
-                    Nothing ->
-                        "00"
-              oppdatertAktivitet =
-                    {gammelAktivitet | skoleId = nySkoleId}
+                gammelAktivitet =
+                    model.aktivitet
+
+                nySkoleId =
+                    case skole of
+                        Just data ->
+                            data.id
+
+                        Nothing ->
+                            "00"
+
+                oppdatertAktivitet =
+                    { gammelAktivitet | skoleId = nySkoleId }
             in
-            ( { model | valgtSkole = skole, aktivitet = oppdatertAktivitet }, Cmd.none, NoSharedMsg )
+                ( { model | valgtSkole = skole, aktivitet = oppdatertAktivitet }, Cmd.none, NoSharedMsg )
 
         SkoleDropdown skole ->
             let
@@ -173,17 +181,21 @@ update msg model =
 
         OnSelectAktivitetstype aktivitetstype ->
             let
-              gammelAktivitet = model.aktivitet
-              nyAktivitetId =
-                case aktivitetstype of
-                    Just data ->
-                        data.id
-                    Nothing ->
-                        "00"
-              oppdatertAktivitet =
-                    {gammelAktivitet | aktivitetsTypeId = nyAktivitetId}
+                gammelAktivitet =
+                    model.aktivitet
+
+                nyAktivitetId =
+                    case aktivitetstype of
+                        Just data ->
+                            data.id
+
+                        Nothing ->
+                            "00"
+
+                oppdatertAktivitet =
+                    { gammelAktivitet | aktivitetsTypeId = nyAktivitetId }
             in
-            ( { model | valgtAktivitetstype = aktivitetstype, aktivitet = oppdatertAktivitet }, Cmd.none, NoSharedMsg )
+                ( { model | valgtAktivitetstype = aktivitetstype, aktivitet = oppdatertAktivitet }, Cmd.none, NoSharedMsg )
 
         AktivitetstypeDropdown aktivitetstype ->
             let
@@ -194,43 +206,50 @@ update msg model =
 
         EndretAktivitetsNavn endretNavn ->
             let
-              gammelAktivitet = model.aktivitet
-              oppdatertAktivitet =
-                    {gammelAktivitet | navn = endretNavn}
+                gammelAktivitet =
+                    model.aktivitet
+
+                oppdatertAktivitet =
+                    { gammelAktivitet | navn = endretNavn }
             in
                 ( Debug.log "endretNavn:" { model | aktivitet = oppdatertAktivitet }, Cmd.none, NoSharedMsg )
 
         EndretAktivitetsBeskrivelse endretBeskrivelse ->
             let
-              gammelAktivitet = model.aktivitet
-              oppdatertAktivitet =
-                    {gammelAktivitet | beskrivelse = endretBeskrivelse}
+                gammelAktivitet =
+                    model.aktivitet
+
+                oppdatertAktivitet =
+                    { gammelAktivitet | beskrivelse = endretBeskrivelse }
             in
                 ( { model | aktivitet = oppdatertAktivitet }, Cmd.none, NoSharedMsg )
 
         EndretAktivitetsOmfangTimer endretOmfangTimer ->
             let
-              gammelAktivitet = model.aktivitet
-              oppdatertAktivitet =
-                    {gammelAktivitet | omfangTimer = Result.withDefault 0 (String.toInt endretOmfangTimer)}
+                gammelAktivitet =
+                    model.aktivitet
+
+                oppdatertAktivitet =
+                    { gammelAktivitet | omfangTimer = Result.withDefault 0 (String.toInt endretOmfangTimer) }
             in
                 ( { model | aktivitet = oppdatertAktivitet }, Cmd.none, NoSharedMsg )
 
         OpprettNyAktivitet ->
-            (model, postOpprettNyAktivitet model.apiEndpoint model.aktivitet NyAktivitetRespons, NoSharedMsg)
+            ( model, postOpprettNyAktivitet model.apiEndpoint model.aktivitet NyAktivitetRespons, NoSharedMsg )
 
         NyAktivitetRespons (Ok nyId) ->
             let
-               tmp = Debug.log "ny aktivitet" nyId
+                tmp =
+                    Debug.log "ny aktivitet" nyId
             in
-               (model, Cmd.none, NoSharedMsg)
+                ( model, Cmd.none, NoSharedMsg )
 
         NyAktivitetRespons (Err error) ->
             let
-               tmp = Debug.log "ny aktivitet - error" error
+                tmp =
+                    Debug.log "ny aktivitet - error" error
             in
-               (model, Cmd.none, NoSharedMsg)
-
+                ( model, Cmd.none, NoSharedMsg )
 
 
 showText : (List (Html.Attribute m) -> List (Html msg) -> a) -> Options.Property c m -> String -> a
@@ -287,6 +306,7 @@ visSkoleDropdown selectedSkoleId model dropdownStateSkole =
         [ Html.map SkoleDropdown (Dropdown.view dropdownConfigSkole dropdownStateSkole model selectedSkoleId)
         ]
 
+
 visAktivitetstype : Model -> Html Msg
 visAktivitetstype model =
     case model.appMetadata of
@@ -312,11 +332,11 @@ visAktivitetstypeDropdown selectedAktivitetstypeId model dropdownStateAktivitets
         [ Html.map AktivitetstypeDropdown (Dropdown.view dropdownConfigAktivitetstype dropdownStateAktivitetstype model selectedAktivitetstypeId)
         ]
 
+
 opprettAktivitet : Model -> Aktivitet -> Html Msg
 opprettAktivitet model aktivitet =
     Options.div
-        [ css "width" "100%"
-        ]
+        []
         [ Textfield.render Mdl
             [ 1 ]
             model.mdl
@@ -360,9 +380,10 @@ opprettAktivitet model aktivitet =
             [ Button.ripple
             , Button.colored
             , Button.raised
-          , Options.onClick (OpprettNyAktivitet)
-            -- , css "margin-left" "1em"
-            -- , Options.onClick (SearchAnsatt "Test")
+            , Options.onClick (OpprettNyAktivitet)
+            , css "float" "right"
+              -- , css "margin-left" "1em"
+              -- , Options.onClick (SearchAnsatt "Test")
             ]
             [ text "Lagre" ]
         ]
