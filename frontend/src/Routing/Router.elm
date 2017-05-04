@@ -143,6 +143,7 @@ getInitialCommand route endpoint =
             Cmd.map AktivitetMsg <|
                 Cmd.batch
                     [ (Aktivitet.hentAktivitetDetalj id endpoint)
+                    , (Aktivitet.hentAktivitetDeltakere id endpoint)
                     , Aktivitet.fetchAppMetadata
                         endpoint
                     ]

@@ -64,6 +64,19 @@ type alias Aktivitet =
     , aktivitetsTypeNavn : String
     }
 
+type alias Deltaker =
+    { id : String
+    , aktivitetId : String
+    , aktivitetNavn : String
+    , utdanningsprogramId : String
+    , utdanningsprogramNavn : String
+    , trinnId : String
+    , trinnNavn : String
+    , fagId : String
+    , fagNavn : String
+    , timer : Int
+    , kompetansemaal : String
+    }
 
 type Route
     = RouteAnsattPortal

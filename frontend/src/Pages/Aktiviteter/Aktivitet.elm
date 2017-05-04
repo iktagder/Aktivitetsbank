@@ -5,6 +5,9 @@ import Material
 import Material.Grid as Grid exposing (grid, size, cell, Device(..))
 import Material.Elevation as Elevation
 import Material.Textfield as Textfield
+import Material.List as Lists
+import Material.Button as Button
+import Material.Color as Color
 import Material.Options as Options exposing (when, css, cs, Style, onClick)
 import Material.Typography as Typo
 import Material.Spinner as Loading
@@ -21,6 +24,7 @@ type alias Model =
     , apiEndpoint : String
     , statusText : String
     , aktivitet : WebData Aktivitet
+    , deltakere : WebData (List Deltaker)
     , appMetadata : WebData AppMetadata
     , valgtSkole : Maybe Skole
     , dropdownStateSkole : Dropdown.State
@@ -31,8 +35,10 @@ type alias Model =
 
 type Msg
     = Mdl (Material.Msg Msg)
+    | VisAktivitetDeltakerDetalj String
     | AppMetadataResponse (WebData AppMetadata)
     | AktivitetResponse (WebData Aktivitet)
+    | AktivitetDeltakereResponse (WebData (List Deltaker))
     | OnSelectSkole (Maybe Skole)
     | SkoleDropdown (Dropdown.Msg Skole)
     | OnSelectAktivitetstype (Maybe AktivitetsType)
@@ -69,6 +75,7 @@ init apiEndpoint =
       , apiEndpoint = apiEndpoint
       , statusText = ""
       , aktivitet = RemoteData.NotAsked
+      , deltakere = RemoteData.NotAsked
       , appMetadata = RemoteData.NotAsked
       , valgtSkole = Nothing
       , dropdownStateSkole = Dropdown.newState "1"
@@ -100,6 +107,26 @@ hentAktivitetDetalj id endPoint =
             |> RemoteData.sendRequest
             |> Cmd.map AktivitetResponse
 
+hentAktivitetDeltakere : String -> String -> Cmd Msg
+hentAktivitetDeltakere id endPoint =
+    let
+        queryUrl =
+            endPoint ++ "aktiviteter/" ++ id ++ "/deltakere"
+
+        req =
+            Http.request
+                { method = "GET"
+                , headers = []
+                , url = queryUrl
+                , body = Http.emptyBody
+                , expect = Http.expectJson Decoders.decodeDeltakerListe
+                , timeout = Nothing
+                , withCredentials = True
+                }
+    in
+        req
+            |> RemoteData.sendRequest
+            |> Cmd.map AktivitetDeltakereResponse
 
 fetchAppMetadata : String -> Cmd Msg
 fetchAppMetadata endPoint =
@@ -135,6 +162,12 @@ update msg model =
 
         AppMetadataResponse response ->
             ( { model | appMetadata = response }, Cmd.none, NoSharedMsg )
+
+        VisAktivitetDeltakerDetalj id ->
+            ( model, Cmd.none, NoSharedMsg )
+
+        AktivitetDeltakereResponse response ->
+            ( { model |  deltakere = Debug.log "Deltakere:" response }, Cmd.none, NoSharedMsg )
 
         AktivitetResponse response ->
             let
@@ -192,6 +225,16 @@ view taco model =
               -- , Options.css "align-items" "left"
             ]
             [ visAktivitet model
+            ]
+        , cell
+            [ size All 12
+            , Elevation.e2
+            , Options.css "padding" "16px 32px"
+            , Options.css "display" "flex"
+              -- , Options.css "flex-direction" "column"
+              -- , Options.css "align-items" "left"
+            ]
+            [ visAktivitetDeltakere model
             ]
         ]
 
@@ -304,3 +347,63 @@ visAktivitetSuksess model aktivitet =
         , showText p Typo.menu "Aktivitetstype"
         , visAktivitetstype model
         ]
+
+visAktivitetDeltakere : Model -> Html Msg
+visAktivitetDeltakere model =
+    case model.deltakere of
+        NotAsked ->
+            text "Venter på henting av deltakere.."
+
+        Loading ->
+            Options.div []
+                [ Loading.spinner [ Loading.active True ]
+                ]
+
+        Failure err ->
+            text "Feil ved henting av data"
+
+        Success data ->
+            visAktivitetDeltakereSuksess model data
+
+visAktivitetDeltakereSuksess : Model -> List Deltaker -> Html Msg
+visAktivitetDeltakereSuksess model deltakere =
+    Lists.ul [ css "width" "100%" ]
+        (deltakere
+            |> List.map (visAktivitetDeltaker model)
+        )
+
+visAktivitetDeltaker : Model -> Deltaker -> Html Msg
+visAktivitetDeltaker model deltaker =
+    let
+        selectButton model k ansattId =
+            Button.render Mdl
+                [ k ]
+                model.mdl
+                [ Button.raised
+                  -- , Button.accent |> when (Set.member k model.toggles)
+                  -- , Options.onClick (SelectAnsatt ansattId)
+                ]
+                [ text "Detaljer" ]
+    in
+        Lists.li [ Lists.withSubtitle ]
+            -- NB! Required on every Lists.li containing subtitle.
+            [ Options.div
+                [ Options.center
+                , Color.background (Color.color Color.Red Color.S500)
+                , Color.text Color.accentContrast
+                , Typography.title
+                , css "width" "36px"
+                , css "height" "36px"
+                , css "margin-right" "2rem"
+                ]
+                [ text <| String.left 1 deltaker.utdanningsprogramNavn ]
+            , Lists.content []
+                [ Options.span [] [ text <| deltaker.aktivitetNavn ++ " - " ++ deltaker.trinnNavn ++ " - " ++ deltaker.fagNavn ++  " (" ++ (toString deltaker.timer) ++ " skoletimer )" ]
+                , Lists.subtitle [ css "width" "80%" ] [ text deltaker.kompetansemaal ]
+                ]
+            , Lists.content2 []
+                [ Options.span [ onClick <| VisAktivitetDeltakerDetalj deltaker.id, cs "editer-aktivitet" ]
+                    [ Lists.icon "mode_edit" []
+                    ]
+                ]
+            ]

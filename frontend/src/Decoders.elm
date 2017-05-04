@@ -133,3 +133,22 @@ decodeNyAktivitet : Json.Decoder NyAktivitet
 decodeNyAktivitet =
     Json.Decode.Pipeline.decode NyAktivitet
         |> Json.Decode.Pipeline.required "id" (Json.string)
+
+decodeDeltaker : Json.Decoder Deltaker
+decodeDeltaker =
+    Json.Decode.Pipeline.decode Deltaker
+        |> Json.Decode.Pipeline.required "id" (Json.string)
+        |> Json.Decode.Pipeline.required "aktivitetId" (Json.string)
+        |> Json.Decode.Pipeline.required "aktivitetNavn" (Json.string)
+        |> Json.Decode.Pipeline.required "utdanningsprogramId" (Json.string)
+        |> Json.Decode.Pipeline.required "utdanningsprogramNavn" (Json.string)
+        |> Json.Decode.Pipeline.required "trinnId" (Json.string)
+        |> Json.Decode.Pipeline.required "trinnNavn" (Json.string)
+        |> Json.Decode.Pipeline.required "fagId" (Json.string)
+        |> Json.Decode.Pipeline.required "fagNavn" (Json.string)
+        |> Json.Decode.Pipeline.required "timer" (Json.int)
+        |> Json.Decode.Pipeline.required "kompetansemaal" (Json.string)
+
+decodeDeltakerListe : Json.Decoder (List Deltaker)
+decodeDeltakerListe =
+    Json.list decodeDeltaker
