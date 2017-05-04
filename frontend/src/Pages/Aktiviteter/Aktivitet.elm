@@ -5,6 +5,7 @@ import Material
 import Material.Grid as Grid exposing (grid, size, cell, Device(..))
 import Material.Elevation as Elevation
 import Material.Textfield as Textfield
+import Material.Icon as Icon
 import Material.List as Lists
 import Material.Button as Button
 import Material.Color as Color
@@ -43,6 +44,7 @@ type Msg
     | SkoleDropdown (Dropdown.Msg Skole)
     | OnSelectAktivitetstype (Maybe AktivitetsType)
     | AktivitetstypeDropdown (Dropdown.Msg AktivitetsType)
+    | VisDeltakerOpprett
 
 
 dropdownConfigSkole : Dropdown.Config Msg Skole
@@ -166,6 +168,17 @@ update msg model =
         VisAktivitetDeltakerDetalj id ->
             ( model, Cmd.none, NoSharedMsg )
 
+        VisDeltakerOpprett ->
+            let
+              sharedMsg =
+                case model.aktivitet of
+                    Success aktivitet ->
+                        NavigerTilDeltakerOpprett aktivitet.id
+                    _ ->
+                        NoSharedMsg
+            in
+              ( model, Cmd.none, sharedMsg)
+
         AktivitetDeltakereResponse response ->
             ( { model |  deltakere = Debug.log "Deltakere:" response }, Cmd.none, NoSharedMsg )
 
@@ -210,11 +223,17 @@ view taco model =
     grid []
         [ cell
             [ size All 12
-            , Elevation.e0
-            , Options.css "align-items" "top"
-            , Options.cs "mdl-grid"
             ]
-            [ Options.styled p [ Typo.display2 ] [ text "Aktivitet" ]
+            [ Button.render Mdl
+                [ 0 ]
+                model.mdl
+                [ Button.fab
+                , Button.ripple
+                -- , Options.onClick OpprettAktivitet
+                , Options.css "float" "right"
+                ]
+                [ Icon.i "content_copy" ]
+            , Options.span [ Typo.headline ] [ text "Aktivitet detaljer" ]
             ]
         , cell
             [ size All 12
@@ -231,10 +250,21 @@ view taco model =
             , Elevation.e2
             , Options.css "padding" "16px 32px"
             , Options.css "display" "flex"
-              -- , Options.css "flex-direction" "column"
+              , Options.css "flex-direction" "column"
               -- , Options.css "align-items" "left"
             ]
-            [ visAktivitetDeltakere model
+            [ showText p Typo.headline "Deltakere"
+            , visAktivitetDeltakere model
+            , Button.render Mdl
+                [ 0, 4, 2 ]
+                model.mdl
+                [ Button.fab
+                , Button.ripple
+                , Options.onClick VisDeltakerOpprett
+                , Options.css "float" "left"
+                ]
+                [ Icon.i "add" ]
+            , Options.span [ Typo.menu ] [ text "Legg til deltaker" ]
             ]
         ]
 
