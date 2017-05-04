@@ -22,7 +22,9 @@ type alias Model =
     , apiEndpoint : String
     , statusText : String
     , appMetadata : WebData AppMetadata
-    -- , valgtSkole : Maybe Skole
+    , valgtUtdanningsprogram : Maybe Utdanningsprogram
+    , valgtTrinn : Maybe Trinn
+    , valgtFag : Maybe Fag
     , deltaker : Deltaker
     , dropdownStateUtdanningsprogram : Dropdown.State
     , dropdownStateTrinn : Dropdown.State
@@ -39,13 +41,13 @@ type Msg
     | UtdanningsprogramDropdown (Dropdown.Msg Utdanningsprogram)
     | TrinnDropdown (Dropdown.Msg Trinn)
     | FagDropdown (Dropdown.Msg Fag)
+    | EndretKompetansemaal String
+    | EndretTimer String
     -- | OnSelectSkole (Maybe Skole)
     -- | SkoleDropdown (Dropdown.Msg Skole)
     -- | OnSelectAktivitetstype (Maybe AktivitetsType)
     -- | AktivitetstypeDropdown (Dropdown.Msg AktivitetsType)
     -- | EndretAktivitetsNavn String
-    -- | EndretAktivitetsBeskrivelse String
-    -- | EndretAktivitetsOmfangTimer String
     -- | OpprettNyAktivitet
     -- | NyAktivitetRespons (Result Error NyAktivitet)
 
@@ -55,7 +57,9 @@ init apiEndpoint =
       , apiEndpoint = apiEndpoint
       , statusText = ""
       , appMetadata = RemoteData.NotAsked
-      -- , valgtSkole = Nothing
+      , valgtUtdanningsprogram = Nothing
+      , valgtTrinn = Nothing
+      , valgtFag = Nothing
       , dropdownStateUtdanningsprogram = Dropdown.newState "1"
       , dropdownStateTrinn = Dropdown.newState "1"
       , dropdownStateFag = Dropdown.newState "1"
@@ -113,29 +117,59 @@ update msg model =
         AppMetadataResponse response ->
             ( { model | appMetadata = response }, Cmd.none, NoSharedMsg )
 
-        OnSelectUtdanningsprogram skole ->
-            (  model, Cmd.none, NoSharedMsg )
-            -- let
-            --     gammelAktivitet =
-            --         model.aktivitet
+        OnSelectUtdanningsprogram valg ->
+            let
+                gammelDeltaker =
+                    model.deltaker
 
-            --     nySkoleId =
-            --         case skole of
-            --             Just data ->
-            --                 data.id
+                nyId =
+                    case valg of
+                        Just data ->
+                            data.id
 
-            --             Nothing ->
-            --                 "00"
+                        Nothing ->
+                            "00"
 
-            --     oppdatertAktivitet =
-            --         { gammelAktivitet | skoleId = nySkoleId }
-            -- in
-            --     ( { model | valgtSkole = skole, aktivitet = oppdatertAktivitet }, Cmd.none, NoSharedMsg )
-        OnSelectTrinn trinn ->
-            (  model, Cmd.none, NoSharedMsg )
+                oppdatertDeltaker =
+                    { gammelDeltaker | utdanningsprogramId = nyId }
+            in
+                ( { model | valgtUtdanningsprogram = valg, deltaker = oppdatertDeltaker }, Cmd.none, NoSharedMsg )
 
-        OnSelectFag fag ->
-            (  model, Cmd.none, NoSharedMsg )
+        OnSelectTrinn valg ->
+            let
+                gammelDeltaker =
+                    model.deltaker
+
+                nyId =
+                    case valg of
+                        Just data ->
+                            data.id
+
+                        Nothing ->
+                            "00"
+
+                oppdatertDeltaker =
+                    { gammelDeltaker | trinnId = nyId }
+            in
+                ( { model | valgtTrinn = valg, deltaker = oppdatertDeltaker }, Cmd.none, NoSharedMsg )
+
+        OnSelectFag valg ->
+            let
+                gammelDeltaker =
+                    model.deltaker
+
+                nyId =
+                    case valg of
+                        Just data ->
+                            data.id
+
+                        Nothing ->
+                            "00"
+
+                oppdatertDeltaker =
+                    { gammelDeltaker | fagId = nyId }
+            in
+                ( { model | valgtFag = valg, deltaker = oppdatertDeltaker }, Cmd.none, NoSharedMsg )
 
         UtdanningsprogramDropdown utdanningsprogram ->
             let
@@ -158,6 +192,26 @@ update msg model =
             in
                 ( { model | dropdownStateFag = updated }, cmd, NoSharedMsg )
 
+        EndretKompetansemaal endretKompetansemaal ->
+            let
+                gammelDeltaker =
+                    model.deltaker
+
+                oppdatertDeltaker =
+                    { gammelDeltaker | kompetansemaal = endretKompetansemaal }
+            in
+                ( { model | deltaker = oppdatertDeltaker }, Cmd.none, NoSharedMsg )
+
+        EndretTimer endretOmfangTimer ->
+            let
+                gammelDeltaker =
+                    model.deltaker
+
+                oppdatertDeltaker =
+                    { gammelDeltaker | timer = Result.withDefault 0 (String.toInt endretOmfangTimer) }
+            in
+                ( { model | deltaker = oppdatertDeltaker }, Cmd.none, NoSharedMsg )
+
 showText : (List (Html.Attribute m) -> List (Html msg) -> a) -> Options.Property c m -> String -> a
 showText elementType displayStyle text_ =
     Options.styled elementType [ displayStyle, Typo.left ] [ text text_ ]
@@ -175,31 +229,9 @@ vis taco model =
             [ size All 12
             , Elevation.e2
             ]
-            [
-            -- [ visOpprettDeltaker model model.deltaker
+            [ visOpprettDeltaker model model.deltaker
             ]
         ]
-    -- grid []
-    --     [ cell
-    --         [ size All 12
-    --         , Elevation.e0
-    --         , Options.css "align-items" "top"
-    --         , Options.cs "mdl-grid"
-    --         ]
-    --         [ Options.styled p [ Typo.display2 ] [ text "Opprett deltaker" ]
-    --         ]
-    --     , cell
-    --         [ size All 12
-    --         , Elevation.e2
-    --         , Options.css "padding" "16px 32px"
-    --         , Options.css "display" "flex"
-    --           -- , Options.css "flex-direction" "column"
-    --           -- , Options.css "align-items" "left"
-    --         ]
-    --         [
-    --         -- [ visOpprettDeltaker model model.deltaker
-    --         ]
-    --     ]
 
 dropdownConfigUtdanningsprogram : Dropdown.Config Msg Utdanningsprogram
 dropdownConfigUtdanningsprogram =
@@ -236,3 +268,139 @@ dropdownConfigFag =
         |> Dropdown.withSelectedClass "bold"
         |> Dropdown.withSelectedStyles [ ( "color", "black" ) ]
         |> Dropdown.withTriggerClass "col-4 border bg-white p1"
+
+visOpprettDeltaker : Model -> Deltaker -> Html Msg
+visOpprettDeltaker model deltaker =
+    Options.div
+        []
+        [
+        --   Textfield.render Mdl
+        --     [ 1 ]
+        --     model.mdl
+        --     [ Textfield.label "Navn"
+        --     , Textfield.floatingLabel
+        --     , Textfield.text_
+        --     , Textfield.value <| aktivitet.navn
+        --     , Options.onInput EndretAktivitetsNavn
+        --     ]
+        --     []
+         Textfield.render Mdl
+            [ 2 ]
+            model.mdl
+            [ Textfield.label "Kompetansemål"
+            , Textfield.floatingLabel
+            , Textfield.text_
+            , Textfield.textarea
+            , Textfield.rows 5
+            , Textfield.value <| deltaker.kompetansemaal
+            , Options.onInput EndretKompetansemaal
+            , cs "text-area"
+            ]
+            []
+        , Textfield.render Mdl
+            [ 3 ]
+            model.mdl
+            [ Textfield.label "Timer (skoletimer)"
+            , Textfield.floatingLabel
+            , Textfield.text_
+            , Textfield.value <| toString deltaker.timer
+            , Options.onInput EndretTimer
+            ]
+            []
+        , showText p Typo.menu "Utdanningsprogram"
+        , visUtdanningsprogram model
+        , showText p Typo.menu "Trinn"
+        , visTrinn model
+        , showText p Typo.menu "Fag"
+        , visFag model
+        -- , showText p Typo.menu "Aktivitetstype"
+        -- , visAktivitetstype model
+        , Button.render Mdl
+            [ 10, 1 ]
+            model.mdl
+            [ Button.ripple
+            , Button.colored
+            , Button.raised
+            -- , Options.onClick (OpprettNyAktivitet)
+            , css "float" "right"
+              -- , css "margin-left" "1em"
+              -- , Options.onClick (SearchAnsatt "Test")
+            ]
+            [ text "Lagre" ]
+        ]
+
+visUtdanningsprogram : Model -> Html Msg
+visUtdanningsprogram model =
+    case model.appMetadata of
+        NotAsked ->
+            text "Initialising."
+
+        Loading ->
+            text "Loading."
+
+        Failure err ->
+            text ("Error: " ++ toString err)
+
+        Success data ->
+            visUtdanningsprogramDropdown
+                model.valgtUtdanningsprogram
+                data.utdanningsprogrammer
+                model.dropdownStateUtdanningsprogram
+
+
+visUtdanningsprogramDropdown : Maybe Utdanningsprogram -> List Utdanningsprogram -> Dropdown.State -> Html Msg
+visUtdanningsprogramDropdown selectedUtdanningsprogramId model dropdownStateUtdanningsprogram =
+    span []
+        [ Html.map UtdanningsprogramDropdown (Dropdown.view dropdownConfigUtdanningsprogram dropdownStateUtdanningsprogram model selectedUtdanningsprogramId)
+        ]
+
+
+visTrinn : Model -> Html Msg
+visTrinn model =
+    case model.appMetadata of
+        NotAsked ->
+            text "Initialising."
+
+        Loading ->
+            text "Loading."
+
+        Failure err ->
+            text ("Error: " ++ toString err)
+
+        Success data ->
+            visTrinnDropdown
+                model.valgtTrinn
+                data.trinnListe
+                model.dropdownStateTrinn
+
+
+visTrinnDropdown : Maybe Trinn -> List Trinn -> Dropdown.State -> Html Msg
+visTrinnDropdown selectedTrinnId model dropdownStateTrinn =
+    span []
+        [ Html.map TrinnDropdown (Dropdown.view dropdownConfigTrinn dropdownStateTrinn model selectedTrinnId)
+        ]
+
+visFag : Model -> Html Msg
+visFag model =
+    case model.appMetadata of
+        NotAsked ->
+            text "Initialising."
+
+        Loading ->
+            text "Loading."
+
+        Failure err ->
+            text ("Error: " ++ toString err)
+
+        Success data ->
+            visFagDropdown
+                model.valgtFag
+                data.fagListe
+                model.dropdownStateFag
+
+
+visFagDropdown : Maybe Fag -> List Fag -> Dropdown.State -> Html Msg
+visFagDropdown selectedFagId model dropdownStateFag =
+    span []
+        [ Html.map FagDropdown (Dropdown.view dropdownConfigFag dropdownStateFag model selectedFagId)
+        ]
