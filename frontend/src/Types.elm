@@ -46,6 +46,9 @@ type alias AppMetadata =
 type alias NyAktivitet =
     { id : String
     }
+type alias NyDeltaker =
+    { id : String
+    }
 
 type alias AktivitetsType =
     { id : String

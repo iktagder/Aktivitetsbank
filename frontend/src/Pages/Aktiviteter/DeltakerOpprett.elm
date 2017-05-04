@@ -22,6 +22,7 @@ type alias Model =
     , apiEndpoint : String
     , statusText : String
     , appMetadata : WebData AppMetadata
+    , aktivitet : WebData Aktivitet
     , valgtUtdanningsprogram : Maybe Utdanningsprogram
     , valgtTrinn : Maybe Trinn
     , valgtFag : Maybe Fag
@@ -35,6 +36,7 @@ type alias Model =
 type Msg
     = Mdl (Material.Msg Msg)
     | AppMetadataResponse (WebData AppMetadata)
+    | AktivitetResponse (WebData Aktivitet)
     | OnSelectUtdanningsprogram (Maybe Utdanningsprogram)
     | OnSelectTrinn (Maybe Trinn)
     | OnSelectFag (Maybe Fag)
@@ -43,20 +45,16 @@ type Msg
     | FagDropdown (Dropdown.Msg Fag)
     | EndretKompetansemaal String
     | EndretTimer String
-    -- | OnSelectSkole (Maybe Skole)
-    -- | SkoleDropdown (Dropdown.Msg Skole)
-    -- | OnSelectAktivitetstype (Maybe AktivitetsType)
-    -- | AktivitetstypeDropdown (Dropdown.Msg AktivitetsType)
-    -- | EndretAktivitetsNavn String
-    -- | OpprettNyAktivitet
-    -- | NyAktivitetRespons (Result Error NyAktivitet)
+    | OpprettNyDeltaker
+    | NyDeltakerRespons (Result Error NyDeltaker)
 
-init : String -> ( Model, Cmd Msg )
-init apiEndpoint =
+init : String -> String -> ( Model, Cmd Msg )
+init apiEndpoint aktivitetId =
     ( { mdl = Material.model
       , apiEndpoint = apiEndpoint
       , statusText = ""
       , appMetadata = RemoteData.NotAsked
+      , aktivitet = RemoteData.NotAsked
       , valgtUtdanningsprogram = Nothing
       , valgtTrinn = Nothing
       , valgtFag = Nothing
@@ -67,7 +65,7 @@ init apiEndpoint =
       -- , dropdownStateAktivitetstype = Dropdown.newState "1"
       , deltaker =
             { id = "0"
-            , aktivitetId = "0"
+            , aktivitetId = Debug.log "aktivitet id: " aktivitetId
             , aktivitetNavn = ""
             , utdanningsprogramId = "0"
             , utdanningsprogramNavn = ""
@@ -82,6 +80,26 @@ init apiEndpoint =
     , Cmd.none
     )
 
+hentAktivitetDetalj : String -> String -> Cmd Msg
+hentAktivitetDetalj id endPoint =
+    let
+        queryUrl =
+            endPoint ++ "aktiviteter/" ++ id
+
+        req =
+            Http.request
+                { method = "GET"
+                , headers = []
+                , url = queryUrl
+                , body = Http.emptyBody
+                , expect = Http.expectJson Decoders.decodeAktivitet
+                , timeout = Nothing
+                , withCredentials = True
+                }
+    in
+        req
+            |> RemoteData.sendRequest
+            |> Cmd.map AktivitetResponse
 
 fetchAppMetadata : String -> Cmd Msg
 fetchAppMetadata endPoint =
@@ -104,6 +122,29 @@ fetchAppMetadata endPoint =
             |> RemoteData.sendRequest
             |> Cmd.map AppMetadataResponse
 
+postOpprettNyDeltaker : String -> String -> Deltaker -> (Result Error NyDeltaker -> msg) -> Cmd msg
+postOpprettNyDeltaker endPoint aktivitetId deltaker responseMsg =
+    let
+        url =
+            endPoint ++ "aktiviteter/" ++ aktivitetId ++ "/opprettDeltaker"
+
+        body =
+            encodeOpprettNyDeltaker aktivitetId deltaker |> Http.jsonBody
+
+        req =
+            Http.request
+                { method = "POST"
+                , headers = []
+                , url = url
+                , body = body
+                , expect = Http.expectJson decodeNyDeltaker
+                , timeout = Nothing
+                , withCredentials = True
+                }
+    in
+        req
+            |> Http.send responseMsg
+
 update : Msg -> Model -> ( Model, Cmd Msg, SharedMsg )
 update msg model =
     case msg of
@@ -116,6 +157,9 @@ update msg model =
 
         AppMetadataResponse response ->
             ( { model | appMetadata = response }, Cmd.none, NoSharedMsg )
+
+        AktivitetResponse response ->
+            ( Debug.log "aktivitet-item-response" { model | aktivitet = response }, Cmd.none, NoSharedMsg )
 
         OnSelectUtdanningsprogram valg ->
             let
@@ -211,6 +255,37 @@ update msg model =
                     { gammelDeltaker | timer = Result.withDefault 0 (String.toInt endretOmfangTimer) }
             in
                 ( { model | deltaker = oppdatertDeltaker }, Cmd.none, NoSharedMsg )
+
+        OpprettNyDeltaker ->
+            let
+              cmd =
+                case model.aktivitet of
+                  Success data ->
+                    postOpprettNyDeltaker model.apiEndpoint data.id model.deltaker NyDeltakerRespons
+                  _ ->
+                    Cmd.none
+            in
+              ( model, cmd, NoSharedMsg )
+
+        NyDeltakerRespons (Ok nyId) ->
+            let
+                tmp =
+                    Debug.log "ny deltaker" nyId
+                cmdShared =
+                  case model.aktivitet of
+                    Success data ->
+                      NavigateToAktivitet data.id
+                    _ ->
+                    NoSharedMsg
+            in
+               (model, Cmd.none, cmdShared)
+
+        NyDeltakerRespons (Err error) ->
+            let
+                tmp =
+                    Debug.log "ny deltaker - error" error
+            in
+                ( model, Cmd.none, NoSharedMsg )
 
 showText : (List (Html.Attribute m) -> List (Html msg) -> a) -> Options.Property c m -> String -> a
 showText elementType displayStyle text_ =
@@ -321,7 +396,7 @@ visOpprettDeltaker model deltaker =
             [ Button.ripple
             , Button.colored
             , Button.raised
-            -- , Options.onClick (OpprettNyAktivitet)
+            , Options.onClick (OpprettNyDeltaker)
             , css "float" "right"
               -- , css "margin-left" "1em"
               -- , Options.onClick (SearchAnsatt "Test")

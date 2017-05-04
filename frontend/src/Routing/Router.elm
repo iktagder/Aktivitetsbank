@@ -65,6 +65,9 @@ type Msg
 init : Location -> String -> ( Model, Cmd Msg )
 init location apiEndpoint =
     let
+        route =
+            parseLocation location
+
         ( aktiviteterModel, aktiviteterCmd ) =
             Aktiviteter.init apiEndpoint
 
@@ -74,11 +77,16 @@ init location apiEndpoint =
         ( aktivitetOpprettModel, aktivitetOpprettCmd ) =
             AktivitetOpprett.init apiEndpoint
 
-        ( deltakerOpprettModel, deltakerOpprettCmd ) =
-            DeltakerOpprett.init apiEndpoint
+        opprettDeltakerAktivitetId =
+            case route of
+                RouteDeltakerOpprett id ->
+                    id
+                _ ->
+                    "0"
 
-        route =
-            parseLocation location
+        ( deltakerOpprettModel, deltakerOpprettCmd ) =
+            DeltakerOpprett.init apiEndpoint opprettDeltakerAktivitetId
+
     in
         ( { mdl = Material.model
           , selectedTab = 0
@@ -154,23 +162,25 @@ getInitialCommand route endpoint =
                 Cmd.batch
                     [ (Aktivitet.hentAktivitetDetalj id endpoint)
                     , (Aktivitet.hentAktivitetDeltakere id endpoint)
-                    , Aktivitet.fetchAppMetadata
-                        endpoint
+                    , Aktivitet.fetchAppMetadata endpoint
                     ]
 
         RouteAktivitetsListe ->
             Cmd.map AktiviteterMsg <|
                 Cmd.batch
                     [ Aktiviteter.fetchAktivitetListe endpoint
-                    , Aktiviteter.fetchAppMetadata
-                        endpoint
+                    , Aktiviteter.fetchAppMetadata endpoint
                     ]
 
         RouteAktivitetOpprett ->
             Cmd.map AktivitetOpprettMsg <| AktivitetOpprett.fetchAppMetadata endpoint
 
-        RouteDeltakerOpprett _ ->
-            Cmd.map DeltakerOpprettMsg <| DeltakerOpprett.fetchAppMetadata endpoint
+        RouteDeltakerOpprett id ->
+            Cmd.map DeltakerOpprettMsg <|
+                Cmd.batch
+                [ (DeltakerOpprett.fetchAppMetadata endpoint)
+                , (DeltakerOpprett.hentAktivitetDetalj id endpoint)
+                ]
 
         _ ->
             Cmd.none
