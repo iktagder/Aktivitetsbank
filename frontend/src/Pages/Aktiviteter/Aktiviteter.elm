@@ -18,7 +18,7 @@ import RemoteData exposing (WebData, RemoteData(..))
 import Types exposing (..)
 import Http exposing (Error)
 import Decoders exposing (..)
-import Array
+import Dict
 
 
 type alias Model =
@@ -26,10 +26,11 @@ type alias Model =
     , apiEndpoint : String
     , statusText : String
     , aktivitetListe : WebData (List Aktivitet)
-    , filtertAktivitetListe : Maybe (List Aktivitet)
+    , filtertAktivitetListe : List Aktivitet
     , appMetadata : WebData AppMetadata
     , visFilter : Bool
-    , aktivitetsTypefilter : Array.Array Bool
+    , aktivitetsTypefilter : Dict.Dict Int String
+    , navnFilter : String
     }
 
 
@@ -52,8 +53,9 @@ init apiEndpoint =
       , aktivitetListe = RemoteData.NotAsked
       , appMetadata = RemoteData.NotAsked
       , visFilter = False
-      , filtertAktivitetListe = Nothing
-      , aktivitetsTypefilter = Array.fromList []
+      , filtertAktivitetListe = []
+      , aktivitetsTypefilter = Dict.empty
+      , navnFilter = ""
       }
     , Cmd.batch [ fetchAppMetadata apiEndpoint, fetchAktivitetListe apiEndpoint ]
     )
@@ -127,13 +129,51 @@ update msg model =
             ( model, Cmd.none, NavigerTilAktivitetOpprett )
 
         VisFilter ->
-            ( { model | visFilter = not model.visFilter, filtertAktivitetListe = Just (getAktivitetListe model) }, Cmd.none, NoSharedMsg )
+            ( { model | visFilter = not model.visFilter, filtertAktivitetListe = (getAktivitetListe model) }, Cmd.none, NoSharedMsg )
 
         FiltrerPaNavn navn ->
-            ( { model | filtertAktivitetListe = Just (getAktivitetListe model |> List.filter (\aktivitet -> String.contains (String.toLower navn) (String.toLower aktivitet.navn))) }, Cmd.none, NoSharedMsg )
+            ( { model
+                | navnFilter = navn
+                , filtertAktivitetListe = filterAktivitetList model navn model.aktivitetsTypefilter
+              }
+            , Cmd.none
+            , NoSharedMsg
+            )
 
         FiltrerPaType typeId index ->
-            ( { model | filtertAktivitetListe = Just (getAktivitetListe model |> List.filter (\aktivitet -> aktivitet.aktivitetsTypeId == typeId)) }, Cmd.none, NoSharedMsg )
+            let
+                newAktivitetsTypefilter =
+                    if Dict.member index model.aktivitetsTypefilter then
+                        Dict.remove index model.aktivitetsTypefilter
+                    else
+                        Dict.insert index typeId model.aktivitetsTypefilter
+            in
+                ( { model
+                    | filtertAktivitetListe = filterAktivitetList model model.navnFilter newAktivitetsTypefilter
+                    , aktivitetsTypefilter = newAktivitetsTypefilter
+                  }
+                , Cmd.none
+                , NoSharedMsg
+                )
+
+
+filterAktivitetList : Model -> String -> Dict.Dict Int String -> List Aktivitet
+filterAktivitetList model navn aktivitetsType =
+    (getAktivitetListe model)
+        |> List.filter
+            (\aktivitet ->
+                if Dict.isEmpty aktivitetsType then
+                    True
+                else
+                    List.member aktivitet.aktivitetsTypeId (Dict.values aktivitetsType)
+            )
+        |> List.filter
+            (\aktivitet ->
+                if String.isEmpty navn then
+                    True
+                else
+                    String.contains (String.toLower navn) (String.toLower aktivitet.navn)
+            )
 
 
 getAktivitetListe : Model -> List Aktivitet
@@ -270,7 +310,7 @@ visAktivitetTypeFilter model type_ index =
         model.mdl
         [ Options.onToggle (FiltrerPaType type_.id index)
         , Toggles.ripple
-        , Toggles.value False
+        , Toggles.value (Dict.member index model.aktivitetsTypefilter)
         ]
         [ text type_.navn ]
 
@@ -322,12 +362,7 @@ getAktiviteter : Model -> List Aktivitet -> List Aktivitet
 getAktiviteter model aktiviteter =
     case model.visFilter of
         True ->
-            case model.filtertAktivitetListe of
-                Just value ->
-                    value
-
-                _ ->
-                    []
+            model.filtertAktivitetListe
 
         False ->
             aktiviteter
