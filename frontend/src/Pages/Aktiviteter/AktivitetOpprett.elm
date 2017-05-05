@@ -356,7 +356,7 @@ opprettAktivitet model aktivitet =
             , Textfield.floatingLabel
             , Textfield.text_
             , Textfield.textarea
-            , Textfield.rows 6
+            , Textfield.rows 4
             , Textfield.value <| aktivitet.beskrivelse
             , Options.onInput EndretAktivitetsBeskrivelse
             , cs "text-area"

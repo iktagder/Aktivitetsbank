@@ -360,6 +360,7 @@ visAktivitetSuksess model aktivitet =
             [ Textfield.label "Navn"
             , Textfield.floatingLabel
             , Textfield.text_
+            , Textfield.disabled
             , Textfield.value <| aktivitet.navn
             ]
             []
@@ -369,8 +370,9 @@ visAktivitetSuksess model aktivitet =
             [ Textfield.label "Beskrivelse"
             , Textfield.floatingLabel
             , Textfield.text_
+            , Textfield.disabled
             , Textfield.textarea
-            , Textfield.rows 6
+            , Textfield.rows 4
             , Textfield.value <| aktivitet.beskrivelse
             , cs "text-area"
             ]
@@ -381,13 +383,36 @@ visAktivitetSuksess model aktivitet =
             [ Textfield.label "Omfang"
             , Textfield.floatingLabel
             , Textfield.text_
+            , Textfield.disabled
             , Textfield.value <| toString aktivitet.omfangTimer
             ]
             []
-        , showText p Typo.menu "Skole"
-        , visSkole model
-        , showText p Typo.menu "Aktivitetstype"
-        , visAktivitetstype model
+        , Textfield.render Mdl
+            [ 4 ]
+            model.mdl
+            [ Textfield.label "Skole"
+            , Textfield.floatingLabel
+            , Textfield.text_
+            , Textfield.disabled
+            , Textfield.value <| aktivitet.skoleNavn
+            , cs "text-area"
+            ]
+            []
+        , Textfield.render Mdl
+            [ 5 ]
+            model.mdl
+            [ Textfield.label "Aktivitetstype"
+            , Textfield.floatingLabel
+            , Textfield.text_
+            , Textfield.disabled
+            , Textfield.value <| aktivitet.aktivitetsTypeNavn
+            , cs "text-area"
+            ]
+            []
+        -- , showText p Typo.menu "Skole"
+        -- , visSkole model
+        -- , showText p Typo.menu "Aktivitetstype"
+        -- , visAktivitetstype model
         ]
 
 visAktivitetDeltakere : Model -> Html Msg
