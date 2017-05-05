@@ -13,3 +13,8 @@ For å oppdatere databasen:
 ´´´
 dotnet ef database update -s ..\VAF.Aktivitetsbank.Data.UI\
 ´´´
+
+For å lage databasescript:
+´´´
+dotnet ef migrations script -s ..\VAF.Aktivitetsbank.Data.UI\ -o c:\tmp\dbscript.sql
+´´´

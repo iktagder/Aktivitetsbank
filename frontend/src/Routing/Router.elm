@@ -98,7 +98,7 @@ init location apiEndpoint =
           , aktivitetOpprettModel = aktivitetOpprettModel
           , deltakerOpprettModel = deltakerOpprettModel
           }
-        , Cmd.none
+        , Cmd.map AktiviteterMsg aktiviteterCmd
         )
 
 
@@ -153,7 +153,6 @@ update msg model =
         DeltakerOpprettMsg deltakerOpprettMsg ->
             updateDeltakerOpprett model deltakerOpprettMsg
 
-
 getInitialCommand : Route -> String -> Cmd Msg
 getInitialCommand route endpoint =
     case route of
@@ -165,12 +164,12 @@ getInitialCommand route endpoint =
                     , Aktivitet.fetchAppMetadata endpoint
                     ]
 
-        RouteAktivitetsListe ->
-            Cmd.map AktiviteterMsg <|
-                Cmd.batch
-                    [ Aktiviteter.fetchAktivitetListe endpoint
-                    , Aktiviteter.fetchAppMetadata endpoint
-                    ]
+        -- RouteAktivitetsListe ->
+        --     Cmd.map AktiviteterMsg <|
+        --         Cmd.batch
+        --             [ Aktiviteter.fetchAktivitetListe endpoint
+        --             , Aktiviteter.fetchAppMetadata endpoint
+        --             ]
 
         RouteAktivitetOpprett ->
             Cmd.map AktivitetOpprettMsg <| AktivitetOpprett.fetchAppMetadata endpoint
@@ -262,6 +261,9 @@ addSharedMsgToUpdate sharedMsg ( model, msg, tacoUpdate ) =
         NavigerTilDeltakerOpprett id ->
             ( model, Navigation.newUrl <| reverseRoute (RouteDeltakerOpprett id), tacoUpdate )
 
+        NavigerTilHjem ->
+            ( model, Navigation.newUrl <| reverseRoute (RouteAktivitetsListe), tacoUpdate )
+
         NoSharedMsg ->
             ( model, msg, tacoUpdate )
 
@@ -279,7 +281,8 @@ view taco model =
             , Options.css "align-items" "center"
             ]
             { header = [ viewHeader taco model ]
-            , drawer = [ drawerHeader model, viewDrawer model ]
+            , drawer = []
+            -- , drawer = [ drawerHeader model, viewDrawer model ]
             , tabs =
                 ( [], [] )
                 -- , tabs = ( tabTitles, [] )

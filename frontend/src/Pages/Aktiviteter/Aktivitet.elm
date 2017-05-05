@@ -45,6 +45,7 @@ type Msg
     | OnSelectAktivitetstype (Maybe AktivitetsType)
     | AktivitetstypeDropdown (Dropdown.Msg AktivitetsType)
     | VisDeltakerOpprett
+    | NavigerHjem
 
 
 dropdownConfigSkole : Dropdown.Config Msg Skole
@@ -213,6 +214,8 @@ update msg model =
                     Dropdown.update dropdownConfigAktivitetstype aktivitetstype model.dropdownStateAktivitetstype
             in
                 ( { model | dropdownStateAktivitetstype = updated }, cmd, NoSharedMsg )
+        NavigerHjem ->
+            ( model, Cmd.none, NavigerTilHjem)
 
 showText : (List (Html.Attribute m) -> List (Html msg) -> a) -> Options.Property c m -> String -> a
 showText elementType displayStyle text_ =
@@ -225,6 +228,15 @@ view taco model =
             [ size All 12
             ]
             [ Button.render Mdl
+                [ 0 ]
+                model.mdl
+                [ Button.fab
+                , Button.ripple
+                , Options.onClick NavigerHjem
+                , Options.css "float" "right"
+                ]
+                [ Icon.i "home" ]
+            , Button.render Mdl
                 [ 0 ]
                 model.mdl
                 [ Button.fab

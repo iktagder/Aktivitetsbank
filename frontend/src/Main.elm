@@ -9,7 +9,10 @@ import Routing.Router as Router
 import Routing.Helpers as RouterHelpers
 import Http
 import Decoders
-
+import Material.Menu as Menu
+import Material
+import Material.Progress as Loading
+import Material.Options as Options exposing (when, css, cs, Style, onClick)
 
 main : Program Flags Model Msg
 main =
@@ -56,7 +59,7 @@ init flags location =
           }
         , Cmd.batch
             [ fetchUserInformation endPoint
-            , Cmd.map RouterMsg (Router.getInitialCommand (RouterHelpers.parseLocation location) endPoint)
+            -- , Cmd.map RouterMsg (Router.getInitialCommand (RouterHelpers.parseLocation location) endPoint)
             ]
         )
 
@@ -129,7 +132,10 @@ updateRouter model routerMsg =
                 )
 
         NotReady _ ->
-            Debug.crash "Ooops. We got a sub-component message even though it wasn't supposed to be initialized?!?!?"
+        let
+          tmp = Debug.log "Ooops. We got a sub-component message even though it wasn't supposed to be initialized?" model
+        in
+          (model, Cmd.none)
 
 
 updateUserInfo : Model -> RemoteData.WebData UserInformation -> ( Model, Cmd Msg )
@@ -184,4 +190,11 @@ view model =
                 |> Html.map RouterMsg
 
         NotReady _ ->
-            text "Loading"
+            Options.div
+                [ css "display" "flex"
+                , css "width" "100%"
+                , css "height" "100vh"
+                , css "align-items" "center"
+                , css "justify-content" "center"
+                ]
+                [ Loading.indeterminate ]
