@@ -45,6 +45,7 @@ type Msg
     | FiltrerPaNavn String
     | FiltrerPaType String Int
     | FiltrerPaSkole String Int
+    | NullstillFilter
 
 
 init : String -> ( Model, Cmd Msg )
@@ -175,6 +176,9 @@ update msg model =
                 , NoSharedMsg
                 )
 
+        NullstillFilter ->
+            ( { model | skoleFilter = Dict.empty, aktivitetsTypefilter = Dict.empty, navnFilter = "", filtertAktivitetListe = (getAktivitetListe model) }, Cmd.none, NoSharedMsg )
+
 
 filterAktivitetList : Model -> String -> Dict.Dict Int String -> Dict.Dict Int String -> List Aktivitet
 filterAktivitetList model navn aktivitetsType skole =
@@ -286,7 +290,17 @@ visFilter model =
             "margin-left"
             "5px"
         ]
-        [ Options.div [ Typo.title ]
+        [ Button.render Mdl
+            [ 1 ]
+            model.mdl
+            [ Button.fab
+            , Button.ripple
+            , Options.onClick NullstillFilter
+            , Options.css "margin" "2px"
+            , Options.css "float" "right"
+            ]
+            [ Icon.i "clear" ]
+        , Options.div [ Typo.title ]
             [ text "Filtrer" ]
         , Textfield.render Mdl
             [ 1 ]
@@ -294,6 +308,7 @@ visFilter model =
             [ Textfield.label "Navn"
             , Textfield.floatingLabel
             , Textfield.text_
+            , Textfield.value <| model.navnFilter
             , Options.onInput (FiltrerPaNavn)
             ]
             []
