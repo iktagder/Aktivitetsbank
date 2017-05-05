@@ -80,7 +80,13 @@ init apiEndpoint =
       , dropdownStateSkole = Dropdown.newState "1"
       , valgtAktivitetstype = Nothing
       , dropdownStateAktivitetstype = Dropdown.newState "1"
-      , aktivitet =
+      , aktivitet = initAktivitet
+      }
+    , Cmd.none
+    )
+
+initAktivitet : Aktivitet
+initAktivitet =
             { id = "00000-0000-00000"
             , navn = ""
             , beskrivelse = ""
@@ -90,10 +96,6 @@ init apiEndpoint =
             , aktivitetsTypeId = ""
             , aktivitetsTypeNavn = ""
             }
-      }
-    , Cmd.none
-    )
-
 
 fetchAppMetadata : String -> Cmd Msg
 fetchAppMetadata endPoint =
@@ -242,7 +244,7 @@ update msg model =
                 tmp =
                     Debug.log "ny aktivitet" nyId
             in
-               (model, Cmd.none, NavigateToAktivitet nyId.id)
+               ({model | aktivitet = initAktivitet, valgtSkole = Nothing, valgtAktivitetstype = Nothing}, Cmd.none, NavigateToAktivitet nyId.id)
 
         NyAktivitetRespons (Err error) ->
             let

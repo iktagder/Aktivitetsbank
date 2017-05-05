@@ -122,7 +122,7 @@ update msg model =
         UrlChange location ->
             let
                 ( snackModel, snackCmd ) =
-                    Snackbar.add (Snackbar.toast Nothing "Url changed") model.snackbar
+                    Snackbar.add (Snackbar.toast Nothing "Endret url") model.snackbar
 
                 route =
                     parseLocation location

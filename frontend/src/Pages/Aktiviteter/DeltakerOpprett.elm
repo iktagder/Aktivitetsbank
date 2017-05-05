@@ -63,9 +63,16 @@ init apiEndpoint aktivitetId =
       , dropdownStateFag = Dropdown.newState "1"
       -- , valgtAktivitetstype = Nothing
       -- , dropdownStateAktivitetstype = Dropdown.newState "1"
-      , deltaker =
+      , deltaker = initDeltaker
+      }
+    , Cmd.none
+    )
+
+
+initDeltaker : Deltaker
+initDeltaker =
             { id = "0"
-            , aktivitetId = Debug.log "aktivitet id: " aktivitetId
+            , aktivitetId = "0"
             , aktivitetNavn = ""
             , utdanningsprogramId = "0"
             , utdanningsprogramNavn = ""
@@ -76,9 +83,6 @@ init apiEndpoint aktivitetId =
             , timer = 0
             , kompetansemaal = ""
             }
-      }
-    , Cmd.none
-    )
 
 hentAktivitetDetalj : String -> String -> Cmd Msg
 hentAktivitetDetalj id endPoint =
@@ -278,7 +282,7 @@ update msg model =
                     _ ->
                     NoSharedMsg
             in
-               (model, Cmd.none, cmdShared)
+               ({model | deltaker = initDeltaker, valgtUtdanningsprogram = Nothing, valgtTrinn = Nothing, valgtFag = Nothing}, Cmd.none, cmdShared)
 
         NyDeltakerRespons (Err error) ->
             let
