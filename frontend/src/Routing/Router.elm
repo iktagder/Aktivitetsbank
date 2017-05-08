@@ -49,10 +49,6 @@ type alias Model =
     , selectedTab : Int
     , snackbar : Snackbar.Model (Maybe Msg)
     , route : Route
-    -- , aktiviteterModel : Aktiviteter.Model
-    -- , aktivitetModel : Aktivitet.Model
-    -- , aktivitetOpprettModel : AktivitetOpprett.Model
-    -- , deltakerOpprettModel : DeltakerOpprett.Model
     , currentPage : Page
     , apiEndpoint : String
     }
@@ -120,7 +116,6 @@ update msg model =
                 , Cmd.batch
                     [ Cmd.map Snackbar snackCmd
                     , pageCmd
-                    -- , getInitialCommand route model.apiEndpoint
                     ]
                 , NoUpdate
                 )
@@ -132,38 +127,8 @@ update msg model =
             )
         PagesMsg pageMsg ->
             updatePage model pageMsg
-            -- case pageMsg of
-            --     AktiviteterMsg aktiviteterMsg ->
-            --         let
-            --             (model_, msg_, tacoMsg) = updateAktiviteter model aktiviteterMsg
-            --         in
-            --             (model_, Cmd.map PagesMsg msg_, tacoMsg)
 
-            --     AktivitetMsg aktivitetMsg ->
-            --         let
-            --             (model_, msg_, tacoMsg) = updateAktivitet model aktivitetMsg
-            --         in
-            --             (model_, Cmd.map PagesMsg msg_, tacoMsg)
 
-            --     AktivitetOpprettMsg aktivitetOpprettMsg ->
-            --         let
-            --             (model_, msg_, tacoMsg) = updateAktivitetOpprett model aktivitetOpprettMsg
-            --         in
-            --             (model_, Cmd.map PagesMsg msg_, tacoMsg)
-
-            --     DeltakerOpprettMsg deltakerOpprettMsg ->
-            --         let
-            --             (model_, msg_, tacoMsg) = updateDeltakerOpprett model deltakerOpprettMsg
-            --         in
-            --             (model_, Cmd.map PagesMsg msg_, tacoMsg)
--- type Page =
---     AktiviteterPage Aktiviteter.Model
---     | AktivitetPage Aktivitet.Model
---     | AktivitetOpprettPage AktivitetOpprett.Model
---     | DeltakerOpprettPage DeltakerOpprett.Model
-
---Skal kalles fra route init og UrlChange
---Case på route, kall respektive init metoder
 urlUpdate : String -> Route -> (Page, Cmd Msg)
 urlUpdate apiEndpoint route =
     let
@@ -194,73 +159,36 @@ urlUpdate apiEndpoint route =
     in
         (pageModel, Cmd.map PagesMsg pageCmd)
 
-
--- getInitialCommand : Route -> String -> Cmd Msg
--- getInitialCommand route endpoint =
---     case route of
---         RouteAktivitetsDetalj id ->
---             Cmd.map (PagesMsg << AktivitetMsg) <|
---                 Cmd.batch
---                     [ (Aktivitet.hentAktivitetDetalj id endpoint)
---                     , (Aktivitet.hentAktivitetDeltakere id endpoint)
---                     , Aktivitet.fetchAppMetadata endpoint
---                     ]
-
---         -- RouteAktivitetsListe ->
---         --     Cmd.map AktiviteterMsg <|
---         --         Cmd.batch
---         --             [ Aktiviteter.fetchAktivitetListe endpoint
---         --             , Aktiviteter.fetchAppMetadata endpoint
---         --             ]
-
---         RouteAktivitetOpprett ->
---             Cmd.map (PagesMsg << AktivitetOpprettMsg) <| AktivitetOpprett.fetchAppMetadata endpoint
-
---         RouteDeltakerOpprett id ->
---             Cmd.map (PagesMsg << DeltakerOpprettMsg) <|
---                 Cmd.batch
---                 [ (DeltakerOpprett.fetchAppMetadata endpoint)
---                 , (DeltakerOpprett.hentAktivitetDetalj id endpoint)
---                 ]
-
---         _ ->
---             Cmd.none
-
 updatePage : Model -> PageMsg -> (Model, Cmd Msg, TacoUpdate)
 updatePage model msg =
     let
       (newPageModel, pageMsg, sharedMsg) =
-            case model.currentPage of
-                AktiviteterPage pageModel ->
-                    case msg of
-                        AktiviteterMsg msg_ ->
+            case msg of
+                AktiviteterMsg msg_ ->
+                    case model.currentPage of
+                        AktiviteterPage pageModel ->
                             updateAktiviteter model pageModel msg_
                         _ ->
                             (model.currentPage, Cmd.none, NoSharedMsg)
 
-                AktivitetPage pageModel ->
-                    case msg of
-                        AktivitetMsg msg_ ->
+                AktivitetMsg msg_ ->
+                    case model.currentPage of
+                        AktivitetPage pageModel ->
                             updateAktivitet model pageModel msg_
                         _ ->
                             (model.currentPage, Cmd.none, NoSharedMsg)
-
-                AktivitetOpprettPage pageModel ->
-                    case msg of
-                        AktivitetOpprettMsg msg_ ->
+                AktivitetOpprettMsg msg_ ->
+                    case model.currentPage of
+                        AktivitetOpprettPage pageModel ->
                             updateAktivitetOpprett model pageModel msg_
                         _ ->
                             (model.currentPage, Cmd.none, NoSharedMsg)
-
-                DeltakerOpprettPage pageModel ->
-                    case msg of
-                        DeltakerOpprettMsg msg_ ->
+                DeltakerOpprettMsg msg_ ->
+                    case model.currentPage of
+                        DeltakerOpprettPage pageModel ->
                             updateDeltakerOpprett model pageModel msg_
                         _ ->
                             (model.currentPage, Cmd.none, NoSharedMsg)
-
-                _ ->
-                    (model.currentPage, Cmd.none, NoSharedMsg)
     in
         ({model | currentPage = newPageModel}, Cmd.map PagesMsg pageMsg, NoUpdate)
         |> addSharedMsgToUpdate sharedMsg
@@ -352,14 +280,11 @@ view taco model =
             ]
             { header = [ viewHeader taco model ]
             , drawer = []
-            -- , drawer = [ drawerHeader model, viewDrawer model ]
             , tabs =
                 ( [], [] )
-                -- , tabs = ( tabTitles, [] )
             , main =
                 [ pageView taco model
                 , Snackbar.view model.snackbar |> map Snackbar
-                  -- , Snackbar.view model.snackbar |> App.map Snackbar
                 ]
             }
         , helpDialog model
