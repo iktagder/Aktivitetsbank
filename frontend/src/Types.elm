@@ -82,11 +82,7 @@ type alias Deltaker =
     }
 
 type Route
-    = RouteAnsattPortal
-    | RouteLederForesporsel
-    | RouteTilgangsadministrasjon
-    | RouteTelefonskjema
-    | RouteAktivitetsListe
+    = RouteAktivitetsListe
     | RouteAktivitetsDetalj String
     | RouteAktivitetOpprett
     | RouteDeltakerOpprett String

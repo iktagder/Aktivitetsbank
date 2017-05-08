@@ -82,7 +82,7 @@ init apiEndpoint =
       , dropdownStateAktivitetstype = Dropdown.newState "1"
       , aktivitet = initAktivitet
       }
-    , Cmd.none
+    , fetchAppMetadata apiEndpoint
     )
 
 initAktivitet : Aktivitet

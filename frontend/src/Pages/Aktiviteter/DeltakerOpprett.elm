@@ -49,7 +49,7 @@ type Msg
     | NyDeltakerRespons (Result Error NyDeltaker)
 
 init : String -> String -> ( Model, Cmd Msg )
-init apiEndpoint aktivitetId =
+init apiEndpoint id =
     ( { mdl = Material.model
       , apiEndpoint = apiEndpoint
       , statusText = ""
@@ -65,7 +65,10 @@ init apiEndpoint aktivitetId =
       -- , dropdownStateAktivitetstype = Dropdown.newState "1"
       , deltaker = initDeltaker
       }
-    , Cmd.none
+    ,   Cmd.batch
+        [ (fetchAppMetadata apiEndpoint)
+        , (hentAktivitetDetalj id apiEndpoint)
+        ]
     )
 
 

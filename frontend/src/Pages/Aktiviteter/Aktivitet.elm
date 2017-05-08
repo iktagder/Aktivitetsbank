@@ -72,8 +72,8 @@ dropdownConfigAktivitetstype =
         |> Dropdown.withSelectedStyles [ ( "color", "black" ) ]
         |> Dropdown.withTriggerClass "col-4 border bg-white p1"
 
-init : String -> ( Model, Cmd Msg )
-init apiEndpoint =
+init : String -> String -> ( Model, Cmd Msg )
+init apiEndpoint id =
     ( { mdl = Material.model
       , apiEndpoint = apiEndpoint
       , statusText = ""
@@ -85,7 +85,11 @@ init apiEndpoint =
       , valgtAktivitetstype = Nothing
       , dropdownStateAktivitetstype = Dropdown.newState "1"
       }
-    , Cmd.none
+      , Cmd.batch
+            [ (hentAktivitetDetalj id apiEndpoint)
+            , (hentAktivitetDeltakere id apiEndpoint)
+            , fetchAppMetadata apiEndpoint
+            ]
     )
 
 
