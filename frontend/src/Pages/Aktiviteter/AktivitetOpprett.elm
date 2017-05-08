@@ -14,7 +14,6 @@ import Types exposing (..)
 import Http exposing (Error)
 import Decoders exposing (..)
 import Dropdown
-import Json.Decode
 
 
 type alias Model =
@@ -67,8 +66,10 @@ initAktivitet =
             , omfangTimer = 0
             , skoleId = "1"
             , skoleNavn = ""
+            , skole = Nothing
             , aktivitetsTypeId = ""
             , aktivitetsTypeNavn = ""
+            , aktivitetsType = Nothing
             }
 
 fetchAppMetadata : String -> Cmd Msg

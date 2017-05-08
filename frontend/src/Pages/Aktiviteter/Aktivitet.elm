@@ -27,9 +27,7 @@ type alias Model =
     , aktivitet : WebData Aktivitet
     , deltakere : WebData (List Deltaker)
     , appMetadata : WebData AppMetadata
-    , valgtSkole : Maybe Skole
     , dropdownStateSkole : Dropdown.State
-    , valgtAktivitetstype : Maybe AktivitetsType
     , dropdownStateAktivitetstype : Dropdown.State
     }
 
@@ -57,9 +55,7 @@ init apiEndpoint id =
       , aktivitet = RemoteData.NotAsked
       , deltakere = RemoteData.NotAsked
       , appMetadata = RemoteData.NotAsked
-      , valgtSkole = Nothing
       , dropdownStateSkole = Dropdown.newState "1"
-      , valgtAktivitetstype = Nothing
       , dropdownStateAktivitetstype = Dropdown.newState "1"
       }
       , Cmd.batch
@@ -133,7 +129,6 @@ fetchAppMetadata endPoint =
             |> RemoteData.sendRequest
             |> Cmd.map AppMetadataResponse
 
-
 update : Msg -> Model -> ( Model, Cmd Msg, SharedMsg )
 update msg model =
     case msg of
@@ -165,19 +160,20 @@ update msg model =
             ( { model |  deltakere = Debug.log "Deltakere:" response }, Cmd.none, NoSharedMsg )
 
         AktivitetResponse response ->
-            let
-              (valgtSkole, valgtAktivitetstype) =
-                case response of
-                  Success aktivitet ->
-                    (Just {id = aktivitet.skoleId, navn = aktivitet.skoleNavn, kode = ""}, Just {id = aktivitet.aktivitetsTypeId, navn = aktivitet.aktivitetsTypeNavn})
-                  _ ->
-                    (Nothing, Nothing)
-            in
-
-            ( Debug.log "aktivitet-item-response" { model | aktivitet = response, valgtSkole = valgtSkole, valgtAktivitetstype = valgtAktivitetstype }, Cmd.none, NoSharedMsg )
+            ( Debug.log "aktivitet-item-response" { model | aktivitet = response}, Cmd.none, NoSharedMsg )
 
         OnSelectSkole skole ->
-            ( { model | valgtSkole = skole }, Cmd.none, NoSharedMsg )
+            let
+                oppdatertAktivitet =
+                    case model.aktivitet of
+                        Success data ->
+                            RemoteData.Success {data | skole = skole}
+                        _ ->
+                            model.aktivitet
+            in
+
+
+            ( { model | aktivitet = oppdatertAktivitet}, Cmd.none, NoSharedMsg )
 
         SkoleDropdown skole ->
             let
@@ -187,7 +183,15 @@ update msg model =
                 ( { model | dropdownStateSkole = updated }, cmd, NoSharedMsg )
 
         OnSelectAktivitetstype aktivitetstype ->
-            ( { model | valgtAktivitetstype = aktivitetstype }, Cmd.none, NoSharedMsg )
+            let
+                oppdatertAktivitet =
+                    case model.aktivitet of
+                        Success data ->
+                            RemoteData.Success {data | aktivitetsType = aktivitetstype}
+                        _ ->
+                            model.aktivitet
+            in
+            ( { model | aktivitet = oppdatertAktivitet}, Cmd.none, NoSharedMsg )
 
         AktivitetstypeDropdown aktivitetstype ->
             let
@@ -280,8 +284,8 @@ visAktivitet model =
             visAktivitetSuksess model data
 
 
-visSkole : Model -> Html Msg
-visSkole model =
+visSkole : Model -> Aktivitet -> Html Msg
+visSkole model aktivitet =
     case model.appMetadata of
         NotAsked ->
             text "Initialising."
@@ -294,7 +298,7 @@ visSkole model =
 
         Success data ->
             visSkoleDropdown
-                model.valgtSkole
+                aktivitet.skole
                 data.skoler
                 model.dropdownStateSkole
 
@@ -305,8 +309,8 @@ visSkoleDropdown selectedSkoleId model dropdownStateSkole =
         [ Html.map SkoleDropdown (Dropdown.view dropdownConfigSkole dropdownStateSkole model selectedSkoleId)
         ]
 
-visAktivitetstype : Model -> Html Msg
-visAktivitetstype model =
+visAktivitetstype : Model -> Aktivitet -> Html Msg
+visAktivitetstype model aktivitet =
     case model.appMetadata of
         NotAsked ->
             text "Initialising."
@@ -319,7 +323,7 @@ visAktivitetstype model =
 
         Success data ->
             visAktivitetstypeDropdown
-                model.valgtAktivitetstype
+                aktivitet.aktivitetsType
                 data.aktivitetstyper
                 model.dropdownStateAktivitetstype
 
@@ -368,32 +372,32 @@ visAktivitetSuksess model aktivitet =
             , Textfield.value <| toString aktivitet.omfangTimer
             ]
             []
-        , Textfield.render Mdl
-            [ 4 ]
-            model.mdl
-            [ Textfield.label "Skole"
-            , Textfield.floatingLabel
-            , Textfield.text_
-            , Textfield.disabled
-            , Textfield.value <| aktivitet.skoleNavn
-            , cs "text-area"
-            ]
-            []
-        , Textfield.render Mdl
-            [ 5 ]
-            model.mdl
-            [ Textfield.label "Aktivitetstype"
-            , Textfield.floatingLabel
-            , Textfield.text_
-            , Textfield.disabled
-            , Textfield.value <| aktivitet.aktivitetsTypeNavn
-            , cs "text-area"
-            ]
-            []
-        -- , showText p Typo.menu "Skole"
-        -- , visSkole model
-        -- , showText p Typo.menu "Aktivitetstype"
-        -- , visAktivitetstype model
+        , showText p Typo.menu "Skole"
+        , visSkole model aktivitet
+        -- , Textfield.render Mdl
+        --     [ 4 ]
+        --     model.mdl
+        --     [ Textfield.label "Skole"
+        --     , Textfield.floatingLabel
+        --     , Textfield.text_
+        --     , Textfield.disabled
+        --     , Textfield.value <| aktivitet.skoleNavn
+        --     , cs "text-area"
+        --     ]
+        --     []
+        -- , Textfield.render Mdl
+        --     [ 5 ]
+        --     model.mdl
+        --     [ Textfield.label "Aktivitetstype"
+        --     , Textfield.floatingLabel
+        --     , Textfield.text_
+        --     , Textfield.disabled
+        --     , Textfield.value <| aktivitet.aktivitetsTypeNavn
+        --     , cs "text-area"
+        --     ]
+        --     []
+        , showText p Typo.menu "Aktivitetstype"
+        , visAktivitetstype model aktivitet
         ]
 
 visAktivitetDeltakere : Model -> Html Msg

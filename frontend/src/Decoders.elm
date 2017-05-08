@@ -108,8 +108,37 @@ decodeAktivitet =
         |> Json.Decode.Pipeline.required "omfangTimer" (Json.int)
         |> Json.Decode.Pipeline.required "skoleId" (Json.string)
         |> Json.Decode.Pipeline.required "skoleNavn" (Json.string)
+        |> Json.Decode.Pipeline.custom ((decodeAktivitetSkole) |> Json.andThen decodeMaybeAktivitetSkole)
         |> Json.Decode.Pipeline.required "aktivitetstypeId" (Json.string)
         |> Json.Decode.Pipeline.required "aktivitetstypeNavn" (Json.string)
+        |> Json.Decode.Pipeline.custom ((decodeAktivitetAktivitetsType) |> Json.andThen decodeMaybeAktivitetAktivitetsType)
+
+decodeAktivitetSkole : Json.Decoder Skole
+decodeAktivitetSkole =
+    Json.map3 Skole
+        (field "skoleId" Json.string)
+        (field "skoleNavn" Json.string)
+        (Json.succeed "")
+
+decodeMaybeAktivitetSkole : Skole -> Json.Decoder (Maybe Skole)
+decodeMaybeAktivitetSkole skole =
+    let
+        maybeSkole = Just skole
+    in
+        Json.succeed maybeSkole
+
+decodeAktivitetAktivitetsType : Json.Decoder AktivitetsType
+decodeAktivitetAktivitetsType =
+    Json.map2 AktivitetsType
+        (field "aktivitetstypeId" Json.string)
+        (field "aktivitetstypeNavn" Json.string)
+
+decodeMaybeAktivitetAktivitetsType : AktivitetsType -> Json.Decoder (Maybe AktivitetsType)
+decodeMaybeAktivitetAktivitetsType aktivitetstype =
+    let
+        maybe = Just aktivitetstype
+    in
+        Json.succeed maybe
 
 encodeOpprettNyAktivitet : Aktivitet -> Json.Encode.Value
 encodeOpprettNyAktivitet model =

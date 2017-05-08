@@ -63,8 +63,10 @@ type alias Aktivitet =
     , omfangTimer : Int
     , skoleId : String
     , skoleNavn : String
+    , skole : Maybe Skole
     , aktivitetsTypeId : String
     , aktivitetsTypeNavn : String
+    , aktivitetsType : Maybe AktivitetsType
     }
 
 type alias Deltaker =
