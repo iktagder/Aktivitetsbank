@@ -21,10 +21,8 @@ type alias Model =
     , apiEndpoint : String
     , statusText : String
     , appMetadata : WebData AppMetadata
-    , valgtSkole : Maybe Skole
     , aktivitet : Aktivitet
     , dropdownStateSkole : Dropdown.State
-    , valgtAktivitetstype : Maybe AktivitetsType
     , dropdownStateAktivitetstype : Dropdown.State
     }
 
@@ -49,9 +47,7 @@ init apiEndpoint =
       , apiEndpoint = apiEndpoint
       , statusText = ""
       , appMetadata = RemoteData.NotAsked
-      , valgtSkole = Nothing
       , dropdownStateSkole = Dropdown.newState "1"
-      , valgtAktivitetstype = Nothing
       , dropdownStateAktivitetstype = Dropdown.newState "1"
       , aktivitet = initAktivitet
       }
@@ -133,21 +129,10 @@ update msg model =
 
         OnSelectSkole skole ->
             let
-                gammelAktivitet =
-                    model.aktivitet
-
-                nySkoleId =
-                    case skole of
-                        Just data ->
-                            data.id
-
-                        Nothing ->
-                            "00"
-
-                oppdatertAktivitet =
-                    { gammelAktivitet | skoleId = nySkoleId }
+                gammelAktivitet = model.aktivitet
+                oppdatertAktivitet = { gammelAktivitet | skole = skole }
             in
-                ( { model | valgtSkole = skole, aktivitet = oppdatertAktivitet }, Cmd.none, NoSharedMsg )
+                ( { model | aktivitet = oppdatertAktivitet }, Cmd.none, NoSharedMsg )
 
         SkoleDropdown skole ->
             let
@@ -158,21 +143,10 @@ update msg model =
 
         OnSelectAktivitetstype aktivitetstype ->
             let
-                gammelAktivitet =
-                    model.aktivitet
-
-                nyAktivitetId =
-                    case aktivitetstype of
-                        Just data ->
-                            data.id
-
-                        Nothing ->
-                            "00"
-
-                oppdatertAktivitet =
-                    { gammelAktivitet | aktivitetsTypeId = nyAktivitetId }
+                gammelAktivitet = model.aktivitet
+                oppdatertAktivitet = { gammelAktivitet | aktivitetsType = aktivitetstype }
             in
-                ( { model | valgtAktivitetstype = aktivitetstype, aktivitet = oppdatertAktivitet }, Cmd.none, NoSharedMsg )
+                ( { model | aktivitet = oppdatertAktivitet }, Cmd.none, NoSharedMsg )
 
         AktivitetstypeDropdown aktivitetstype ->
             let
@@ -258,8 +232,8 @@ view taco model =
         ]
 
 
-visSkole : Model -> Html Msg
-visSkole model =
+visSkole : Model -> Aktivitet -> Html Msg
+visSkole model aktivitet =
     case model.appMetadata of
         NotAsked ->
             text "Initialising."
@@ -272,7 +246,7 @@ visSkole model =
 
         Success data ->
             visSkoleDropdown
-                model.valgtSkole
+                aktivitet.skole
                 data.skoler
                 model.dropdownStateSkole
 
@@ -284,8 +258,8 @@ visSkoleDropdown selectedSkoleId model dropdownStateSkole =
         ]
 
 
-visAktivitetstype : Model -> Html Msg
-visAktivitetstype model =
+visAktivitetstype : Model -> Aktivitet -> Html Msg
+visAktivitetstype model aktivitet =
     case model.appMetadata of
         NotAsked ->
             text "Initialising."
@@ -298,7 +272,7 @@ visAktivitetstype model =
 
         Success data ->
             visAktivitetstypeDropdown
-                model.valgtAktivitetstype
+                aktivitet.aktivitetsType
                 data.aktivitetstyper
                 model.dropdownStateAktivitetstype
 
@@ -348,9 +322,9 @@ opprettAktivitet model aktivitet =
             ]
             []
         , showText p Typo.menu "Skole"
-        , visSkole model
+        , visSkole model aktivitet
         , showText p Typo.menu "Aktivitetstype"
-        , visAktivitetstype model
+        , visAktivitetstype model aktivitet
         , Button.render Mdl
             [ 10, 1 ]
             model.mdl

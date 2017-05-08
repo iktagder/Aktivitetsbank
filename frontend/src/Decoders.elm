@@ -147,8 +147,16 @@ encodeOpprettNyAktivitet model =
             [ ( "navn", Json.Encode.string model.navn )
             , ( "beskrivelse", Json.Encode.string model.beskrivelse )
             , ( "omfangTimer", Json.Encode.int model.omfangTimer )
-            , ( "skoleId", Json.Encode.string model.skoleId )
-            , ( "aktivitetsTypeId", Json.Encode.string model.aktivitetsTypeId )
+            , ( "skoleId", model.skole
+                            |> Maybe.andThen (\skole -> Just skole.id)
+                            |> Maybe.withDefault "feil"
+                            |> Json.Encode.string
+                            )
+            , ( "aktivitetsTypeId", model.aktivitetsType
+                                    |> Maybe.andThen (\aktivitetsType -> Just aktivitetsType.id)
+                                    |> Maybe.withDefault "feil"
+                                    |> Json.Encode.string
+                                    )
             ]
     in
         encodings
