@@ -48,29 +48,6 @@ type Msg
     | NavigerHjem
 
 
-dropdownConfigSkole : Dropdown.Config Msg Skole
-dropdownConfigSkole =
-    Dropdown.newConfig OnSelectSkole .navn
-        |> Dropdown.withItemClass "border-bottom border-silver p1 gray"
-        |> Dropdown.withMenuClass "border border-gray"
-        |> Dropdown.withMenuStyles [ ( "background", "white" ) ]
-        |> Dropdown.withPrompt "Velg skole"
-        |> Dropdown.withPromptClass "silver"
-        |> Dropdown.withSelectedClass "bold"
-        |> Dropdown.withSelectedStyles [ ( "color", "black" ) ]
-        |> Dropdown.withTriggerClass "col-4 border bg-white p1"
-
-dropdownConfigAktivitetstype : Dropdown.Config Msg AktivitetsType
-dropdownConfigAktivitetstype =
-    Dropdown.newConfig OnSelectAktivitetstype .navn
-        |> Dropdown.withItemClass "border-bottom border-silver p1 gray"
-        |> Dropdown.withMenuClass "border border-gray"
-        |> Dropdown.withMenuStyles [ ( "background", "white" ) ]
-        |> Dropdown.withPrompt "Velg aktivitetstype"
-        |> Dropdown.withPromptClass "silver"
-        |> Dropdown.withSelectedClass "bold"
-        |> Dropdown.withSelectedStyles [ ( "color", "black" ) ]
-        |> Dropdown.withTriggerClass "col-4 border bg-white p1"
 
 init : String -> String -> ( Model, Cmd Msg )
 init apiEndpoint id =
@@ -478,3 +455,27 @@ visAktivitetDeltaker model deltaker =
                     ]
                 ]
             ]
+
+dropdownConfigSkole : Dropdown.Config Msg Skole
+dropdownConfigSkole =
+    Dropdown.newConfig OnSelectSkole .navn
+        |> Dropdown.withItemClass "border-bottom border-silver p1 gray"
+        |> Dropdown.withMenuClass "border border-gray"
+        |> Dropdown.withMenuStyles [ ( "background", "white" ) ]
+        |> Dropdown.withPrompt "Velg skole"
+        |> Dropdown.withPromptClass "silver"
+        |> Dropdown.withSelectedClass "bold"
+        |> Dropdown.withSelectedStyles [ ( "color", "black" ) ]
+        |> Dropdown.withTriggerClass "col-4 border bg-white p1"
+
+dropdownConfigAktivitetstype : Dropdown.Config Msg AktivitetsType
+dropdownConfigAktivitetstype =
+    Dropdown.newConfig OnSelectAktivitetstype .navn
+        |> Dropdown.withItemClass "border-bottom border-silver p1 gray"
+        |> Dropdown.withMenuClass "border border-gray"
+        |> Dropdown.withMenuStyles [ ( "background", "white" ) ]
+        |> Dropdown.withPrompt "Velg aktivitetstype"
+        |> Dropdown.withPromptClass "silver"
+        |> Dropdown.withSelectedClass "bold"
+        |> Dropdown.withSelectedStyles [ ( "color", "black" ) ]
+        |> Dropdown.withTriggerClass "col-4 border bg-white p1"
