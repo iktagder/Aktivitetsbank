@@ -218,7 +218,7 @@ update msg model =
                 tmp =
                     Debug.log "ny aktivitet" nyId
             in
-               ({model | aktivitet = initAktivitet, valgtSkole = Nothing, valgtAktivitetstype = Nothing}, Cmd.none, NavigateToAktivitet nyId.id)
+               (model , Cmd.none, NavigateToAktivitet nyId.id)
 
         NyAktivitetRespons (Err error) ->
             let

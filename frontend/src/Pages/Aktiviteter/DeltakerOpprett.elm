@@ -285,7 +285,7 @@ update msg model =
                     _ ->
                     NoSharedMsg
             in
-               ({model | deltaker = initDeltaker, valgtUtdanningsprogram = Nothing, valgtTrinn = Nothing, valgtFag = Nothing}, Cmd.none, cmdShared)
+               ( model, Cmd.none, cmdShared)
 
         NyDeltakerRespons (Err error) ->
             let
