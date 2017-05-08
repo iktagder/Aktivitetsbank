@@ -156,9 +156,21 @@ encodeOpprettNyDeltaker aktivitetId model =
             [ ( "aktivitetId", Json.Encode.string aktivitetId )
             , ( "kompetansemaal", Json.Encode.string model.kompetansemaal )
             , ( "timer", Json.Encode.int model.timer )
-            , ( "utdanningsprogramId", Json.Encode.string model.utdanningsprogramId )
-            , ( "trinnId", Json.Encode.string model.trinnId )
-            , ( "fagId", Json.Encode.string model.fagId )
+            , ( "utdanningsprogramId", model.utdanningsprogram
+                            |> Maybe.andThen (\skole -> Just skole.id)
+                            |> Maybe.withDefault "feil"
+                            |> Json.Encode.string
+                            )
+            , ( "trinnId", model.trinn
+                            |> Maybe.andThen (\skole -> Just skole.id)
+                            |> Maybe.withDefault "feil"
+                            |> Json.Encode.string
+                            )
+            , ( "fagId", model.fag
+                            |> Maybe.andThen (\skole -> Just skole.id)
+                            |> Maybe.withDefault "feil"
+                            |> Json.Encode.string
+                            )
             ]
     in
         encodings
@@ -186,12 +198,34 @@ decodeDeltaker =
         |> Json.Decode.Pipeline.required "aktivitetNavn" (Json.string)
         |> Json.Decode.Pipeline.required "utdanningsprogramId" (Json.string)
         |> Json.Decode.Pipeline.required "utdanningsprogramNavn" (Json.string)
+        |> Json.Decode.Pipeline.custom ((decodeDeltakerUtdanningsprogram) |> Json.andThen (\x -> Json.succeed <| Just x))
         |> Json.Decode.Pipeline.required "trinnId" (Json.string)
         |> Json.Decode.Pipeline.required "trinnNavn" (Json.string)
+        |> Json.Decode.Pipeline.custom ((decodeDeltakerTrinn) |> Json.andThen (\x -> Json.succeed <| Just x))
         |> Json.Decode.Pipeline.required "fagId" (Json.string)
         |> Json.Decode.Pipeline.required "fagNavn" (Json.string)
+        |> Json.Decode.Pipeline.custom ((decodeDeltakerFag) |> Json.andThen (\x -> Json.succeed <| Just x))
         |> Json.Decode.Pipeline.required "timer" (Json.int)
         |> Json.Decode.Pipeline.required "kompetansemaal" (Json.string)
+
+decodeDeltakerUtdanningsprogram : Json.Decoder Utdanningsprogram
+decodeDeltakerUtdanningsprogram =
+    Json.map3 Utdanningsprogram
+        (field "utdanningsprogramId" Json.string)
+        (Json.succeed "")
+        (field "utdanningsprogramNavn" Json.string)
+
+decodeDeltakerTrinn : Json.Decoder Trinn
+decodeDeltakerTrinn =
+    Json.map2 Trinn
+        (field "trinnId" Json.string)
+        (field "trinnNavn" Json.string)
+
+decodeDeltakerFag : Json.Decoder Fag
+decodeDeltakerFag =
+    Json.map2 Fag
+        (field "fagId" Json.string)
+        (field "fagNavn" Json.string)
 
 decodeDeltakerListe : Json.Decoder (List Deltaker)
 decodeDeltakerListe =

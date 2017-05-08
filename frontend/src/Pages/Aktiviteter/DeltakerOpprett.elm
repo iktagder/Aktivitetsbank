@@ -14,7 +14,6 @@ import Types exposing (..)
 import Http exposing (Error)
 import Decoders exposing (..)
 import Dropdown
-import Json.Decode
 
 
 type alias Model =
@@ -23,9 +22,6 @@ type alias Model =
     , statusText : String
     , appMetadata : WebData AppMetadata
     , aktivitet : WebData Aktivitet
-    , valgtUtdanningsprogram : Maybe Utdanningsprogram
-    , valgtTrinn : Maybe Trinn
-    , valgtFag : Maybe Fag
     , deltaker : Deltaker
     , dropdownStateUtdanningsprogram : Dropdown.State
     , dropdownStateTrinn : Dropdown.State
@@ -55,14 +51,9 @@ init apiEndpoint id =
       , statusText = ""
       , appMetadata = RemoteData.NotAsked
       , aktivitet = RemoteData.NotAsked
-      , valgtUtdanningsprogram = Nothing
-      , valgtTrinn = Nothing
-      , valgtFag = Nothing
       , dropdownStateUtdanningsprogram = Dropdown.newState "1"
       , dropdownStateTrinn = Dropdown.newState "1"
       , dropdownStateFag = Dropdown.newState "1"
-      -- , valgtAktivitetstype = Nothing
-      -- , dropdownStateAktivitetstype = Dropdown.newState "1"
       , deltaker = initDeltaker
       }
     ,   Cmd.batch
@@ -79,10 +70,13 @@ initDeltaker =
             , aktivitetNavn = ""
             , utdanningsprogramId = "0"
             , utdanningsprogramNavn = ""
+            , utdanningsprogram = Nothing
             , trinnId = "0"
             , trinnNavn = ""
+            , trinn = Nothing
             , fagId = "0"
             , fagNavn = ""
+            , fag = Nothing
             , timer = 0
             , kompetansemaal = ""
             }
@@ -173,54 +167,30 @@ update msg model =
                 gammelDeltaker =
                     model.deltaker
 
-                nyId =
-                    case valg of
-                        Just data ->
-                            data.id
-
-                        Nothing ->
-                            "00"
-
                 oppdatertDeltaker =
-                    { gammelDeltaker | utdanningsprogramId = nyId }
+                    { gammelDeltaker | utdanningsprogram = valg }
             in
-                ( { model | valgtUtdanningsprogram = valg, deltaker = oppdatertDeltaker }, Cmd.none, NoSharedMsg )
+                ( { model | deltaker = oppdatertDeltaker }, Cmd.none, NoSharedMsg )
 
         OnSelectTrinn valg ->
             let
                 gammelDeltaker =
                     model.deltaker
 
-                nyId =
-                    case valg of
-                        Just data ->
-                            data.id
-
-                        Nothing ->
-                            "00"
-
                 oppdatertDeltaker =
-                    { gammelDeltaker | trinnId = nyId }
+                    { gammelDeltaker | trinn = valg }
             in
-                ( { model | valgtTrinn = valg, deltaker = oppdatertDeltaker }, Cmd.none, NoSharedMsg )
+                ( { model | deltaker = oppdatertDeltaker }, Cmd.none, NoSharedMsg )
 
         OnSelectFag valg ->
             let
                 gammelDeltaker =
                     model.deltaker
 
-                nyId =
-                    case valg of
-                        Just data ->
-                            data.id
-
-                        Nothing ->
-                            "00"
-
                 oppdatertDeltaker =
-                    { gammelDeltaker | fagId = nyId }
+                    { gammelDeltaker | fag = valg }
             in
-                ( { model | valgtFag = valg, deltaker = oppdatertDeltaker }, Cmd.none, NoSharedMsg )
+                ( { model | deltaker = oppdatertDeltaker }, Cmd.none, NoSharedMsg )
 
         UtdanningsprogramDropdown utdanningsprogram ->
             let
@@ -390,11 +360,11 @@ visOpprettDeltaker model deltaker =
             ]
             []
         , showText p Typo.menu "Utdanningsprogram"
-        , visUtdanningsprogram model
+        , visUtdanningsprogram model deltaker
         , showText p Typo.menu "Trinn"
-        , visTrinn model
+        , visTrinn model deltaker
         , showText p Typo.menu "Fag"
-        , visFag model
+        , visFag model deltaker
         -- , showText p Typo.menu "Aktivitetstype"
         -- , visAktivitetstype model
         , Button.render Mdl
@@ -411,8 +381,8 @@ visOpprettDeltaker model deltaker =
             [ text "Lagre" ]
         ]
 
-visUtdanningsprogram : Model -> Html Msg
-visUtdanningsprogram model =
+visUtdanningsprogram : Model -> Deltaker -> Html Msg
+visUtdanningsprogram model deltaker =
     case model.appMetadata of
         NotAsked ->
             text "Initialising."
@@ -425,7 +395,7 @@ visUtdanningsprogram model =
 
         Success data ->
             visUtdanningsprogramDropdown
-                model.valgtUtdanningsprogram
+                deltaker.utdanningsprogram
                 data.utdanningsprogrammer
                 model.dropdownStateUtdanningsprogram
 
@@ -437,8 +407,8 @@ visUtdanningsprogramDropdown selectedUtdanningsprogramId model dropdownStateUtda
         ]
 
 
-visTrinn : Model -> Html Msg
-visTrinn model =
+visTrinn : Model -> Deltaker -> Html Msg
+visTrinn model deltaker =
     case model.appMetadata of
         NotAsked ->
             text "Initialising."
@@ -451,7 +421,7 @@ visTrinn model =
 
         Success data ->
             visTrinnDropdown
-                model.valgtTrinn
+                deltaker.trinn
                 data.trinnListe
                 model.dropdownStateTrinn
 
@@ -462,8 +432,8 @@ visTrinnDropdown selectedTrinnId model dropdownStateTrinn =
         [ Html.map TrinnDropdown (Dropdown.view dropdownConfigTrinn dropdownStateTrinn model selectedTrinnId)
         ]
 
-visFag : Model -> Html Msg
-visFag model =
+visFag : Model -> Deltaker -> Html Msg
+visFag model deltaker =
     case model.appMetadata of
         NotAsked ->
             text "Initialising."
@@ -476,7 +446,7 @@ visFag model =
 
         Success data ->
             visFagDropdown
-                model.valgtFag
+                deltaker.fag
                 data.fagListe
                 model.dropdownStateFag
 

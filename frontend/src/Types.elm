@@ -75,10 +75,13 @@ type alias Deltaker =
     , aktivitetNavn : String
     , utdanningsprogramId : String
     , utdanningsprogramNavn : String
+    , utdanningsprogram : Maybe Utdanningsprogram
     , trinnId : String
     , trinnNavn : String
+    , trinn : Maybe Trinn
     , fagId : String
     , fagNavn : String
+    , fag : Maybe Fag
     , timer : Int
     , kompetansemaal : String
     }
