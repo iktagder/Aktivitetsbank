@@ -69,6 +69,23 @@ type alias Aktivitet =
     , aktivitetsType : Maybe AktivitetsType
     }
 
+type alias AktivitetEdit =
+    { id : Maybe String
+    , navn : Maybe String
+    , beskrivelse : Maybe String
+    , omfangTimer : Maybe Int
+    , skole : Maybe Skole
+    , aktivitetsType : Maybe AktivitetsType
+    }
+
+type alias AktivitetGyldigNy =
+    { navn : String
+    , beskrivelse : String
+    , omfangTimer : Int
+    , skole : Skole
+    , aktivitetsType : AktivitetsType
+    }
+
 type alias Deltaker =
     { id : String
     , aktivitetId : String
@@ -84,6 +101,17 @@ type alias Deltaker =
     , fag : Maybe Fag
     , timer : Int
     , kompetansemaal : String
+    }
+
+type alias DeltakerEdit =
+    { id : Maybe String
+    , aktivitetId : String
+    , aktivitetNavn : String
+    , utdanningsprogram : Maybe Utdanningsprogram
+    , trinn : Maybe Trinn
+    , fag : Maybe Fag
+    , timer : Maybe Int
+    , kompetansemaal : Maybe String
     }
 
 type Route

@@ -21,7 +21,7 @@ type alias Model =
     , apiEndpoint : String
     , statusText : String
     , appMetadata : WebData AppMetadata
-    , aktivitet : Aktivitet
+    , aktivitet : AktivitetEdit
     , dropdownStateSkole : Dropdown.State
     , dropdownStateAktivitetstype : Dropdown.State
     }
@@ -54,17 +54,13 @@ init apiEndpoint =
     , fetchAppMetadata apiEndpoint
     )
 
-initAktivitet : Aktivitet
+initAktivitet : AktivitetEdit
 initAktivitet =
-            { id = "00000-0000-00000"
-            , navn = ""
-            , beskrivelse = ""
-            , omfangTimer = 0
-            , skoleId = "1"
-            , skoleNavn = ""
+            { id = Nothing
+            , navn = Nothing
+            , beskrivelse = Nothing
+            , omfangTimer = Nothing
             , skole = Nothing
-            , aktivitetsTypeId = ""
-            , aktivitetsTypeNavn = ""
             , aktivitetsType = Nothing
             }
 
@@ -90,7 +86,7 @@ fetchAppMetadata endPoint =
             |> Cmd.map AppMetadataResponse
 
 
-postOpprettNyAktivitet : String -> Aktivitet -> (Result Error NyAktivitet -> msg) -> Cmd msg
+postOpprettNyAktivitet : String -> AktivitetGyldigNy -> (Result Error NyAktivitet -> msg) -> Cmd msg
 postOpprettNyAktivitet endPoint aktivitet responseMsg =
     let
         url =
@@ -161,7 +157,7 @@ update msg model =
                     model.aktivitet
 
                 oppdatertAktivitet =
-                    { gammelAktivitet | navn = endretNavn }
+                    { gammelAktivitet | navn = Just endretNavn }
             in
                 ( Debug.log "endretNavn:" { model | aktivitet = oppdatertAktivitet }, Cmd.none, NoSharedMsg )
 
@@ -171,7 +167,7 @@ update msg model =
                     model.aktivitet
 
                 oppdatertAktivitet =
-                    { gammelAktivitet | beskrivelse = endretBeskrivelse }
+                    { gammelAktivitet | beskrivelse = Just endretBeskrivelse }
             in
                 ( { model | aktivitet = oppdatertAktivitet }, Cmd.none, NoSharedMsg )
 
@@ -181,12 +177,13 @@ update msg model =
                     model.aktivitet
 
                 oppdatertAktivitet =
-                    { gammelAktivitet | omfangTimer = Result.withDefault 0 (String.toInt endretOmfangTimer) }
+                    { gammelAktivitet | omfangTimer = Just <| Result.withDefault 0 (String.toInt endretOmfangTimer) }
             in
                 ( { model | aktivitet = oppdatertAktivitet }, Cmd.none, NoSharedMsg )
 
         OpprettNyAktivitet ->
-            ( model, postOpprettNyAktivitet model.apiEndpoint model.aktivitet NyAktivitetRespons, NoSharedMsg )
+            ( model, Cmd.none, NoSharedMsg )
+            -- ( model, postOpprettNyAktivitet model.apiEndpoint model.aktivitet NyAktivitetRespons, NoSharedMsg )
 
         NyAktivitetRespons (Ok nyId) ->
             let
@@ -227,12 +224,12 @@ view taco model =
               -- , Options.css "flex-direction" "column"
               -- , Options.css "align-items" "left"
             ]
-            [ opprettAktivitet model model.aktivitet
+            [ visOpprettAktivitet model model.aktivitet
             ]
         ]
 
 
-visSkole : Model -> Aktivitet -> Html Msg
+visSkole : Model -> AktivitetEdit -> Html Msg
 visSkole model aktivitet =
     case model.appMetadata of
         NotAsked ->
@@ -258,7 +255,7 @@ visSkoleDropdown selectedSkoleId model dropdownStateSkole =
         ]
 
 
-visAktivitetstype : Model -> Aktivitet -> Html Msg
+visAktivitetstype : Model -> AktivitetEdit -> Html Msg
 visAktivitetstype model aktivitet =
     case model.appMetadata of
         NotAsked ->
@@ -284,8 +281,8 @@ visAktivitetstypeDropdown selectedAktivitetstypeId model dropdownStateAktivitets
         ]
 
 
-opprettAktivitet : Model -> Aktivitet -> Html Msg
-opprettAktivitet model aktivitet =
+visOpprettAktivitet : Model -> AktivitetEdit -> Html Msg
+visOpprettAktivitet model aktivitet =
     Options.div
         []
         [ Textfield.render Mdl
@@ -294,7 +291,7 @@ opprettAktivitet model aktivitet =
             [ Textfield.label "Navn"
             , Textfield.floatingLabel
             , Textfield.text_
-            , Textfield.value <| aktivitet.navn
+            , Textfield.value <| Maybe.withDefault "" aktivitet.navn
             , Options.onInput EndretAktivitetsNavn
             ]
             []
@@ -306,7 +303,7 @@ opprettAktivitet model aktivitet =
             , Textfield.text_
             , Textfield.textarea
             , Textfield.rows 4
-            , Textfield.value <| aktivitet.beskrivelse
+            , Textfield.value <| Maybe.withDefault "" aktivitet.beskrivelse
             , Options.onInput EndretAktivitetsBeskrivelse
             , cs "text-area"
             ]
@@ -317,7 +314,7 @@ opprettAktivitet model aktivitet =
             [ Textfield.label "Omfang"
             , Textfield.floatingLabel
             , Textfield.text_
-            , Textfield.value <| toString aktivitet.omfangTimer
+            , Textfield.value <| "123" --toString aktivitet.omfangTimer
             , Options.onInput EndretAktivitetsOmfangTimer
             ]
             []

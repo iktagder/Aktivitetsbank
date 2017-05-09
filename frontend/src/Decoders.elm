@@ -127,27 +127,41 @@ decodeAktivitetAktivitetsType =
         (field "aktivitetstypeId" Json.string)
         (field "aktivitetstypeNavn" Json.string)
 
-encodeOpprettNyAktivitet : Aktivitet -> Json.Encode.Value
+encodeOpprettNyAktivitet : AktivitetGyldigNy -> Json.Encode.Value
 encodeOpprettNyAktivitet model =
     let
         encodings =
             [ ( "navn", Json.Encode.string model.navn )
             , ( "beskrivelse", Json.Encode.string model.beskrivelse )
             , ( "omfangTimer", Json.Encode.int model.omfangTimer )
-            , ( "skoleId", model.skole
-                            |> Maybe.andThen (\skole -> Just skole.id)
-                            |> Maybe.withDefault "feil"
-                            |> Json.Encode.string
-                            )
-            , ( "aktivitetsTypeId", model.aktivitetsType
-                                    |> Maybe.andThen (\aktivitetsType -> Just aktivitetsType.id)
-                                    |> Maybe.withDefault "feil"
-                                    |> Json.Encode.string
-                                    )
+            , ( "skoleId", Json.Encode.string model.skole.id )
+            , ( "aktivitetsTypeId", Json.Encode.string model.aktivitetsType.id )
             ]
     in
         encodings
             |> Json.Encode.object
+
+-- encodeOpprettNyAktivitet : Aktivitet -> Json.Encode.Value
+-- encodeOpprettNyAktivitet model =
+--     let
+--         encodings =
+--             [ ( "navn", Json.Encode.string model.navn )
+--             , ( "beskrivelse", Json.Encode.string model.beskrivelse )
+--             , ( "omfangTimer", Json.Encode.int model.omfangTimer )
+--             , ( "skoleId", model.skole
+--                             |> Maybe.andThen (\skole -> Just skole.id)
+--                             |> Maybe.withDefault "feil"
+--                             |> Json.Encode.string
+--                             )
+--             , ( "aktivitetsTypeId", model.aktivitetsType
+--                                     |> Maybe.andThen (\aktivitetsType -> Just aktivitetsType.id)
+--                                     |> Maybe.withDefault "feil"
+--                                     |> Json.Encode.string
+--                                     )
+--             ]
+--     in
+--         encodings
+--             |> Json.Encode.object
 
 encodeOpprettNyDeltaker : String -> Deltaker -> Json.Encode.Value
 encodeOpprettNyDeltaker aktivitetId model =
