@@ -14,12 +14,14 @@ import Types exposing (..)
 import Http exposing (Error)
 import Decoders exposing (..)
 import Dropdown
+import Shared.Validation exposing (..)
 
 
 type alias Model =
     { mdl : Material.Model
     , apiEndpoint : String
     , statusText : String
+    , visLagreKnapp : Bool
     , appMetadata : WebData AppMetadata
     , aktivitet : AktivitetEdit
     , dropdownStateSkole : Dropdown.State
@@ -46,6 +48,7 @@ init apiEndpoint =
     ( { mdl = Material.model
       , apiEndpoint = apiEndpoint
       , statusText = ""
+      , visLagreKnapp = False
       , appMetadata = RemoteData.NotAsked
       , dropdownStateSkole = Dropdown.newState "1"
       , dropdownStateAktivitetstype = Dropdown.newState "1"
@@ -127,8 +130,9 @@ update msg model =
             let
                 gammelAktivitet = model.aktivitet
                 oppdatertAktivitet = { gammelAktivitet | skole = skole }
+                (visLagreKnapp, statusTekst) = valideringsInfo oppdatertAktivitet
             in
-                ( { model | aktivitet = oppdatertAktivitet }, Cmd.none, NoSharedMsg )
+                ( { model | aktivitet = oppdatertAktivitet, statusText = statusTekst, visLagreKnapp = visLagreKnapp }, Cmd.none, NoSharedMsg )
 
         SkoleDropdown skole ->
             let
@@ -141,8 +145,9 @@ update msg model =
             let
                 gammelAktivitet = model.aktivitet
                 oppdatertAktivitet = { gammelAktivitet | aktivitetsType = aktivitetstype }
+                (visLagreKnapp, statusTekst) = valideringsInfo oppdatertAktivitet
             in
-                ( { model | aktivitet = oppdatertAktivitet }, Cmd.none, NoSharedMsg )
+                ( { model | aktivitet = oppdatertAktivitet, statusText = statusTekst, visLagreKnapp = visLagreKnapp }, Cmd.none, NoSharedMsg )
 
         AktivitetstypeDropdown aktivitetstype ->
             let
@@ -158,8 +163,10 @@ update msg model =
 
                 oppdatertAktivitet =
                     { gammelAktivitet | navn = Just endretNavn }
+
+                (visLagreKnapp, statusTekst) = valideringsInfo oppdatertAktivitet
             in
-                ( Debug.log "endretNavn:" { model | aktivitet = oppdatertAktivitet }, Cmd.none, NoSharedMsg )
+                ( { model | aktivitet = oppdatertAktivitet, statusText = statusTekst, visLagreKnapp = visLagreKnapp }, Cmd.none, NoSharedMsg )
 
         EndretAktivitetsBeskrivelse endretBeskrivelse ->
             let
@@ -168,8 +175,10 @@ update msg model =
 
                 oppdatertAktivitet =
                     { gammelAktivitet | beskrivelse = Just endretBeskrivelse }
+
+                (visLagreKnapp, statusTekst) = valideringsInfo oppdatertAktivitet
             in
-                ( { model | aktivitet = oppdatertAktivitet }, Cmd.none, NoSharedMsg )
+                ( { model | aktivitet = oppdatertAktivitet, statusText = statusTekst, visLagreKnapp = visLagreKnapp }, Cmd.none, NoSharedMsg )
 
         EndretAktivitetsOmfangTimer endretOmfangTimer ->
             let
@@ -178,12 +187,22 @@ update msg model =
 
                 oppdatertAktivitet =
                     { gammelAktivitet | omfangTimer = Just <| Result.withDefault 0 (String.toInt endretOmfangTimer) }
+
+                (visLagreKnapp, statusTekst) = valideringsInfo oppdatertAktivitet
             in
-                ( { model | aktivitet = oppdatertAktivitet }, Cmd.none, NoSharedMsg )
+                ( { model | aktivitet = oppdatertAktivitet, statusText = statusTekst, visLagreKnapp = visLagreKnapp }, Cmd.none, NoSharedMsg )
 
         OpprettNyAktivitet ->
-            ( model, Cmd.none, NoSharedMsg )
-            -- ( model, postOpprettNyAktivitet model.apiEndpoint model.aktivitet NyAktivitetRespons, NoSharedMsg )
+            let
+              validering = validerAktivitetGyldigNy model.aktivitet
+              (statusTekst, cmd) =
+                case validering of
+                    Ok resultat ->
+                        ("", postOpprettNyAktivitet model.apiEndpoint resultat NyAktivitetRespons)
+                    Err feil ->
+                        (feil, Cmd.none)
+            in
+            ( {model | statusText = statusTekst}, cmd, NoSharedMsg )
 
         NyAktivitetRespons (Ok nyId) ->
             let
@@ -199,6 +218,24 @@ update msg model =
             in
                 ( model, Cmd.none, NoSharedMsg )
 
+
+valideringsInfo : AktivitetEdit -> (Bool, String)
+valideringsInfo aktivitet =
+    case validerAktivitetGyldigNy aktivitet of
+            Ok _ ->
+                (True, "")
+            Err feil ->
+                (False, feil)
+
+
+validerAktivitetGyldigNy : AktivitetEdit -> Result String AktivitetGyldigNy
+validerAktivitetGyldigNy form =
+    Ok AktivitetGyldigNy
+        |: notBlank "Navn må fylles ut" form.navn
+        |: notBlank "Beskrivelse må fylles ut" form.beskrivelse
+        |: required "Timer må fylles ut" form.omfangTimer
+        |: required "Velg skole" form.skole
+        |: required "Aktivitetstype må velges" form.aktivitetsType
 
 showText : (List (Html.Attribute m) -> List (Html msg) -> a) -> Options.Property c m -> String -> a
 showText elementType displayStyle text_ =
@@ -289,6 +326,7 @@ visOpprettAktivitet model aktivitet =
             [ 1 ]
             model.mdl
             [ Textfield.label "Navn"
+            , Textfield.autofocus
             , Textfield.floatingLabel
             , Textfield.text_
             , Textfield.value <| Maybe.withDefault "" aktivitet.navn
@@ -314,7 +352,7 @@ visOpprettAktivitet model aktivitet =
             [ Textfield.label "Omfang"
             , Textfield.floatingLabel
             , Textfield.text_
-            , Textfield.value <| "123" --toString aktivitet.omfangTimer
+            , Textfield.value <| Maybe.withDefault "0" <| Maybe.map toString aktivitet.omfangTimer
             , Options.onInput EndretAktivitetsOmfangTimer
             ]
             []
@@ -322,12 +360,14 @@ visOpprettAktivitet model aktivitet =
         , visSkole model aktivitet
         , showText p Typo.menu "Aktivitetstype"
         , visAktivitetstype model aktivitet
+        , Options.div [] [showText p Typo.subhead model.statusText]
         , Button.render Mdl
             [ 10, 1 ]
             model.mdl
             [ Button.ripple
             , Button.colored
             , Button.raised
+            , Options.when (not model.visLagreKnapp) Button.disabled
             , Options.onClick (OpprettNyAktivitet)
             , css "float" "right"
               -- , css "margin-left" "1em"
