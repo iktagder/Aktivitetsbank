@@ -117,8 +117,8 @@ type alias DeltakerGyldigNy =
     { aktivitet : Aktivitet
     , utdanningsprogram : Utdanningsprogram
     , trinn : Trinn
-    , fag : Fag
     , timer : Int
+    , fag : Fag
     , kompetansemaal : String
     }
 

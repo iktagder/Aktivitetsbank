@@ -297,8 +297,8 @@ validerDeltakerGyldigNy form =
         |: required "Mangler gyldig aktivitet" form.aktivitet
         |: required "Velg utdanningsprogram" form.utdanningsprogram
         |: required "Velg trinn" form.trinn
-        |: required "Velg fag" form.fag
         |: required "Timer må fylles ut." form.timer
+        |: required "Velg fag" form.fag
         |: notBlank "Kompetansemål må fylles ut." form.kompetansemaal
 
 
@@ -375,7 +375,23 @@ visOpprettDeltaker model deltaker =
         --     , Options.onInput EndretAktivitetsNavn
         --     ]
         --     []
-         Textfield.render Mdl
+          showText p Typo.menu "Utdanningsprogram"
+        , visUtdanningsprogram model deltaker
+        , showText p Typo.menu "Trinn"
+        , visTrinn model deltaker
+        , Textfield.render Mdl
+            [ 3 ]
+            model.mdl
+            [ Textfield.label "Timer (skoletimer)"
+            , Textfield.floatingLabel
+            , Textfield.text_
+            , Textfield.value <| Maybe.withDefault "0" <| Maybe.map toString deltaker.timer
+            , Options.onInput EndretTimer
+            ]
+            []
+        , showText p Typo.menu "Fag"
+        , visFag model deltaker
+        , Textfield.render Mdl
             [ 2 ]
             model.mdl
             [ Textfield.label "Kompetansemål"
@@ -388,22 +404,6 @@ visOpprettDeltaker model deltaker =
             , cs "text-area"
             ]
             []
-        , Textfield.render Mdl
-            [ 3 ]
-            model.mdl
-            [ Textfield.label "Timer (skoletimer)"
-            , Textfield.floatingLabel
-            , Textfield.text_
-            , Textfield.value <| Maybe.withDefault "0" <| Maybe.map toString deltaker.timer
-            , Options.onInput EndretTimer
-            ]
-            []
-        , showText p Typo.menu "Utdanningsprogram"
-        , visUtdanningsprogram model deltaker
-        , showText p Typo.menu "Trinn"
-        , visTrinn model deltaker
-        , showText p Typo.menu "Fag"
-        , visFag model deltaker
         , Options.div [] [showText p Typo.subhead model.statusText]
         -- , showText p Typo.menu "Aktivitetstype"
         -- , visAktivitetstype model
