@@ -6,11 +6,8 @@ import Types exposing (..)
 import Time exposing (Time)
 import RemoteData exposing (RemoteData(..))
 import Routing.Router as Router
-import Routing.Helpers as RouterHelpers
 import Http
 import Decoders
-import Material.Menu as Menu
-import Material
 import Material.Progress as Loading
 import Material.Options as Options exposing (when, css, cs, Style, onClick)
 
