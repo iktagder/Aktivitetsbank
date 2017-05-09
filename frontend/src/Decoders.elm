@@ -163,28 +163,16 @@ encodeOpprettNyAktivitet model =
 --         encodings
 --             |> Json.Encode.object
 
-encodeOpprettNyDeltaker : String -> Deltaker -> Json.Encode.Value
+encodeOpprettNyDeltaker : String -> DeltakerGyldigNy -> Json.Encode.Value
 encodeOpprettNyDeltaker aktivitetId model =
     let
         encodings =
             [ ( "aktivitetId", Json.Encode.string aktivitetId )
             , ( "kompetansemaal", Json.Encode.string model.kompetansemaal )
             , ( "timer", Json.Encode.int model.timer )
-            , ( "utdanningsprogramId", model.utdanningsprogram
-                            |> Maybe.andThen (\skole -> Just skole.id)
-                            |> Maybe.withDefault "feil"
-                            |> Json.Encode.string
-                            )
-            , ( "trinnId", model.trinn
-                            |> Maybe.andThen (\skole -> Just skole.id)
-                            |> Maybe.withDefault "feil"
-                            |> Json.Encode.string
-                            )
-            , ( "fagId", model.fag
-                            |> Maybe.andThen (\skole -> Just skole.id)
-                            |> Maybe.withDefault "feil"
-                            |> Json.Encode.string
-                            )
+            , ( "utdanningsprogramId", Json.Encode.string model.utdanningsprogram.id )
+            , ( "trinnId", Json.Encode.string model.trinn.id )
+            , ( "fagId", Json.Encode.string model.fag.id )
             ]
     in
         encodings

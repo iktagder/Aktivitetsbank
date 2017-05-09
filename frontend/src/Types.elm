@@ -105,13 +105,21 @@ type alias Deltaker =
 
 type alias DeltakerEdit =
     { id : Maybe String
-    , aktivitetId : String
-    , aktivitetNavn : String
+    , aktivitet : Maybe Aktivitet
     , utdanningsprogram : Maybe Utdanningsprogram
     , trinn : Maybe Trinn
     , fag : Maybe Fag
     , timer : Maybe Int
     , kompetansemaal : Maybe String
+    }
+
+type alias DeltakerGyldigNy =
+    { aktivitet : Aktivitet
+    , utdanningsprogram : Utdanningsprogram
+    , trinn : Trinn
+    , fag : Fag
+    , timer : Int
+    , kompetansemaal : String
     }
 
 type Route
