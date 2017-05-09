@@ -29,6 +29,7 @@ type alias Model =
     , location : Location
     , loadUserRetryCount : Int
     , apiEndpoint : String
+    , statusText : String
     }
 
 
@@ -60,6 +61,7 @@ init flags location =
           , location = location
           , loadUserRetryCount = 0
           , apiEndpoint = flags.apiEndpoint
+          , statusText = ""
           }
         , Cmd.batch
             [ fetchUserInformation endPoint
@@ -160,11 +162,14 @@ updateUserInfo model webData =
                                 (Cmd.none, "Stoppet henting av data på nytt.", model.loadUserRetryCount)
 
                         Http.NetworkError ->
-                            (Cmd.none, "Nettverksfeil", model.loadUserRetryCount)
+                            if model.loadUserRetryCount < 5 then
+                                (fetchUserInformation model.apiEndpoint, "Nettverksfeil - Prøver henting av data på nytt", model.loadUserRetryCount + 1)
+                            else
+                                (Cmd.none, "Stoppet henting av data på nytt.", model.loadUserRetryCount)
                         Http.Timeout ->
                             (Cmd.none, "Nettverksfeil - timet ut", model.loadUserRetryCount)
             in
-                ({model | loadUserRetryCount = retryCount}, cmd)
+                (Debug.log "UpdateUserInfo feil" {model | loadUserRetryCount = retryCount}, cmd)
 
 
             -- Debug.crash "OMG CANT EVEN DOWNLOAD."
