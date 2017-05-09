@@ -281,20 +281,12 @@ view taco model =
     grid []
         [ cell
             [ size All 12
-            , Elevation.e0
-            , Options.css "align-items" "top"
-            , Options.cs "mdl-grid"
             ]
-            [ Options.styled p [ Typo.display2 ] [ text "Opprett aktivitet" ]
+            [ Options.span [ Typo.headline ] [ text "Opprett aktivitet" ]
             ]
         , cell
             [ size All 12
             , Elevation.e2
-            , Options.css "padding" "16px 32px"
-            , Options.css "display" "flex"
-
-            -- , Options.css "flex-direction" "column"
-            -- , Options.css "align-items" "left"
             ]
             [ visOpprettAktivitet model model.aktivitet
             ]
