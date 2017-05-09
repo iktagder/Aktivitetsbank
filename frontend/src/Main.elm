@@ -27,6 +27,8 @@ main =
 type alias Model =
     { appState : AppState
     , location : Location
+    , loadUserRetryCount : Int
+    , apiEndpoint : String
     }
 
 
@@ -56,6 +58,8 @@ init flags location =
     in
         ( { appState = NotReady flags
           , location = location
+          , loadUserRetryCount = 0
+          , apiEndpoint = flags.apiEndpoint
           }
         , Cmd.batch
             [ fetchUserInformation endPoint
@@ -141,8 +145,29 @@ updateRouter model routerMsg =
 updateUserInfo : Model -> RemoteData.WebData UserInformation -> ( Model, Cmd Msg )
 updateUserInfo model webData =
     case webData of
-        Failure _ ->
-            Debug.crash "OMG CANT EVEN DOWNLOAD."
+        Failure error ->
+            let
+                (cmd, statusText, retryCount) =
+                    case error of
+                        Http.BadUrl info ->
+                            (Cmd.none, "Feil i url til API", model.loadUserRetryCount)
+                        Http.BadPayload _ _ ->
+                            (Cmd.none, "Feil i sending av data til API", model.loadUserRetryCount)
+                        Http.BadStatus status ->
+                            if model.loadUserRetryCount < 5 then
+                                (fetchUserInformation model.apiEndpoint, "Prøver henting av data på nytt", model.loadUserRetryCount + 1)
+                            else
+                                (Cmd.none, "Stoppet henting av data på nytt.", model.loadUserRetryCount)
+
+                        Http.NetworkError ->
+                            (Cmd.none, "Nettverksfeil", model.loadUserRetryCount)
+                        Http.Timeout ->
+                            (Cmd.none, "Nettverksfeil - timet ut", model.loadUserRetryCount)
+            in
+                ({model | loadUserRetryCount = retryCount}, cmd)
+
+
+            -- Debug.crash "OMG CANT EVEN DOWNLOAD."
 
         Success userInfo ->
             case model.appState of
