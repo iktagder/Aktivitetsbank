@@ -276,10 +276,20 @@ update msg model =
 
         NyDeltakerRespons (Err error) ->
             let
-                tmp =
-                    Debug.log "ny deltaker - error" error
+                (cmd, statusText, _) =
+                    case error of
+                        Http.BadUrl info ->
+                            (Cmd.none, "Feil i url til API.", 0)
+                        Http.BadPayload _ _ ->
+                            (Cmd.none, "Feil i innhold ved sending av data til API.", 0)
+                        Http.BadStatus status ->
+                            (Cmd.none, "Feil i sending av data til API.", 0)
+                        Http.NetworkError ->
+                            (Cmd.none, "Feil i sending av data til API. Nettverksfeil.", 0)
+                        Http.Timeout ->
+                            (Cmd.none, "Nettverksfeil - timet ut ved kall til API.", 0)
             in
-                ( model, Cmd.none, NoSharedMsg )
+                ( {model | statusText = statusText}, cmd, NoSharedMsg )
 
 
 valideringsInfo : DeltakerEdit -> (Bool, String)
