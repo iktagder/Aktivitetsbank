@@ -57,15 +57,17 @@ init apiEndpoint =
     , fetchAppMetadata apiEndpoint
     )
 
+
 initAktivitet : AktivitetEdit
 initAktivitet =
-            { id = Nothing
-            , navn = Nothing
-            , beskrivelse = Nothing
-            , omfangTimer = Nothing
-            , skole = Nothing
-            , aktivitetsType = Nothing
-            }
+    { id = Nothing
+    , navn = Nothing
+    , beskrivelse = Nothing
+    , omfangTimer = Nothing
+    , skole = Nothing
+    , aktivitetsType = Nothing
+    }
+
 
 fetchAppMetadata : String -> Cmd Msg
 fetchAppMetadata endPoint =
@@ -128,9 +130,14 @@ update msg model =
 
         OnSelectSkole skole ->
             let
-                gammelAktivitet = model.aktivitet
-                oppdatertAktivitet = { gammelAktivitet | skole = skole }
-                (visLagreKnapp, statusTekst) = valideringsInfo oppdatertAktivitet
+                gammelAktivitet =
+                    model.aktivitet
+
+                oppdatertAktivitet =
+                    { gammelAktivitet | skole = skole }
+
+                ( visLagreKnapp, statusTekst ) =
+                    valideringsInfo oppdatertAktivitet
             in
                 ( { model | aktivitet = oppdatertAktivitet, statusText = statusTekst, visLagreKnapp = visLagreKnapp }, Cmd.none, NoSharedMsg )
 
@@ -143,9 +150,14 @@ update msg model =
 
         OnSelectAktivitetstype aktivitetstype ->
             let
-                gammelAktivitet = model.aktivitet
-                oppdatertAktivitet = { gammelAktivitet | aktivitetsType = aktivitetstype }
-                (visLagreKnapp, statusTekst) = valideringsInfo oppdatertAktivitet
+                gammelAktivitet =
+                    model.aktivitet
+
+                oppdatertAktivitet =
+                    { gammelAktivitet | aktivitetsType = aktivitetstype }
+
+                ( visLagreKnapp, statusTekst ) =
+                    valideringsInfo oppdatertAktivitet
             in
                 ( { model | aktivitet = oppdatertAktivitet, statusText = statusTekst, visLagreKnapp = visLagreKnapp }, Cmd.none, NoSharedMsg )
 
@@ -164,7 +176,8 @@ update msg model =
                 oppdatertAktivitet =
                     { gammelAktivitet | navn = Just endretNavn }
 
-                (visLagreKnapp, statusTekst) = valideringsInfo oppdatertAktivitet
+                ( visLagreKnapp, statusTekst ) =
+                    valideringsInfo oppdatertAktivitet
             in
                 ( { model | aktivitet = oppdatertAktivitet, statusText = statusTekst, visLagreKnapp = visLagreKnapp }, Cmd.none, NoSharedMsg )
 
@@ -176,7 +189,8 @@ update msg model =
                 oppdatertAktivitet =
                     { gammelAktivitet | beskrivelse = Just endretBeskrivelse }
 
-                (visLagreKnapp, statusTekst) = valideringsInfo oppdatertAktivitet
+                ( visLagreKnapp, statusTekst ) =
+                    valideringsInfo oppdatertAktivitet
             in
                 ( { model | aktivitet = oppdatertAktivitet, statusText = statusTekst, visLagreKnapp = visLagreKnapp }, Cmd.none, NoSharedMsg )
 
@@ -188,54 +202,63 @@ update msg model =
                 oppdatertAktivitet =
                     { gammelAktivitet | omfangTimer = Just <| Result.withDefault 0 (String.toInt endretOmfangTimer) }
 
-                (visLagreKnapp, statusTekst) = valideringsInfo oppdatertAktivitet
+                ( visLagreKnapp, statusTekst ) =
+                    valideringsInfo oppdatertAktivitet
             in
                 ( { model | aktivitet = oppdatertAktivitet, statusText = statusTekst, visLagreKnapp = visLagreKnapp }, Cmd.none, NoSharedMsg )
 
         OpprettNyAktivitet ->
             let
-              validering = validerAktivitetGyldigNy model.aktivitet
-              (statusTekst, cmd) =
-                case validering of
-                    Ok resultat ->
-                        ("", postOpprettNyAktivitet model.apiEndpoint resultat NyAktivitetRespons)
-                    Err feil ->
-                        (feil, Cmd.none)
+                validering =
+                    validerAktivitetGyldigNy model.aktivitet
+
+                ( statusTekst, cmd ) =
+                    case validering of
+                        Ok resultat ->
+                            ( "", postOpprettNyAktivitet model.apiEndpoint resultat NyAktivitetRespons )
+
+                        Err feil ->
+                            ( feil, Cmd.none )
             in
-            ( {model | statusText = statusTekst}, cmd, NoSharedMsg )
+                ( { model | statusText = statusTekst }, cmd, NoSharedMsg )
 
         NyAktivitetRespons (Ok nyId) ->
             let
                 tmp =
                     Debug.log "ny aktivitet" nyId
             in
-               (model , Cmd.none, NavigateToAktivitet nyId.id)
+                ( model, Cmd.none, NavigateToAktivitet nyId.id )
 
         NyAktivitetRespons (Err error) ->
             let
-                (cmd, statusText, _) =
+                ( cmd, statusText, _ ) =
                     case error of
                         Http.BadUrl info ->
-                            (Cmd.none, "Feil i url til API.", 0)
+                            ( Cmd.none, "Feil i url til API.", 0 )
+
                         Http.BadPayload _ _ ->
-                            (Cmd.none, "Feil i innhold ved sending av data til API.", 0)
+                            ( Cmd.none, "Feil i innhold ved sending av data til API.", 0 )
+
                         Http.BadStatus status ->
-                            (Cmd.none, "Feil i sending av data til API.", 0)
+                            ( Cmd.none, "Feil i sending av data til API.", 0 )
+
                         Http.NetworkError ->
-                            (Cmd.none, "Feil i sending av data til API. Nettverksfeil.", 0)
+                            ( Cmd.none, "Feil i sending av data til API. Nettverksfeil.", 0 )
+
                         Http.Timeout ->
-                            (Cmd.none, "Nettverksfeil - timet ut ved kall til API.", 0)
+                            ( Cmd.none, "Nettverksfeil - timet ut ved kall til API.", 0 )
             in
-                ( {model | statusText = statusText}, cmd, NoSharedMsg )
+                ( { model | statusText = statusText }, cmd, NoSharedMsg )
 
 
-valideringsInfo : AktivitetEdit -> (Bool, String)
+valideringsInfo : AktivitetEdit -> ( Bool, String )
 valideringsInfo aktivitet =
     case validerAktivitetGyldigNy aktivitet of
-            Ok _ ->
-                (True, "")
-            Err feil ->
-                (False, feil)
+        Ok _ ->
+            ( True, "" )
+
+        Err feil ->
+            ( False, feil )
 
 
 validerAktivitetGyldigNy : AktivitetEdit -> Result String AktivitetGyldigNy
@@ -246,6 +269,7 @@ validerAktivitetGyldigNy form =
         |: required "Timer må fylles ut" form.omfangTimer
         |: required "Velg skole" form.skole
         |: required "Aktivitetstype må velges" form.aktivitetsType
+
 
 showText : (List (Html.Attribute m) -> List (Html msg) -> a) -> Options.Property c m -> String -> a
 showText elementType displayStyle text_ =
@@ -268,8 +292,9 @@ view taco model =
             , Elevation.e2
             , Options.css "padding" "16px 32px"
             , Options.css "display" "flex"
-              -- , Options.css "flex-direction" "column"
-              -- , Options.css "align-items" "left"
+
+            -- , Options.css "flex-direction" "column"
+            -- , Options.css "align-items" "left"
             ]
             [ visOpprettAktivitet model model.aktivitet
             ]
@@ -370,7 +395,7 @@ visOpprettAktivitet model aktivitet =
         , visSkole model aktivitet
         , showText p Typo.menu "Aktivitetstype"
         , visAktivitetstype model aktivitet
-        , Options.div [] [showText p Typo.subhead model.statusText]
+        , Options.div [] [ showText p Typo.subhead model.statusText ]
         , Button.render Mdl
             [ 10, 1 ]
             model.mdl
@@ -380,8 +405,9 @@ visOpprettAktivitet model aktivitet =
             , Options.when (not model.visLagreKnapp) Button.disabled
             , Options.onClick (OpprettNyAktivitet)
             , css "float" "right"
-              -- , css "margin-left" "1em"
-              -- , Options.onClick (SearchAnsatt "Test")
+
+            -- , css "margin-left" "1em"
+            -- , Options.onClick (SearchAnsatt "Test")
             ]
             [ text "Lagre" ]
         ]

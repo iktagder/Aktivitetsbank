@@ -40,4 +40,3 @@ parseLocation location =
     location
         |> Url.parseHash routeParser
         |> Maybe.withDefault NotFoundRoute
-

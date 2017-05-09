@@ -46,6 +46,7 @@ type Msg
     | OpprettNyDeltaker
     | NyDeltakerRespons (Result Error NyDeltaker)
 
+
 init : String -> String -> ( Model, Cmd Msg )
 init apiEndpoint id =
     ( { mdl = Material.model
@@ -59,7 +60,7 @@ init apiEndpoint id =
       , dropdownStateFag = Dropdown.newState "1"
       , deltaker = initDeltaker
       }
-    ,   Cmd.batch
+    , Cmd.batch
         [ (fetchAppMetadata apiEndpoint)
         , (hentAktivitetDetalj id apiEndpoint)
         ]
@@ -68,14 +69,15 @@ init apiEndpoint id =
 
 initDeltaker : DeltakerEdit
 initDeltaker =
-            { id = Nothing
-            , aktivitet = Nothing
-            , utdanningsprogram = Nothing
-            , trinn = Nothing
-            , fag = Nothing
-            , timer = Nothing
-            , kompetansemaal = Nothing
-            }
+    { id = Nothing
+    , aktivitet = Nothing
+    , utdanningsprogram = Nothing
+    , trinn = Nothing
+    , fag = Nothing
+    , timer = Nothing
+    , kompetansemaal = Nothing
+    }
+
 
 hentAktivitetDetalj : String -> String -> Cmd Msg
 hentAktivitetDetalj id endPoint =
@@ -98,6 +100,7 @@ hentAktivitetDetalj id endPoint =
             |> RemoteData.sendRequest
             |> Cmd.map AktivitetResponse
 
+
 fetchAppMetadata : String -> Cmd Msg
 fetchAppMetadata endPoint =
     let
@@ -118,6 +121,7 @@ fetchAppMetadata endPoint =
         req
             |> RemoteData.sendRequest
             |> Cmd.map AppMetadataResponse
+
 
 postOpprettNyDeltaker : String -> String -> DeltakerGyldigNy -> (Result Error NyDeltaker -> msg) -> Cmd msg
 postOpprettNyDeltaker endPoint aktivitetId deltaker responseMsg =
@@ -142,6 +146,7 @@ postOpprettNyDeltaker endPoint aktivitetId deltaker responseMsg =
         req
             |> Http.send responseMsg
 
+
 update : Msg -> Model -> ( Model, Cmd Msg, SharedMsg )
 update msg model =
     case msg of
@@ -157,16 +162,18 @@ update msg model =
 
         AktivitetResponse response ->
             let
-              deltaker = model.deltaker
-              oppdatertDeltaker =
-                case response of
-                    Success aktivitet ->
-                        {deltaker | aktivitet = Just aktivitet}
-                    _ ->
-                        {deltaker | aktivitet = Nothing}
-            in
+                deltaker =
+                    model.deltaker
 
-            ( { model | aktivitet = response, deltaker = oppdatertDeltaker }, Cmd.none, NoSharedMsg )
+                oppdatertDeltaker =
+                    case response of
+                        Success aktivitet ->
+                            { deltaker | aktivitet = Just aktivitet }
+
+                        _ ->
+                            { deltaker | aktivitet = Nothing }
+            in
+                ( { model | aktivitet = response, deltaker = oppdatertDeltaker }, Cmd.none, NoSharedMsg )
 
         OnSelectUtdanningsprogram valg ->
             let
@@ -176,9 +183,10 @@ update msg model =
                 oppdatertDeltaker =
                     { gammelDeltaker | utdanningsprogram = valg }
 
-                (visLagreKnapp, statusTekst) = valideringsInfo oppdatertDeltaker
+                ( visLagreKnapp, statusTekst ) =
+                    valideringsInfo oppdatertDeltaker
             in
-                ( { model | deltaker = oppdatertDeltaker, statusText = statusTekst, visLagreKnapp = visLagreKnapp  }, Cmd.none, NoSharedMsg )
+                ( { model | deltaker = oppdatertDeltaker, statusText = statusTekst, visLagreKnapp = visLagreKnapp }, Cmd.none, NoSharedMsg )
 
         OnSelectTrinn valg ->
             let
@@ -188,9 +196,10 @@ update msg model =
                 oppdatertDeltaker =
                     { gammelDeltaker | trinn = valg }
 
-                (visLagreKnapp, statusTekst) = valideringsInfo oppdatertDeltaker
+                ( visLagreKnapp, statusTekst ) =
+                    valideringsInfo oppdatertDeltaker
             in
-                ( { model | deltaker = oppdatertDeltaker, statusText = statusTekst, visLagreKnapp = visLagreKnapp  }, Cmd.none, NoSharedMsg )
+                ( { model | deltaker = oppdatertDeltaker, statusText = statusTekst, visLagreKnapp = visLagreKnapp }, Cmd.none, NoSharedMsg )
 
         OnSelectFag valg ->
             let
@@ -200,9 +209,10 @@ update msg model =
                 oppdatertDeltaker =
                     { gammelDeltaker | fag = valg }
 
-                (visLagreKnapp, statusTekst) = valideringsInfo oppdatertDeltaker
+                ( visLagreKnapp, statusTekst ) =
+                    valideringsInfo oppdatertDeltaker
             in
-                ( { model | deltaker = oppdatertDeltaker, statusText = statusTekst, visLagreKnapp = visLagreKnapp  }, Cmd.none, NoSharedMsg )
+                ( { model | deltaker = oppdatertDeltaker, statusText = statusTekst, visLagreKnapp = visLagreKnapp }, Cmd.none, NoSharedMsg )
 
         UtdanningsprogramDropdown utdanningsprogram ->
             let
@@ -233,9 +243,10 @@ update msg model =
                 oppdatertDeltaker =
                     { gammelDeltaker | kompetansemaal = Just endretKompetansemaal }
 
-                (visLagreKnapp, statusTekst) = valideringsInfo oppdatertDeltaker
+                ( visLagreKnapp, statusTekst ) =
+                    valideringsInfo oppdatertDeltaker
             in
-                ( { model | deltaker = oppdatertDeltaker, statusText = statusTekst, visLagreKnapp = visLagreKnapp  }, Cmd.none, NoSharedMsg )
+                ( { model | deltaker = oppdatertDeltaker, statusText = statusTekst, visLagreKnapp = visLagreKnapp }, Cmd.none, NoSharedMsg )
 
         EndretTimer endretOmfangTimer ->
             let
@@ -245,60 +256,71 @@ update msg model =
                 oppdatertDeltaker =
                     { gammelDeltaker | timer = Just <| Result.withDefault 0 (String.toInt endretOmfangTimer) }
 
-                (visLagreKnapp, statusTekst) = valideringsInfo oppdatertDeltaker
+                ( visLagreKnapp, statusTekst ) =
+                    valideringsInfo oppdatertDeltaker
             in
-                ( { model | deltaker = oppdatertDeltaker, statusText = statusTekst, visLagreKnapp = visLagreKnapp  }, Cmd.none, NoSharedMsg )
+                ( { model | deltaker = oppdatertDeltaker, statusText = statusTekst, visLagreKnapp = visLagreKnapp }, Cmd.none, NoSharedMsg )
 
         OpprettNyDeltaker ->
             let
-              validering = validerDeltakerGyldigNy model.deltaker
-              (statusTekst, cmd) =
-                case validering of
-                    Ok resultat ->
-                        ("", postOpprettNyDeltaker model.apiEndpoint resultat.aktivitet.id resultat NyDeltakerRespons)
-                    Err feil ->
-                        (feil, Cmd.none)
+                validering =
+                    validerDeltakerGyldigNy model.deltaker
+
+                ( statusTekst, cmd ) =
+                    case validering of
+                        Ok resultat ->
+                            ( "", postOpprettNyDeltaker model.apiEndpoint resultat.aktivitet.id resultat NyDeltakerRespons )
+
+                        Err feil ->
+                            ( feil, Cmd.none )
             in
-            ( {model | statusText = statusTekst}, cmd, NoSharedMsg )
+                ( { model | statusText = statusTekst }, cmd, NoSharedMsg )
 
         NyDeltakerRespons (Ok nyId) ->
             let
                 tmp =
                     Debug.log "ny deltaker" nyId
+
                 cmdShared =
-                  case model.aktivitet of
-                    Success data ->
-                      NavigateToAktivitet data.id
-                    _ ->
-                    NoSharedMsg
+                    case model.aktivitet of
+                        Success data ->
+                            NavigateToAktivitet data.id
+
+                        _ ->
+                            NoSharedMsg
             in
-               ( model, Cmd.none, cmdShared)
+                ( model, Cmd.none, cmdShared )
 
         NyDeltakerRespons (Err error) ->
             let
-                (cmd, statusText, _) =
+                ( cmd, statusText, _ ) =
                     case error of
                         Http.BadUrl info ->
-                            (Cmd.none, "Feil i url til API.", 0)
+                            ( Cmd.none, "Feil i url til API.", 0 )
+
                         Http.BadPayload _ _ ->
-                            (Cmd.none, "Feil i innhold ved sending av data til API.", 0)
+                            ( Cmd.none, "Feil i innhold ved sending av data til API.", 0 )
+
                         Http.BadStatus status ->
-                            (Cmd.none, "Feil i sending av data til API.", 0)
+                            ( Cmd.none, "Feil i sending av data til API.", 0 )
+
                         Http.NetworkError ->
-                            (Cmd.none, "Feil i sending av data til API. Nettverksfeil.", 0)
+                            ( Cmd.none, "Feil i sending av data til API. Nettverksfeil.", 0 )
+
                         Http.Timeout ->
-                            (Cmd.none, "Nettverksfeil - timet ut ved kall til API.", 0)
+                            ( Cmd.none, "Nettverksfeil - timet ut ved kall til API.", 0 )
             in
-                ( {model | statusText = statusText}, cmd, NoSharedMsg )
+                ( { model | statusText = statusText }, cmd, NoSharedMsg )
 
 
-valideringsInfo : DeltakerEdit -> (Bool, String)
+valideringsInfo : DeltakerEdit -> ( Bool, String )
 valideringsInfo deltaker =
     case validerDeltakerGyldigNy deltaker of
-            Ok _ ->
-                (True, "")
-            Err feil ->
-                (False, feil)
+        Ok _ ->
+            ( True, "" )
+
+        Err feil ->
+            ( False, feil )
 
 
 validerDeltakerGyldigNy : DeltakerEdit -> Result String DeltakerGyldigNy
@@ -310,7 +332,6 @@ validerDeltakerGyldigNy form =
         |: required "Timer må fylles ut." form.timer
         |: required "Velg fag" form.fag
         |: notBlank "Kompetansemål må fylles ut." form.kompetansemaal
-
 
 
 showText : (List (Html.Attribute m) -> List (Html msg) -> a) -> Options.Property c m -> String -> a
@@ -334,6 +355,7 @@ vis taco model =
             ]
         ]
 
+
 dropdownConfigUtdanningsprogram : Dropdown.Config Msg Utdanningsprogram
 dropdownConfigUtdanningsprogram =
     Dropdown.newConfig OnSelectUtdanningsprogram .navn
@@ -345,6 +367,7 @@ dropdownConfigUtdanningsprogram =
         |> Dropdown.withSelectedClass "bold"
         |> Dropdown.withSelectedStyles [ ( "color", "black" ) ]
         |> Dropdown.withTriggerClass "col-4 border bg-white p1"
+
 
 dropdownConfigTrinn : Dropdown.Config Msg Trinn
 dropdownConfigTrinn =
@@ -358,6 +381,7 @@ dropdownConfigTrinn =
         |> Dropdown.withSelectedStyles [ ( "color", "black" ) ]
         |> Dropdown.withTriggerClass "col-4 border bg-white p1"
 
+
 dropdownConfigFag : Dropdown.Config Msg Fag
 dropdownConfigFag =
     Dropdown.newConfig OnSelectFag .navn
@@ -370,21 +394,21 @@ dropdownConfigFag =
         |> Dropdown.withSelectedStyles [ ( "color", "black" ) ]
         |> Dropdown.withTriggerClass "col-4 border bg-white p1"
 
+
 visOpprettDeltaker : Model -> DeltakerEdit -> Html Msg
 visOpprettDeltaker model deltaker =
     Options.div
         []
-        [
-        --   Textfield.render Mdl
-        --     [ 1 ]
-        --     model.mdl
-        --     [ Textfield.label "Navn"
-        --     , Textfield.floatingLabel
-        --     , Textfield.text_
-        --     , Textfield.value <| aktivitet.navn
-        --     , Options.onInput EndretAktivitetsNavn
-        --     ]
-        --     []
+        [ --   Textfield.render Mdl
+          --     [ 1 ]
+          --     model.mdl
+          --     [ Textfield.label "Navn"
+          --     , Textfield.floatingLabel
+          --     , Textfield.text_
+          --     , Textfield.value <| aktivitet.navn
+          --     , Options.onInput EndretAktivitetsNavn
+          --     ]
+          --     []
           showText p Typo.menu "Utdanningsprogram"
         , visUtdanningsprogram model deltaker
         , showText p Typo.menu "Trinn"
@@ -414,7 +438,8 @@ visOpprettDeltaker model deltaker =
             , cs "text-area"
             ]
             []
-        , Options.div [] [showText p Typo.subhead model.statusText]
+        , Options.div [] [ showText p Typo.subhead model.statusText ]
+
         -- , showText p Typo.menu "Aktivitetstype"
         -- , visAktivitetstype model
         , Button.render Mdl
@@ -426,11 +451,13 @@ visOpprettDeltaker model deltaker =
             , Button.raised
             , Options.onClick (OpprettNyDeltaker)
             , css "float" "right"
-              -- , css "margin-left" "1em"
-              -- , Options.onClick (SearchAnsatt "Test")
+
+            -- , css "margin-left" "1em"
+            -- , Options.onClick (SearchAnsatt "Test")
             ]
             [ text "Lagre" ]
         ]
+
 
 visUtdanningsprogram : Model -> DeltakerEdit -> Html Msg
 visUtdanningsprogram model deltaker =
@@ -482,6 +509,7 @@ visTrinnDropdown selectedTrinnId model dropdownStateTrinn =
     span []
         [ Html.map TrinnDropdown (Dropdown.view dropdownConfigTrinn dropdownStateTrinn model selectedTrinnId)
         ]
+
 
 visFag : Model -> DeltakerEdit -> Html Msg
 visFag model deltaker =

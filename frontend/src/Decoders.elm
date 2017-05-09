@@ -1,8 +1,10 @@
 module Decoders exposing (..)
+
 import Types exposing (..)
 import Json.Decode as Json exposing (field)
 import Json.Encode
 import Json.Decode.Pipeline
+
 
 decodeUserInformation : Json.Decoder UserInformation
 decodeUserInformation =
@@ -12,10 +14,10 @@ decodeUserInformation =
         (field "rolle" Json.string)
 
 
-
 decodeSearchAnsattList : Json.Decoder (List AnsattSearchItem)
 decodeSearchAnsattList =
     Json.list decodeAnsattSearchItem
+
 
 decodeAnsattSearchItem : Json.Decoder AnsattSearchItem
 decodeAnsattSearchItem =
@@ -37,10 +39,10 @@ decodeAnsattItem =
         ((Json.maybe (field "tittel" Json.string)) |> Json.andThen decodeMaybeString)
         (field "agressoResourceId" Json.string)
 
+
 decodeMaybeString : Maybe String -> Json.Decoder (Maybe String)
 decodeMaybeString maybeString =
     Json.succeed (Maybe.withDefault Nothing (Just maybeString))
-
 
 
 encodeChangePhoneNumber : AnsattItem -> Json.Encode.Value
@@ -53,6 +55,7 @@ encodeChangePhoneNumber model =
     in
         encodings
             |> Json.Encode.object
+
 
 decodeUtdanningsprogram : Json.Decoder Utdanningsprogram
 decodeUtdanningsprogram =
@@ -82,6 +85,7 @@ decodeFag =
         |> Json.Decode.Pipeline.required "id" (Json.string)
         |> Json.Decode.Pipeline.required "navn" (Json.string)
 
+
 decodeSkole : Json.Decoder Skole
 decodeSkole =
     Json.Decode.Pipeline.decode Skole
@@ -89,7 +93,11 @@ decodeSkole =
         |> Json.Decode.Pipeline.required "navn" (Json.string)
         |> Json.Decode.Pipeline.required "kode" (Json.string)
 
+
+
 --
+
+
 decodeAppMetadata : Json.Decoder AppMetadata
 decodeAppMetadata =
     Json.Decode.Pipeline.decode AppMetadata
@@ -98,6 +106,7 @@ decodeAppMetadata =
         |> Json.Decode.Pipeline.required "trinnListe" (Json.list decodeTrinn)
         |> Json.Decode.Pipeline.required "aktivitetstyper" (Json.list decodeAktivitetsType)
         |> Json.Decode.Pipeline.required "utdanningsprogrammer" (Json.list decodeUtdanningsprogram)
+
 
 decodeAktivitet : Json.Decoder Aktivitet
 decodeAktivitet =
@@ -113,6 +122,7 @@ decodeAktivitet =
         |> Json.Decode.Pipeline.required "aktivitetstypeNavn" (Json.string)
         |> Json.Decode.Pipeline.custom ((decodeAktivitetAktivitetsType) |> Json.andThen (\x -> Json.succeed <| Just x))
 
+
 decodeAktivitetSkole : Json.Decoder Skole
 decodeAktivitetSkole =
     Json.map3 Skole
@@ -127,6 +137,7 @@ decodeAktivitetAktivitetsType =
         (field "aktivitetstypeId" Json.string)
         (field "aktivitetstypeNavn" Json.string)
 
+
 encodeOpprettNyAktivitet : AktivitetGyldigNy -> Json.Encode.Value
 encodeOpprettNyAktivitet model =
     let
@@ -140,6 +151,8 @@ encodeOpprettNyAktivitet model =
     in
         encodings
             |> Json.Encode.object
+
+
 
 -- encodeOpprettNyAktivitet : Aktivitet -> Json.Encode.Value
 -- encodeOpprettNyAktivitet model =
@@ -163,6 +176,7 @@ encodeOpprettNyAktivitet model =
 --         encodings
 --             |> Json.Encode.object
 
+
 encodeOpprettNyDeltaker : String -> DeltakerGyldigNy -> Json.Encode.Value
 encodeOpprettNyDeltaker aktivitetId model =
     let
@@ -178,19 +192,23 @@ encodeOpprettNyDeltaker aktivitetId model =
         encodings
             |> Json.Encode.object
 
+
 decodeAktivitetListe : Json.Decoder (List Aktivitet)
 decodeAktivitetListe =
     Json.list decodeAktivitet
+
 
 decodeNyAktivitet : Json.Decoder NyAktivitet
 decodeNyAktivitet =
     Json.Decode.Pipeline.decode NyAktivitet
         |> Json.Decode.Pipeline.required "id" (Json.string)
 
+
 decodeNyDeltaker : Json.Decoder NyDeltaker
 decodeNyDeltaker =
     Json.Decode.Pipeline.decode NyDeltaker
         |> Json.Decode.Pipeline.required "id" (Json.string)
+
 
 decodeDeltaker : Json.Decoder Deltaker
 decodeDeltaker =
@@ -210,6 +228,7 @@ decodeDeltaker =
         |> Json.Decode.Pipeline.required "timer" (Json.int)
         |> Json.Decode.Pipeline.required "kompetansemaal" (Json.string)
 
+
 decodeDeltakerUtdanningsprogram : Json.Decoder Utdanningsprogram
 decodeDeltakerUtdanningsprogram =
     Json.map3 Utdanningsprogram
@@ -217,17 +236,20 @@ decodeDeltakerUtdanningsprogram =
         (Json.succeed "")
         (field "utdanningsprogramNavn" Json.string)
 
+
 decodeDeltakerTrinn : Json.Decoder Trinn
 decodeDeltakerTrinn =
     Json.map2 Trinn
         (field "trinnId" Json.string)
         (field "trinnNavn" Json.string)
 
+
 decodeDeltakerFag : Json.Decoder Fag
 decodeDeltakerFag =
     Json.map2 Fag
         (field "fagId" Json.string)
         (field "fagNavn" Json.string)
+
 
 decodeDeltakerListe : Json.Decoder (List Deltaker)
 decodeDeltakerListe =

@@ -14,6 +14,7 @@ import Material
 import Material.Progress as Loading
 import Material.Options as Options exposing (when, css, cs, Style, onClick)
 
+
 main : Program Flags Model Msg
 main =
     Navigation.programWithFlags UrlChange
@@ -65,6 +66,7 @@ init flags location =
           }
         , Cmd.batch
             [ fetchUserInformation endPoint
+
             -- , Cmd.map RouterMsg (Router.getInitialCommand (RouterHelpers.parseLocation location) endPoint)
             ]
         )
@@ -138,10 +140,11 @@ updateRouter model routerMsg =
                 )
 
         NotReady _ ->
-        let
-          tmp = Debug.log "Ooops. We got a sub-component message even though it wasn't supposed to be initialized?" model
-        in
-          (model, Cmd.none)
+            let
+                tmp =
+                    Debug.log "Ooops. We got a sub-component message even though it wasn't supposed to be initialized?" model
+            in
+                ( model, Cmd.none )
 
 
 updateUserInfo : Model -> RemoteData.WebData UserInformation -> ( Model, Cmd Msg )
@@ -149,31 +152,32 @@ updateUserInfo model webData =
     case webData of
         Failure error ->
             let
-                (cmd, statusText, retryCount) =
+                ( cmd, statusText, retryCount ) =
                     case error of
                         Http.BadUrl info ->
-                            (Cmd.none, "Feil i url til API", model.loadUserRetryCount)
+                            ( Cmd.none, "Feil i url til API", model.loadUserRetryCount )
+
                         Http.BadPayload _ _ ->
-                            (Cmd.none, "Feil i sending av data til API", model.loadUserRetryCount)
+                            ( Cmd.none, "Feil i sending av data til API", model.loadUserRetryCount )
+
                         Http.BadStatus status ->
                             if model.loadUserRetryCount < 5 then
-                                (fetchUserInformation model.apiEndpoint, "Prøver henting av data på nytt", model.loadUserRetryCount + 1)
+                                ( fetchUserInformation model.apiEndpoint, "Prøver henting av data på nytt", model.loadUserRetryCount + 1 )
                             else
-                                (Cmd.none, "Stoppet henting av data på nytt.", model.loadUserRetryCount)
+                                ( Cmd.none, "Stoppet henting av data på nytt.", model.loadUserRetryCount )
 
                         Http.NetworkError ->
                             if model.loadUserRetryCount < 5 then
-                                (fetchUserInformation model.apiEndpoint, "Nettverksfeil - Prøver henting av data på nytt", model.loadUserRetryCount + 1)
+                                ( fetchUserInformation model.apiEndpoint, "Nettverksfeil - Prøver henting av data på nytt", model.loadUserRetryCount + 1 )
                             else
-                                (Cmd.none, "Stoppet henting av data på nytt.", model.loadUserRetryCount)
+                                ( Cmd.none, "Stoppet henting av data på nytt.", model.loadUserRetryCount )
+
                         Http.Timeout ->
-                            (Cmd.none, "Nettverksfeil - timet ut", model.loadUserRetryCount)
+                            ( Cmd.none, "Nettverksfeil - timet ut", model.loadUserRetryCount )
             in
-                ({model | loadUserRetryCount = retryCount}, cmd)
+                ( { model | loadUserRetryCount = retryCount }, cmd )
 
-
-            -- Debug.crash "OMG CANT EVEN DOWNLOAD."
-
+        -- Debug.crash "OMG CANT EVEN DOWNLOAD."
         Success userInfo ->
             case model.appState of
                 NotReady notreadyModel ->

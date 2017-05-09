@@ -46,7 +46,6 @@ type Msg
     | NavigerHjem
 
 
-
 init : String -> String -> ( Model, Cmd Msg )
 init apiEndpoint id =
     ( { mdl = Material.model
@@ -58,11 +57,11 @@ init apiEndpoint id =
       , dropdownStateSkole = Dropdown.newState "1"
       , dropdownStateAktivitetstype = Dropdown.newState "1"
       }
-      , Cmd.batch
-            [ (hentAktivitetDetalj id apiEndpoint)
-            , (hentAktivitetDeltakere id apiEndpoint)
-            , fetchAppMetadata apiEndpoint
-            ]
+    , Cmd.batch
+        [ (hentAktivitetDetalj id apiEndpoint)
+        , (hentAktivitetDeltakere id apiEndpoint)
+        , fetchAppMetadata apiEndpoint
+        ]
     )
 
 
@@ -87,6 +86,7 @@ hentAktivitetDetalj id endPoint =
             |> RemoteData.sendRequest
             |> Cmd.map AktivitetResponse
 
+
 hentAktivitetDeltakere : String -> String -> Cmd Msg
 hentAktivitetDeltakere id endPoint =
     let
@@ -107,6 +107,7 @@ hentAktivitetDeltakere id endPoint =
         req
             |> RemoteData.sendRequest
             |> Cmd.map AktivitetDeltakereResponse
+
 
 fetchAppMetadata : String -> Cmd Msg
 fetchAppMetadata endPoint =
@@ -129,6 +130,7 @@ fetchAppMetadata endPoint =
             |> RemoteData.sendRequest
             |> Cmd.map AppMetadataResponse
 
+
 update : Msg -> Model -> ( Model, Cmd Msg, SharedMsg )
 update msg model =
     case msg of
@@ -147,33 +149,33 @@ update msg model =
 
         VisDeltakerOpprett ->
             let
-              sharedMsg =
-                case model.aktivitet of
-                    Success aktivitet ->
-                        NavigerTilDeltakerOpprett aktivitet.id
-                    _ ->
-                        NoSharedMsg
+                sharedMsg =
+                    case model.aktivitet of
+                        Success aktivitet ->
+                            NavigerTilDeltakerOpprett aktivitet.id
+
+                        _ ->
+                            NoSharedMsg
             in
-              ( model, Cmd.none, sharedMsg)
+                ( model, Cmd.none, sharedMsg )
 
         AktivitetDeltakereResponse response ->
-            ( { model |  deltakere = Debug.log "Deltakere:" response }, Cmd.none, NoSharedMsg )
+            ( { model | deltakere = Debug.log "Deltakere:" response }, Cmd.none, NoSharedMsg )
 
         AktivitetResponse response ->
-            ( Debug.log "aktivitet-item-response" { model | aktivitet = response}, Cmd.none, NoSharedMsg )
+            ( Debug.log "aktivitet-item-response" { model | aktivitet = response }, Cmd.none, NoSharedMsg )
 
         OnSelectSkole skole ->
             let
                 oppdatertAktivitet =
                     case model.aktivitet of
                         Success data ->
-                            RemoteData.Success {data | skole = skole}
+                            RemoteData.Success { data | skole = skole }
+
                         _ ->
                             model.aktivitet
             in
-
-
-            ( { model | aktivitet = oppdatertAktivitet}, Cmd.none, NoSharedMsg )
+                ( { model | aktivitet = oppdatertAktivitet }, Cmd.none, NoSharedMsg )
 
         SkoleDropdown skole ->
             let
@@ -187,11 +189,12 @@ update msg model =
                 oppdatertAktivitet =
                     case model.aktivitet of
                         Success data ->
-                            RemoteData.Success {data | aktivitetsType = aktivitetstype}
+                            RemoteData.Success { data | aktivitetsType = aktivitetstype }
+
                         _ ->
                             model.aktivitet
             in
-            ( { model | aktivitet = oppdatertAktivitet}, Cmd.none, NoSharedMsg )
+                ( { model | aktivitet = oppdatertAktivitet }, Cmd.none, NoSharedMsg )
 
         AktivitetstypeDropdown aktivitetstype ->
             let
@@ -199,12 +202,15 @@ update msg model =
                     Dropdown.update dropdownConfigAktivitetstype aktivitetstype model.dropdownStateAktivitetstype
             in
                 ( { model | dropdownStateAktivitetstype = updated }, cmd, NoSharedMsg )
+
         NavigerHjem ->
-            ( model, Cmd.none, NavigerTilHjem)
+            ( model, Cmd.none, NavigerTilHjem )
+
 
 showText : (List (Html.Attribute m) -> List (Html msg) -> a) -> Options.Property c m -> String -> a
 showText elementType displayStyle text_ =
     Options.styled elementType [ displayStyle, Typo.left ] [ text text_ ]
+
 
 view : Taco -> Model -> Html Msg
 view taco model =
@@ -226,6 +232,7 @@ view taco model =
                 model.mdl
                 [ Button.fab
                 , Button.ripple
+
                 -- , Options.onClick OpprettAktivitet
                 , Options.css "float" "right"
                 ]
@@ -237,8 +244,9 @@ view taco model =
             , Elevation.e2
             , Options.css "padding" "16px 32px"
             , Options.css "display" "flex"
-              -- , Options.css "flex-direction" "column"
-              -- , Options.css "align-items" "left"
+
+            -- , Options.css "flex-direction" "column"
+            -- , Options.css "align-items" "left"
             ]
             [ visAktivitet model
             ]
@@ -247,8 +255,9 @@ view taco model =
             , Elevation.e2
             , Options.css "padding" "16px 32px"
             , Options.css "display" "flex"
-              , Options.css "flex-direction" "column"
-              -- , Options.css "align-items" "left"
+            , Options.css "flex-direction" "column"
+
+            -- , Options.css "align-items" "left"
             ]
             [ showText p Typo.headline "Deltakere"
             , visAktivitetDeltakere model
@@ -309,6 +318,7 @@ visSkoleDropdown selectedSkoleId model dropdownStateSkole =
         [ Html.map SkoleDropdown (Dropdown.view dropdownConfigSkole dropdownStateSkole model selectedSkoleId)
         ]
 
+
 visAktivitetstype : Model -> Aktivitet -> Html Msg
 visAktivitetstype model aktivitet =
     case model.appMetadata of
@@ -333,6 +343,7 @@ visAktivitetstypeDropdown selectedAktivitetstypeId model dropdownStateAktivitets
     span []
         [ Html.map AktivitetstypeDropdown (Dropdown.view dropdownConfigAktivitetstype dropdownStateAktivitetstype model selectedAktivitetstypeId)
         ]
+
 
 visAktivitetSuksess : Model -> Aktivitet -> Html Msg
 visAktivitetSuksess model aktivitet =
@@ -374,6 +385,7 @@ visAktivitetSuksess model aktivitet =
             []
         , showText p Typo.menu "Skole"
         , visSkole model aktivitet
+
         -- , Textfield.render Mdl
         --     [ 4 ]
         --     model.mdl
@@ -400,6 +412,7 @@ visAktivitetSuksess model aktivitet =
         , visAktivitetstype model aktivitet
         ]
 
+
 visAktivitetDeltakere : Model -> Html Msg
 visAktivitetDeltakere model =
     case model.deltakere of
@@ -417,12 +430,14 @@ visAktivitetDeltakere model =
         Success data ->
             visAktivitetDeltakereSuksess model data
 
+
 visAktivitetDeltakereSuksess : Model -> List Deltaker -> Html Msg
 visAktivitetDeltakereSuksess model deltakere =
     Lists.ul [ css "width" "100%" ]
         (deltakere
             |> List.map (visAktivitetDeltaker model)
         )
+
 
 visAktivitetDeltaker : Model -> Deltaker -> Html Msg
 visAktivitetDeltaker model deltaker =
@@ -432,8 +447,9 @@ visAktivitetDeltaker model deltaker =
                 [ k ]
                 model.mdl
                 [ Button.raised
-                  -- , Button.accent |> when (Set.member k model.toggles)
-                  -- , Options.onClick (SelectAnsatt ansattId)
+
+                -- , Button.accent |> when (Set.member k model.toggles)
+                -- , Options.onClick (SelectAnsatt ansattId)
                 ]
                 [ text "Detaljer" ]
     in
@@ -450,7 +466,7 @@ visAktivitetDeltaker model deltaker =
                 ]
                 [ text <| String.left 1 deltaker.utdanningsprogramNavn ]
             , Lists.content []
-                [ Options.span [] [ text <| deltaker.aktivitetNavn ++ " - " ++ deltaker.trinnNavn ++ " - " ++ deltaker.fagNavn ++  " (" ++ (toString deltaker.timer) ++ " skoletimer )" ]
+                [ Options.span [] [ text <| deltaker.aktivitetNavn ++ " - " ++ deltaker.trinnNavn ++ " - " ++ deltaker.fagNavn ++ " (" ++ (toString deltaker.timer) ++ " skoletimer )" ]
                 , Lists.subtitle [ css "width" "80%" ] [ text deltaker.kompetansemaal ]
                 ]
             , Lists.content2 []
@@ -459,6 +475,7 @@ visAktivitetDeltaker model deltaker =
                     ]
                 ]
             ]
+
 
 dropdownConfigSkole : Dropdown.Config Msg Skole
 dropdownConfigSkole =
@@ -471,6 +488,7 @@ dropdownConfigSkole =
         |> Dropdown.withSelectedClass "bold"
         |> Dropdown.withSelectedStyles [ ( "color", "black" ) ]
         |> Dropdown.withTriggerClass "col-4 border bg-white p1"
+
 
 dropdownConfigAktivitetstype : Dropdown.Config Msg AktivitetsType
 dropdownConfigAktivitetstype =

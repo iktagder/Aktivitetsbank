@@ -437,8 +437,9 @@ visAktivitet model aktivitet =
                 [ k ]
                 model.mdl
                 [ Button.raised
-                  -- , Button.accent |> when (Set.member k model.toggles)
-                  -- , Options.onClick (SelectAnsatt ansattId)
+
+                -- , Button.accent |> when (Set.member k model.toggles)
+                -- , Options.onClick (SelectAnsatt ansattId)
                 ]
                 [ text "Detaljer" ]
     in

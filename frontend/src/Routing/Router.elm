@@ -37,12 +37,14 @@ styles =
     }\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D
    """
 
-type Page =
-    AktiviteterPage Aktiviteter.Model
+
+type Page
+    = AktiviteterPage Aktiviteter.Model
     | AktivitetPage Aktivitet.Model
     | AktivitetOpprettPage AktivitetOpprett.Model
     | DeltakerOpprettPage DeltakerOpprett.Model
     | NotFoundPage
+
 
 type alias Model =
     { mdl : Material.Model
@@ -53,11 +55,13 @@ type alias Model =
     , apiEndpoint : String
     }
 
-type PageMsg =
-      AktiviteterMsg Aktiviteter.Msg
+
+type PageMsg
+    = AktiviteterMsg Aktiviteter.Msg
     | AktivitetMsg Aktivitet.Msg
     | AktivitetOpprettMsg AktivitetOpprett.Msg
     | DeltakerOpprettMsg DeltakerOpprett.Msg
+
 
 type Msg
     = Mdl (Material.Msg Msg)
@@ -73,7 +77,8 @@ init location apiEndpoint =
         route =
             parseLocation location
 
-        (pageModel, pageCmd) = urlUpdate apiEndpoint route
+        ( pageModel, pageCmd ) =
+            urlUpdate apiEndpoint route
     in
         ( { mdl = Material.model
           , selectedTab = 0
@@ -110,7 +115,9 @@ update msg model =
 
                 route =
                     parseLocation location
-                (pageModel, pageCmd) = urlUpdate model.apiEndpoint route
+
+                ( pageModel, pageCmd ) =
+                    urlUpdate model.apiEndpoint route
             in
                 ( { model | route = route, currentPage = pageModel, snackbar = snackModel }
                 , Cmd.batch
@@ -125,108 +132,132 @@ update msg model =
             , Navigation.newUrl (reverseRoute route)
             , NoUpdate
             )
+
         PagesMsg pageMsg ->
             updatePage model pageMsg
 
 
-urlUpdate : String -> Route -> (Page, Cmd Msg)
+urlUpdate : String -> Route -> ( Page, Cmd Msg )
 urlUpdate apiEndpoint route =
     let
-        (pageModel, pageCmd) =
+        ( pageModel, pageCmd ) =
             case route of
                 RouteAktivitetsDetalj id ->
                     let
-                        (model_, cmd_) = Aktivitet.init apiEndpoint id
+                        ( model_, cmd_ ) =
+                            Aktivitet.init apiEndpoint id
                     in
-                        (AktivitetPage model_, Cmd.map AktivitetMsg cmd_)
+                        ( AktivitetPage model_, Cmd.map AktivitetMsg cmd_ )
+
                 RouteAktivitetsListe ->
                     let
-                        (model_, cmd_) = Aktiviteter.init apiEndpoint
+                        ( model_, cmd_ ) =
+                            Aktiviteter.init apiEndpoint
                     in
-                        (AktiviteterPage model_, Cmd.map AktiviteterMsg cmd_)
+                        ( AktiviteterPage model_, Cmd.map AktiviteterMsg cmd_ )
+
                 RouteAktivitetOpprett ->
                     let
-                        (model_, cmd_) = AktivitetOpprett.init apiEndpoint
+                        ( model_, cmd_ ) =
+                            AktivitetOpprett.init apiEndpoint
                     in
-                        (AktivitetOpprettPage model_, Cmd.map AktivitetOpprettMsg cmd_)
+                        ( AktivitetOpprettPage model_, Cmd.map AktivitetOpprettMsg cmd_ )
+
                 RouteDeltakerOpprett id ->
                     let
-                        (model_, cmd_) = DeltakerOpprett.init apiEndpoint id
+                        ( model_, cmd_ ) =
+                            DeltakerOpprett.init apiEndpoint id
                     in
-                        (DeltakerOpprettPage model_, Cmd.map DeltakerOpprettMsg cmd_)
-                _ ->
-                    (NotFoundPage, Cmd.none)
-    in
-        (pageModel, Cmd.map PagesMsg pageCmd)
+                        ( DeltakerOpprettPage model_, Cmd.map DeltakerOpprettMsg cmd_ )
 
-updatePage : Model -> PageMsg -> (Model, Cmd Msg, TacoUpdate)
+                _ ->
+                    ( NotFoundPage, Cmd.none )
+    in
+        ( pageModel, Cmd.map PagesMsg pageCmd )
+
+
+updatePage : Model -> PageMsg -> ( Model, Cmd Msg, TacoUpdate )
 updatePage model msg =
     let
-      (newPageModel, pageMsg, sharedMsg) =
+        ( newPageModel, pageMsg, sharedMsg ) =
             case msg of
                 AktiviteterMsg msg_ ->
                     case model.currentPage of
                         AktiviteterPage pageModel ->
                             updateAktiviteter model pageModel msg_
+
                         _ ->
-                            (model.currentPage, Cmd.none, NoSharedMsg)
+                            ( model.currentPage, Cmd.none, NoSharedMsg )
 
                 AktivitetMsg msg_ ->
                     case model.currentPage of
                         AktivitetPage pageModel ->
                             updateAktivitet model pageModel msg_
+
                         _ ->
-                            (model.currentPage, Cmd.none, NoSharedMsg)
+                            ( model.currentPage, Cmd.none, NoSharedMsg )
+
                 AktivitetOpprettMsg msg_ ->
                     case model.currentPage of
                         AktivitetOpprettPage pageModel ->
                             updateAktivitetOpprett model pageModel msg_
+
                         _ ->
-                            (model.currentPage, Cmd.none, NoSharedMsg)
+                            ( model.currentPage, Cmd.none, NoSharedMsg )
+
                 DeltakerOpprettMsg msg_ ->
                     case model.currentPage of
                         DeltakerOpprettPage pageModel ->
                             updateDeltakerOpprett model pageModel msg_
+
                         _ ->
-                            (model.currentPage, Cmd.none, NoSharedMsg)
+                            ( model.currentPage, Cmd.none, NoSharedMsg )
     in
-        ({model | currentPage = newPageModel}, Cmd.map PagesMsg pageMsg, NoUpdate)
-        |> addSharedMsgToUpdate sharedMsg
+        ( { model | currentPage = newPageModel }, Cmd.map PagesMsg pageMsg, NoUpdate )
+            |> addSharedMsgToUpdate sharedMsg
+
 
 updateAktiviteter : Model -> Aktiviteter.Model -> Aktiviteter.Msg -> ( Page, Cmd PageMsg, SharedMsg )
 updateAktiviteter model aktiviteterModel aktiviteterMsg =
     let
-        ( nextAktiviteterModel, aktiviteterCmd, sharedMsg ) = Aktiviteter.update aktiviteterMsg aktiviteterModel
+        ( nextAktiviteterModel, aktiviteterCmd, sharedMsg ) =
+            Aktiviteter.update aktiviteterMsg aktiviteterModel
     in
         ( AktiviteterPage nextAktiviteterModel
         , Cmd.map AktiviteterMsg aktiviteterCmd
         , sharedMsg
         )
 
+
 updateAktivitet : Model -> Aktivitet.Model -> Aktivitet.Msg -> ( Page, Cmd PageMsg, SharedMsg )
 updateAktivitet model aktivitetModel aktivitetMsg =
     let
-        ( nextAktivitetModel, aktivitetCmd, sharedMsg ) = Aktivitet.update aktivitetMsg aktivitetModel
+        ( nextAktivitetModel, aktivitetCmd, sharedMsg ) =
+            Aktivitet.update aktivitetMsg aktivitetModel
     in
         ( AktivitetPage nextAktivitetModel
         , Cmd.map AktivitetMsg aktivitetCmd
         , sharedMsg
         )
 
+
 updateAktivitetOpprett : Model -> AktivitetOpprett.Model -> AktivitetOpprett.Msg -> ( Page, Cmd PageMsg, SharedMsg )
 updateAktivitetOpprett model aktivitetOpprettModel aktivitetOpprettMsg =
     let
-        ( nextAktivitetOpprettModel, aktivitetOpprettCmd, sharedMsg ) = AktivitetOpprett.update aktivitetOpprettMsg aktivitetOpprettModel
+        ( nextAktivitetOpprettModel, aktivitetOpprettCmd, sharedMsg ) =
+            AktivitetOpprett.update aktivitetOpprettMsg aktivitetOpprettModel
     in
         ( AktivitetOpprettPage nextAktivitetOpprettModel
         , Cmd.map AktivitetOpprettMsg aktivitetOpprettCmd
         , sharedMsg
         )
 
+
 updateDeltakerOpprett : Model -> DeltakerOpprett.Model -> DeltakerOpprett.Msg -> ( Page, Cmd PageMsg, SharedMsg )
 updateDeltakerOpprett model deltakerOpprettModel deltakerOpprettMsg =
     let
-        ( nextDeltakerOpprettModel, deltakerOpprettCmd, sharedMsg ) = DeltakerOpprett.update deltakerOpprettMsg deltakerOpprettModel
+        ( nextDeltakerOpprettModel, deltakerOpprettCmd, sharedMsg ) =
+            DeltakerOpprett.update deltakerOpprettMsg deltakerOpprettModel
     in
         ( DeltakerOpprettPage nextDeltakerOpprettModel
         , Cmd.map DeltakerOpprettMsg deltakerOpprettCmd
@@ -312,6 +343,7 @@ type alias MenuItem =
     , iconName : String
     , route : Types.Route
     }
+
 
 menuItems : List MenuItem
 menuItems =
@@ -403,9 +435,7 @@ pageView taco model =
                     h1 [] [ text "404 :(" ]
     in
         view
-        |> Html.map PagesMsg
-
-
+            |> Html.map PagesMsg
 
 
 helpDialog : Model -> Html Msg
