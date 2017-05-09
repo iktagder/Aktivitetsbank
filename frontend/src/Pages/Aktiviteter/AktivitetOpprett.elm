@@ -279,17 +279,17 @@ showText elementType displayStyle text_ =
 view : Taco -> Model -> Html Msg
 view taco model =
     grid []
-        [ cell
-            [ size All 12
-            ]
-            [ Options.span [ Typo.headline ] [ text "Opprett aktivitet" ]
-            ]
-        , cell
-            [ size All 12
-            , Elevation.e2
-            ]
-            [ visOpprettAktivitet model model.aktivitet
-            ]
+        (visHeading
+            :: visOpprettAktivitet model model.aktivitet
+        )
+
+
+visHeading : Grid.Cell Msg
+visHeading =
+    cell
+        [ size All 12
+        ]
+        [ Options.span [ Typo.headline ] [ text "Opprett aktivitet" ]
         ]
 
 
@@ -345,64 +345,78 @@ visAktivitetstypeDropdown selectedAktivitetstypeId model dropdownStateAktivitets
         ]
 
 
-visOpprettAktivitet : Model -> AktivitetEdit -> Html Msg
+visOpprettAktivitet : Model -> AktivitetEdit -> List (Grid.Cell Msg)
 visOpprettAktivitet model aktivitet =
-    Options.div
-        []
-        [ Textfield.render Mdl
-            [ 1 ]
-            model.mdl
-            [ Textfield.label "Navn"
-            , Textfield.autofocus
-            , Textfield.floatingLabel
-            , Textfield.text_
-            , Textfield.value <| Maybe.withDefault "" aktivitet.navn
-            , Options.onInput EndretAktivitetsNavn
-            ]
-            []
-        , Textfield.render Mdl
-            [ 2 ]
-            model.mdl
-            [ Textfield.label "Beskrivelse"
-            , Textfield.floatingLabel
-            , Textfield.text_
-            , Textfield.textarea
-            , Textfield.rows 4
-            , Textfield.value <| Maybe.withDefault "" aktivitet.beskrivelse
-            , Options.onInput EndretAktivitetsBeskrivelse
-            , cs "text-area"
-            ]
-            []
-        , Textfield.render Mdl
-            [ 3 ]
-            model.mdl
-            [ Textfield.label "Omfang"
-            , Textfield.floatingLabel
-            , Textfield.text_
-            , Textfield.value <| Maybe.withDefault "0" <| Maybe.map toString aktivitet.omfangTimer
-            , Options.onInput EndretAktivitetsOmfangTimer
-            ]
-            []
-        , showText p Typo.menu "Skole"
-        , visSkole model aktivitet
-        , showText p Typo.menu "Aktivitetstype"
-        , visAktivitetstype model aktivitet
-        , Options.div [] [ showText p Typo.subhead model.statusText ]
-        , Button.render Mdl
-            [ 10, 1 ]
-            model.mdl
-            [ Button.ripple
-            , Button.colored
-            , Button.raised
-            , Options.when (not model.visLagreKnapp) Button.disabled
-            , Options.onClick (OpprettNyAktivitet)
-            , css "float" "right"
-
-            -- , css "margin-left" "1em"
-            -- , Options.onClick (SearchAnsatt "Test")
-            ]
-            [ text "Lagre" ]
+    [ cell
+        [ size All 6
+        , Elevation.e2
         ]
+        [ Options.div
+            []
+            [ Textfield.render Mdl
+                [ 1 ]
+                model.mdl
+                [ Textfield.label "Navn"
+                , Textfield.autofocus
+                , Textfield.floatingLabel
+                , Textfield.text_
+                , Textfield.value <| Maybe.withDefault "" aktivitet.navn
+                , Options.onInput EndretAktivitetsNavn
+                ]
+                []
+            , Textfield.render Mdl
+                [ 2 ]
+                model.mdl
+                [ Textfield.label "Beskrivelse"
+                , Textfield.floatingLabel
+                , Textfield.text_
+                , Textfield.textarea
+                , Textfield.rows 4
+                , Textfield.value <| Maybe.withDefault "" aktivitet.beskrivelse
+                , Options.onInput EndretAktivitetsBeskrivelse
+                , cs "text-area"
+                ]
+                []
+            , Options.div [] [ showText p Typo.subhead model.statusText ]
+            , Button.render Mdl
+                [ 10, 1 ]
+                model.mdl
+                [ Button.ripple
+                , Button.colored
+                , Button.raised
+                , Options.when (not model.visLagreKnapp) Button.disabled
+                , Options.onClick (OpprettNyAktivitet)
+                , css "float" "right"
+
+                -- , css "margin-left" "1em"
+                -- , Options.onClick (SearchAnsatt "Test")
+                ]
+                [ text "Lagre" ]
+            ]
+        ]
+    , cell
+        [ size All 6
+        , Elevation.e2
+        ]
+        [ Options.div
+            []
+            [ Textfield.render Mdl
+                [ 3 ]
+                model.mdl
+                [ Textfield.label "Omfang"
+                , Textfield.floatingLabel
+                , Textfield.text_
+                , Textfield.value <| Maybe.withDefault "0" <| Maybe.map toString aktivitet.omfangTimer
+                , Options.onInput EndretAktivitetsOmfangTimer
+                ]
+                []
+            , showText p Typo.menu "Skole"
+            , visSkole model aktivitet
+            , showText p Typo.menu "Aktivitetstype"
+            , visAktivitetstype model aktivitet
+            ]
+        ]
+    ]
 
 
 dropdownConfigSkole : Dropdown.Config Msg Skole
