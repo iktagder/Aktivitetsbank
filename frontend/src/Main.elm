@@ -169,7 +169,7 @@ updateUserInfo model webData =
                         Http.Timeout ->
                             (Cmd.none, "Nettverksfeil - timet ut", model.loadUserRetryCount)
             in
-                (Debug.log "UpdateUserInfo feil" {model | loadUserRetryCount = retryCount}, cmd)
+                ({model | loadUserRetryCount = retryCount}, cmd)
 
 
             -- Debug.crash "OMG CANT EVEN DOWNLOAD."
