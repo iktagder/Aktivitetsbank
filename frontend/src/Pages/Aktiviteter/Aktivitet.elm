@@ -479,12 +479,18 @@ visAktivitetDeltakereSuksess model deltakere =
         , Elevation.e0
 
         -- , Options.css "padding" "16px 32px"
-        , Options.css "display" "flex"
-        , Options.css "flex-direction" "column"
+        -- , Options.css "display" "flex"
+        -- , Options.css "flex-direction" "column"
+        -- , Options.css "float" "left"
+        , css "flex-direction" "row"
+        , css "align-items" "stretch"
+        , css "justify-content" "flex-start"
+        , css "align-content" "stretch"
 
         -- , Options.css "align-items" "left"
         ]
-        [ Button.render Mdl
+        [ Options.span [ Typo.menu, Options.css "float" "left" ] [ text "Legg til deltaker" ]
+        , Button.render Mdl
             [ 0, 4, 2 ]
             model.mdl
             [ Button.fab
@@ -493,7 +499,6 @@ visAktivitetDeltakereSuksess model deltakere =
             , Options.css "float" "left"
             ]
             [ Icon.i "add" ]
-        , Options.span [ Typo.menu ] [ text "Legg til deltaker" ]
         ]
     ]
 
