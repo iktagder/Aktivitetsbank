@@ -43,12 +43,16 @@ type alias AppMetadata =
     , utdanningsprogrammer : List Utdanningsprogram
     }
 
+
 type alias NyAktivitet =
     { id : String
     }
+
+
 type alias NyDeltaker =
     { id : String
     }
+
 
 type alias AktivitetsType =
     { id : String
@@ -69,6 +73,7 @@ type alias Aktivitet =
     , aktivitetsType : Maybe AktivitetsType
     }
 
+
 type alias AktivitetEdit =
     { id : Maybe String
     , navn : Maybe String
@@ -78,6 +83,7 @@ type alias AktivitetEdit =
     , aktivitetsType : Maybe AktivitetsType
     }
 
+
 type alias AktivitetGyldigNy =
     { navn : String
     , beskrivelse : String
@@ -85,6 +91,7 @@ type alias AktivitetGyldigNy =
     , skole : Skole
     , aktivitetsType : AktivitetsType
     }
+
 
 type alias Deltaker =
     { id : String
@@ -103,6 +110,7 @@ type alias Deltaker =
     , kompetansemaal : String
     }
 
+
 type alias DeltakerEdit =
     { id : Maybe String
     , aktivitet : Maybe Aktivitet
@@ -113,6 +121,7 @@ type alias DeltakerEdit =
     , kompetansemaal : Maybe String
     }
 
+
 type alias DeltakerGyldigNy =
     { aktivitet : Aktivitet
     , utdanningsprogram : Utdanningsprogram
@@ -122,9 +131,11 @@ type alias DeltakerGyldigNy =
     , kompetansemaal : String
     }
 
+
 type Route
     = RouteAktivitetsListe
     | RouteAktivitetsDetalj String
+    | RouteAktivitetEndre String
     | RouteAktivitetOpprett
     | RouteDeltakerOpprett String
     | NotFoundRoute
@@ -141,6 +152,7 @@ type SharedMsg
     | NoSharedMsg
     | NavigateToAktivitet String
     | NavigerTilAktivitetOpprett
+    | NavigerTilAktivitetEndre String
     | NavigerTilDeltakerOpprett String
     | NavigerTilHjem
 

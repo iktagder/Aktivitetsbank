@@ -11,6 +11,7 @@ import Pages.Aktiviteter.Aktiviteter as Aktiviteter
 import Pages.Aktiviteter.Aktivitet as Aktivitet
 import Pages.Aktiviteter.AktivitetOpprett as AktivitetOpprett
 import Pages.Aktiviteter.DeltakerOpprett as DeltakerOpprett
+import Pages.Aktiviteter.AktivitetEndre as AktivitetEndre
 import Material
 import Material.Layout as Layout
 import Material.Snackbar as Snackbar
@@ -43,6 +44,7 @@ type Page
     = AktiviteterPage Aktiviteter.Model
     | AktivitetPage Aktivitet.Model
     | AktivitetOpprettPage AktivitetOpprett.Model
+    | AktivitetEndrePage AktivitetEndre.Model
     | DeltakerOpprettPage DeltakerOpprett.Model
     | NotFoundPage
 
@@ -61,6 +63,7 @@ type PageMsg
     = AktiviteterMsg Aktiviteter.Msg
     | AktivitetMsg Aktivitet.Msg
     | AktivitetOpprettMsg AktivitetOpprett.Msg
+    | AktivitetEndreMsg AktivitetEndre.Msg
     | DeltakerOpprettMsg DeltakerOpprett.Msg
 
 
@@ -164,6 +167,13 @@ urlUpdate apiEndpoint route =
                     in
                         ( AktivitetOpprettPage model_, Cmd.map AktivitetOpprettMsg cmd_ )
 
+                RouteAktivitetEndre id ->
+                    let
+                        ( model_, cmd_ ) =
+                            AktivitetEndre.init apiEndpoint id
+                    in
+                        ( AktivitetEndrePage model_, Cmd.map AktivitetEndreMsg cmd_ )
+
                 RouteDeltakerOpprett id ->
                     let
                         ( model_, cmd_ ) =
@@ -202,6 +212,14 @@ updatePage model msg =
                     case model.currentPage of
                         AktivitetOpprettPage pageModel ->
                             updateAktivitetOpprett model pageModel msg_
+
+                        _ ->
+                            ( model.currentPage, Cmd.none, NoSharedMsg )
+
+                AktivitetEndreMsg msg_ ->
+                    case model.currentPage of
+                        AktivitetEndrePage pageModel ->
+                            updateAktivitetEndre model pageModel msg_
 
                         _ ->
                             ( model.currentPage, Cmd.none, NoSharedMsg )
@@ -254,6 +272,18 @@ updateAktivitetOpprett model aktivitetOpprettModel aktivitetOpprettMsg =
         )
 
 
+updateAktivitetEndre : Model -> AktivitetEndre.Model -> AktivitetEndre.Msg -> ( Page, Cmd PageMsg, SharedMsg )
+updateAktivitetEndre model aktivitetEndreModel aktivitetEndreMsg =
+    let
+        ( nextAktivitetEndreModel, aktivitetEndreCmd, sharedMsg ) =
+            AktivitetEndre.update aktivitetEndreMsg aktivitetEndreModel
+    in
+        ( AktivitetEndrePage nextAktivitetEndreModel
+        , Cmd.map AktivitetEndreMsg aktivitetEndreCmd
+        , sharedMsg
+        )
+
+
 updateDeltakerOpprett : Model -> DeltakerOpprett.Model -> DeltakerOpprett.Msg -> ( Page, Cmd PageMsg, SharedMsg )
 updateDeltakerOpprett model deltakerOpprettModel deltakerOpprettMsg =
     let
@@ -290,6 +320,9 @@ addSharedMsgToUpdate sharedMsg ( model, msg, tacoUpdate ) =
 
         NavigerTilDeltakerOpprett id ->
             ( model, Navigation.newUrl <| reverseRoute (RouteDeltakerOpprett id), tacoUpdate )
+
+        NavigerTilAktivitetEndre id ->
+            ( model, Navigation.newUrl <| reverseRoute (RouteAktivitetEndre id), tacoUpdate )
 
         NavigerTilHjem ->
             ( model, Navigation.newUrl <| reverseRoute (RouteAktivitetsListe), tacoUpdate )
@@ -427,6 +460,10 @@ pageView taco model =
                 AktivitetOpprettPage pageModel ->
                     AktivitetOpprett.view taco pageModel
                         |> Html.map AktivitetOpprettMsg
+
+                AktivitetEndrePage pageModel ->
+                    AktivitetEndre.view taco pageModel
+                        |> Html.map AktivitetEndreMsg
 
                 DeltakerOpprettPage pageModel ->
                     DeltakerOpprett.vis taco pageModel

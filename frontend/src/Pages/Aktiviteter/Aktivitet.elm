@@ -25,6 +25,7 @@ type alias Model =
     { mdl : Material.Model
     , apiEndpoint : String
     , statusText : String
+    , aktivitetId : String
     , aktivitet : WebData Aktivitet
     , deltakere : WebData (List Deltaker)
     , appMetadata : WebData AppMetadata
@@ -36,6 +37,7 @@ type alias Model =
 type Msg
     = Mdl (Material.Msg Msg)
     | VisAktivitetDeltakerDetalj String
+    | VisAktivitetEndre String
     | AppMetadataResponse (WebData AppMetadata)
     | AktivitetResponse (WebData Aktivitet)
     | AktivitetDeltakereResponse (WebData (List Deltaker))
@@ -52,6 +54,7 @@ init apiEndpoint id =
     ( { mdl = Material.model
       , apiEndpoint = apiEndpoint
       , statusText = ""
+      , aktivitetId = id
       , aktivitet = RemoteData.NotAsked
       , deltakere = RemoteData.NotAsked
       , appMetadata = RemoteData.NotAsked
@@ -148,6 +151,9 @@ update msg model =
         VisAktivitetDeltakerDetalj id ->
             ( model, Cmd.none, NoSharedMsg )
 
+        VisAktivitetEndre id ->
+            ( model, Cmd.none, NavigerTilAktivitetEndre id )
+
         VisDeltakerOpprett ->
             let
                 sharedMsg =
@@ -243,6 +249,15 @@ visHeading model =
             , Options.css "float" "right"
             ]
             [ Icon.i "content_copy" ]
+        , Button.render Mdl
+            [ 199, 3 ]
+            model.mdl
+            [ Button.fab
+            , Button.ripple
+            , Options.onClick <| VisAktivitetEndre model.aktivitetId
+            , Options.css "float" "right"
+            ]
+            [ Icon.i "mode_edit" ]
         , Options.span [ Typo.headline ] [ text "Aktivitet detaljer" ]
         ]
 

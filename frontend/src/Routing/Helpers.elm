@@ -17,6 +17,9 @@ reverseRoute route =
         RouteAktivitetsDetalj id ->
             "#/aktiviteter/" ++ id
 
+        RouteAktivitetEndre id ->
+            "#/endreaktivitet/" ++ id
+
         RouteDeltakerOpprett id ->
             "#/opprettdeltaker/" ++ id
 
@@ -32,6 +35,7 @@ routeParser =
         , Url.map RouteAktivitetOpprett (Url.s "opprettaktivitet")
         , Url.map RouteAktivitetsDetalj (Url.s "aktiviteter" </> Url.string)
         , Url.map RouteDeltakerOpprett (Url.s "opprettdeltaker" </> Url.string)
+        , Url.map RouteAktivitetEndre (Url.s "endreaktivitet" </> Url.string)
         ]
 
 
