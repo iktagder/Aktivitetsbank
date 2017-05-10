@@ -225,7 +225,7 @@ visHeading model =
         [ size All 12
         ]
         [ Button.render Mdl
-            [ 0 ]
+            [ 199, 1 ]
             model.mdl
             [ Button.fab
             , Button.ripple
@@ -234,7 +234,7 @@ visHeading model =
             ]
             [ Icon.i "home" ]
         , Button.render Mdl
-            [ 0 ]
+            [ 199, 2 ]
             model.mdl
             [ Button.fab
             , Button.ripple
@@ -529,7 +529,6 @@ visAktivitetDeltakerTabell model deltakere =
             ]
         , Table.tbody []
             (deltakere
-                |> List.sortBy .trinnNavn
                 |> List.indexedMap (\idx item -> visAktivitetDeltakerTabellRad idx item model.mdl)
             )
         ]

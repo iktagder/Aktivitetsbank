@@ -23,6 +23,7 @@ type alias Model =
     , statusText : String
     , visLagreKnapp : Bool
     , appMetadata : WebData AppMetadata
+    , aktivitetId : String
     , aktivitet : WebData Aktivitet
     , deltaker : DeltakerEdit
     , dropdownStateUtdanningsprogram : Dropdown.State
@@ -45,6 +46,7 @@ type Msg
     | EndretTimer String
     | OpprettNyDeltaker
     | NyDeltakerRespons (Result Error NyDeltaker)
+    | NavigerTilbake
 
 
 init : String -> String -> ( Model, Cmd Msg )
@@ -54,6 +56,7 @@ init apiEndpoint id =
       , statusText = ""
       , visLagreKnapp = False
       , appMetadata = RemoteData.NotAsked
+      , aktivitetId = id
       , aktivitet = RemoteData.NotAsked
       , dropdownStateUtdanningsprogram = Dropdown.newState "1"
       , dropdownStateTrinn = Dropdown.newState "1"
@@ -312,6 +315,9 @@ update msg model =
             in
                 ( { model | statusText = statusText }, cmd, NoSharedMsg )
 
+        NavigerTilbake ->
+            ( model, Cmd.none, NavigateToAktivitet model.aktivitetId )
+
 
 valideringsInfo : DeltakerEdit -> ( Bool, String )
 valideringsInfo deltaker =
@@ -349,7 +355,7 @@ vis taco model =
             ]
         , cell
             [ size All 12
-            , Elevation.e2
+            , Elevation.e0
             ]
             [ visOpprettDeltaker model model.deltaker
             ]
@@ -447,10 +453,22 @@ visOpprettDeltaker model deltaker =
             model.mdl
             [ Button.ripple
             , Button.colored
+            , Button.raised
+            , Options.onClick (NavigerTilbake)
+            , css "float" "left"
+            , Options.css "margin" "6px 6px"
+            ]
+            [ text "Avbryt" ]
+        , Button.render Mdl
+            [ 10, 1 ]
+            model.mdl
+            [ Button.ripple
+            , Button.colored
             , Options.when (not model.visLagreKnapp) Button.disabled
             , Button.raised
             , Options.onClick (OpprettNyDeltaker)
-            , css "float" "right"
+            , css "float" "left"
+            , Options.css "margin" "6px 6px"
 
             -- , css "margin-left" "1em"
             -- , Options.onClick (SearchAnsatt "Test")

@@ -41,6 +41,7 @@ type Msg
     | EndretAktivitetsOmfangTimer String
     | OpprettNyAktivitet
     | NyAktivitetRespons (Result Error NyAktivitet)
+    | NavigerHjem
 
 
 init : String -> ( Model, Cmd Msg )
@@ -250,6 +251,9 @@ update msg model =
             in
                 ( { model | statusText = statusText }, cmd, NoSharedMsg )
 
+        NavigerHjem ->
+            ( model, Cmd.none, NavigerTilHjem )
+
 
 valideringsInfo : AktivitetEdit -> ( Bool, String )
 valideringsInfo aktivitet =
@@ -367,9 +371,21 @@ visOpprettAktivitet model aktivitet =
             [ Button.ripple
             , Button.colored
             , Button.raised
+            , Options.onClick (NavigerHjem)
+            , css "float" "left"
+            , Options.css "margin" "6px 6px"
+            ]
+            [ text "Avbryt" ]
+        , Button.render Mdl
+            [ 10, 1 ]
+            model.mdl
+            [ Button.ripple
+            , Button.colored
+            , Button.raised
             , Options.when (not model.visLagreKnapp) Button.disabled
             , Options.onClick (OpprettNyAktivitet)
             , css "float" "left"
+            , Options.css "margin" "6px 6px"
 
             -- , css "margin-left" "1em"
             -- , Options.onClick (SearchAnsatt "Test")
