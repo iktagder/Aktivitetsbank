@@ -1,6 +1,7 @@
 module Routing.Router exposing (..)
 
 import Material.Snackbar as Snackbar
+import Material.Options as Options exposing (when, css, cs, Style, onClick)
 import Navigation exposing (Location)
 import Html exposing (..)
 import Html.Attributes exposing (href)
@@ -328,7 +329,7 @@ viewHeader taco model =
         [ Color.background <| Color.color Color.Grey Color.S100
         , Color.text <| Color.color Color.Grey Color.S900
         ]
-        [ Layout.title [] [ text "VAF - Aktivitetsbank" ]
+        [ Layout.title [ Options.onClick (NavigateTo RouteAktivitetsListe), cs "vis-navigering" ] [ text "VAF - Aktivitetsbank" ]
         , Layout.spacer
         , Layout.navigation []
             [ Layout.link
