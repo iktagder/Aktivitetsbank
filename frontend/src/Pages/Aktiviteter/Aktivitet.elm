@@ -288,9 +288,9 @@ visAktivitet model =
 visAktivitetSuksess : Model -> Aktivitet -> List (Grid.Cell Msg)
 visAktivitetSuksess model aktivitet =
     [ cell
-        [ size All 6
+        [ size All 4
         , Elevation.e0
-        , Options.css "padding" "16px 32px"
+        , Options.css "padding" "0px 32px"
 
         -- , Options.css "display" "flex"
         -- , Options.css "flex-direction" "column"
@@ -299,33 +299,12 @@ visAktivitetSuksess model aktivitet =
         [ Options.div
             [ css "width" "100%"
             ]
-            [ Textfield.render Mdl
-                [ 1 ]
-                model.mdl
-                [ Textfield.label "Navn"
-                , Textfield.floatingLabel
-                , Textfield.text_
-                , Textfield.disabled
-                , Textfield.value <| aktivitet.navn
-                ]
-                []
-            , Textfield.render Mdl
-                [ 2 ]
-                model.mdl
-                [ Textfield.label "Beskrivelse"
-                , Textfield.floatingLabel
-                , Textfield.text_
-                , Textfield.disabled
-                , Textfield.textarea
-                , Textfield.rows 4
-                , Textfield.value <| aktivitet.beskrivelse
-                , cs "text-area"
-                ]
-                []
+            [ Options.styled p [ Typo.headline ] [ text aktivitet.navn ]
+            , Options.styled p [ Typo.subhead ] [ text aktivitet.beskrivelse ]
             ]
         ]
     , cell
-        [ size All 6
+        [ size All 8
         , Elevation.e0
         , Options.css "padding" "16px 32px"
 
@@ -336,20 +315,18 @@ visAktivitetSuksess model aktivitet =
         [ Options.div
             [ css "width" "100%"
             ]
-            [ Textfield.render Mdl
-                [ 3 ]
-                model.mdl
-                [ Textfield.label "Omfang"
-                , Textfield.floatingLabel
-                , Textfield.text_
-                , Textfield.disabled
-                , Textfield.value <| toString aktivitet.omfangTimer
+            [ p []
+                [ Options.styled span [ Typo.caption ] [ text "Klokketimer: " ]
+                , Options.styled span [ Typo.subhead ] [ text (toString aktivitet.omfangTimer) ]
                 ]
-                []
-            , showText p Typo.menu "Skole"
-            , visSkole model aktivitet
-            , showText p Typo.menu "Aktivitetstype"
-            , visAktivitetstype model aktivitet
+            , p []
+                [ Options.styled span [ Typo.caption ] [ text "Skole: " ]
+                , Options.styled span [ Typo.subhead ] [ text (aktivitet.skoleNavn) ]
+                ]
+            , p []
+                [ Options.styled span [ Typo.caption ] [ text "Aktivitetstype: " ]
+                , Options.styled span [ Typo.subhead ] [ text (aktivitet.aktivitetsTypeNavn) ]
+                ]
             ]
         ]
     ]
