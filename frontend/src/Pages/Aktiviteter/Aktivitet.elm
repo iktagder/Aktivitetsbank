@@ -467,12 +467,10 @@ visAktivitetDeltakereSuksess model deltakere =
     , cell
         [ size All 12
         , Elevation.e0
-        , Options.css "padding" "16px 32px"
+
+        -- , Options.css "padding" "16px 32px"
         ]
-        [ Lists.ul [ css "width" "100%" ]
-            (deltakere
-                |> List.map (visAktivitetDeltaker model)
-            )
+        [ visAktivitetDeltakerListe model deltakere
         ]
     , cell
         [ size All 12
@@ -496,6 +494,14 @@ visAktivitetDeltakereSuksess model deltakere =
         , Options.span [ Typo.menu ] [ text "Legg til deltaker" ]
         ]
     ]
+
+
+visAktivitetDeltakerListe : Model -> List Deltaker -> Html Msg
+visAktivitetDeltakerListe model deltakere =
+    Lists.ul [ css "width" "100%" ]
+        (deltakere
+            |> List.map (visAktivitetDeltaker model)
+        )
 
 
 visAktivitetDeltaker : Model -> Deltaker -> Html Msg
