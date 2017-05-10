@@ -293,58 +293,6 @@ visHeading =
         ]
 
 
-visSkole : Model -> AktivitetEdit -> Html Msg
-visSkole model aktivitet =
-    case model.appMetadata of
-        NotAsked ->
-            text "Initialising."
-
-        Loading ->
-            text "Loading."
-
-        Failure err ->
-            text ("Error: " ++ toString err)
-
-        Success data ->
-            visSkoleDropdown
-                aktivitet.skole
-                data.skoler
-                model.dropdownStateSkole
-
-
-visSkoleDropdown : Maybe Skole -> List Skole -> Dropdown.State -> Html Msg
-visSkoleDropdown selectedSkoleId model dropdownStateSkole =
-    span []
-        [ Html.map SkoleDropdown (Dropdown.view dropdownConfigSkole dropdownStateSkole model selectedSkoleId)
-        ]
-
-
-visAktivitetstype : Model -> AktivitetEdit -> Html Msg
-visAktivitetstype model aktivitet =
-    case model.appMetadata of
-        NotAsked ->
-            text "Initialising."
-
-        Loading ->
-            text "Loading."
-
-        Failure err ->
-            text ("Error: " ++ toString err)
-
-        Success data ->
-            visAktivitetstypeDropdown
-                aktivitet.aktivitetsType
-                data.aktivitetstyper
-                model.dropdownStateAktivitetstype
-
-
-visAktivitetstypeDropdown : Maybe AktivitetsType -> List AktivitetsType -> Dropdown.State -> Html Msg
-visAktivitetstypeDropdown selectedAktivitetstypeId model dropdownStateAktivitetstype =
-    span []
-        [ Html.map AktivitetstypeDropdown (Dropdown.view dropdownConfigAktivitetstype dropdownStateAktivitetstype model selectedAktivitetstypeId)
-        ]
-
-
 visOpprettAktivitet : Model -> AktivitetEdit -> List (Grid.Cell Msg)
 visOpprettAktivitet model aktivitet =
     [ cell
@@ -429,6 +377,58 @@ visOpprettAktivitet model aktivitet =
             [ text "Lagre" ]
         ]
     ]
+
+
+visSkole : Model -> AktivitetEdit -> Html Msg
+visSkole model aktivitet =
+    case model.appMetadata of
+        NotAsked ->
+            text "Initialising."
+
+        Loading ->
+            text "Loading."
+
+        Failure err ->
+            text ("Error: " ++ toString err)
+
+        Success data ->
+            visSkoleDropdown
+                aktivitet.skole
+                data.skoler
+                model.dropdownStateSkole
+
+
+visSkoleDropdown : Maybe Skole -> List Skole -> Dropdown.State -> Html Msg
+visSkoleDropdown selectedSkoleId model dropdownStateSkole =
+    span []
+        [ Html.map SkoleDropdown (Dropdown.view dropdownConfigSkole dropdownStateSkole model selectedSkoleId)
+        ]
+
+
+visAktivitetstype : Model -> AktivitetEdit -> Html Msg
+visAktivitetstype model aktivitet =
+    case model.appMetadata of
+        NotAsked ->
+            text "Initialising."
+
+        Loading ->
+            text "Loading."
+
+        Failure err ->
+            text ("Error: " ++ toString err)
+
+        Success data ->
+            visAktivitetstypeDropdown
+                aktivitet.aktivitetsType
+                data.aktivitetstyper
+                model.dropdownStateAktivitetstype
+
+
+visAktivitetstypeDropdown : Maybe AktivitetsType -> List AktivitetsType -> Dropdown.State -> Html Msg
+visAktivitetstypeDropdown selectedAktivitetstypeId model dropdownStateAktivitetstype =
+    span []
+        [ Html.map AktivitetstypeDropdown (Dropdown.view dropdownConfigAktivitetstype dropdownStateAktivitetstype model selectedAktivitetstypeId)
+        ]
 
 
 dropdownConfigSkole : Dropdown.Config Msg Skole
