@@ -443,7 +443,7 @@ visAktivitet model aktivitet =
                 ]
                 [ text "Detaljer" ]
     in
-        Lists.li [ Lists.withSubtitle ]
+        Lists.li [ Lists.withSubtitle, onClick <| VisAktivitetDetalj aktivitet.id, cs "vis-navigering" ]
             -- NB! Required on every Lists.li containing subtitle.
             [ Options.div
                 [ Options.center
@@ -459,9 +459,10 @@ visAktivitet model aktivitet =
                 [ Options.span [] [ text <| aktivitet.navn ++ " - " ++ aktivitet.skoleNavn ++ " (" ++ (toString aktivitet.omfangTimer) ++ " klokketimer ) - " ++ aktivitet.aktivitetsTypeNavn ]
                 , Lists.subtitle [ css "width" "80%" ] [ text aktivitet.beskrivelse ]
                 ]
-            , Lists.content2 []
-                [ Options.span [ onClick <| VisAktivitetDetalj aktivitet.id, cs "editer-aktivitet" ]
-                    [ Lists.icon "mode_edit" []
-                    ]
-                ]
+
+            -- , Lists.content2 []
+            --     [ Options.span [ onClick <| VisAktivitetDetalj aktivitet.id, cs "editer-aktivitet" ]
+            --         [ Lists.icon "mode_edit" []
+            --         ]
+            --     ]
             ]
