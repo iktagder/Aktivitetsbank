@@ -299,8 +299,13 @@ visAktivitetSuksess model aktivitet =
         [ Options.div
             [ css "width" "100%"
             ]
-            [ Options.styled p [ Typo.headline ] [ text aktivitet.navn ]
-            , Options.styled p [ Typo.subhead ] [ text aktivitet.beskrivelse ]
+            [ p []
+                [ Options.styled div [ Typo.title ] [ text aktivitet.navn ]
+                ]
+            , p []
+                [ Options.styled div [ Typo.caption ] [ text "Beskrivelse: " ]
+                , Options.styled div [ Typo.subhead ] [ text (aktivitet.beskrivelse) ]
+                ]
             ]
         ]
     , cell
@@ -316,16 +321,16 @@ visAktivitetSuksess model aktivitet =
             [ css "width" "100%"
             ]
             [ p []
-                [ Options.styled span [ Typo.caption ] [ text "Klokketimer: " ]
-                , Options.styled span [ Typo.subhead ] [ text (toString aktivitet.omfangTimer) ]
+                [ Options.styled div [ Typo.caption ] [ text "Klokketimer: " ]
+                , Options.styled div [ Typo.subhead ] [ text (toString aktivitet.omfangTimer) ]
                 ]
             , p []
-                [ Options.styled span [ Typo.caption ] [ text "Skole: " ]
-                , Options.styled span [ Typo.subhead ] [ text (aktivitet.skoleNavn) ]
+                [ Options.styled div [ Typo.caption ] [ text "Skole: " ]
+                , Options.styled div [ Typo.subhead ] [ text (aktivitet.skoleNavn) ]
                 ]
             , p []
-                [ Options.styled span [ Typo.caption ] [ text "Aktivitetstype: " ]
-                , Options.styled span [ Typo.subhead ] [ text (aktivitet.aktivitetsTypeNavn) ]
+                [ Options.styled div [ Typo.caption ] [ text "Aktivitetstype" ]
+                , Options.styled div [ Typo.subhead ] [ text aktivitet.aktivitetsTypeNavn ]
                 ]
             ]
         ]
@@ -454,6 +459,14 @@ visAktivitetDeltakereSuksess model deltakere =
     [ cell
         [ size All 12
         , Elevation.e0
+
+        -- , Options.css "padding" "16px 32px"
+        ]
+        [ showText p Typo.headline "Deltakere"
+        ]
+    , cell
+        [ size All 12
+        , Elevation.e0
         , Options.css "padding" "16px 32px"
         ]
         [ Lists.ul [ css "width" "100%" ]
@@ -464,7 +477,8 @@ visAktivitetDeltakereSuksess model deltakere =
     , cell
         [ size All 12
         , Elevation.e0
-        , Options.css "padding" "16px 32px"
+
+        -- , Options.css "padding" "16px 32px"
         , Options.css "display" "flex"
         , Options.css "flex-direction" "column"
 
