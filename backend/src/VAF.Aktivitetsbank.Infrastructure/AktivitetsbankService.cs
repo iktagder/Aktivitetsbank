@@ -23,15 +23,15 @@ namespace VAF.Aktivitetsbank.Infrastructure
         }
         public AktivitetsbankMetadata HenteAlleMetadata()
         {
-            var skoler = _context.SkoleSet.AsEnumerable();
+            var skoler = _context.SkoleSet.OrderBy(x => x.Navn).AsEnumerable();
             var skolerMapped = Mapper.Map<IEnumerable<SkoleDto>>(skoler);
-            var trinn = _context.TrinnSet.AsEnumerable();
+            var trinn = _context.TrinnSet.OrderBy(x => x.Navn).AsEnumerable();
             var trinnMapped = Mapper.Map<IEnumerable<TrinnDto>>(trinn);
-            var fag = _context.FagSet.AsEnumerable();
+            var fag = _context.FagSet.OrderBy(x => x.Navn).AsEnumerable();
             var fagMapped = Mapper.Map<IEnumerable<FagDto>>(fag);
-            var aktivitetsTyper = _context.AktivitetstypeSet.AsEnumerable();
+            var aktivitetsTyper = _context.AktivitetstypeSet.OrderBy(x => x.Navn).AsEnumerable();
             var aktivitetsTyperMapped = Mapper.Map<IEnumerable<AktivitetstypeDto>>(aktivitetsTyper);
-            var utdanningsProgrammer = _context.UtdanningsprogramSet.AsEnumerable();
+            var utdanningsProgrammer = _context.UtdanningsprogramSet.OrderBy(x => x.Navn).AsEnumerable();
             var utdanningsProgrammerMapped = Mapper.Map<IEnumerable<UtdanningsprogramDto>>(utdanningsProgrammer);
 
 
@@ -46,14 +46,14 @@ namespace VAF.Aktivitetsbank.Infrastructure
 
         public IList<AktivitetDto> HentAktiviteter(string queryQueryTerm)
         {
-            var aktiviteter = _context.AktivitetSet.Include(x => x.Skole).Include(x => x.Aktivitetstype).ToList();
+            var aktiviteter = _context.AktivitetSet.Include(x => x.Skole).OrderBy(x => x.Navn).Include(x => x.Aktivitetstype).ToList();
             var aktiviteterMapped = Mapper.Map<IList<AktivitetDto>>(aktiviteter);
             return aktiviteterMapped;
         }
 
         public IList<DeltakerDto> HentDeltakere(Guid queryAktivitetId)
         {
-            var deltakere = _context.DeltakerSet.Where(x => x.AktivitetId.Equals(queryAktivitetId)).Include(x => x.Utdanningsprogram).Include(x => x.Fag).Include(x => x.Trinn).Include(x => x.Aktivitet).ToList();
+            var deltakere = _context.DeltakerSet.Where(x => x.AktivitetId.Equals(queryAktivitetId)).OrderBy(x => x.Utdanningsprogram.Navn).ThenBy(x => x.Trinn.Navn).Include(x => x.Utdanningsprogram).Include(x => x.Fag).Include(x => x.Trinn).Include(x => x.Aktivitet).ToList();
             var deltakereMapped = Mapper.Map<IList<DeltakerDto>>(deltakere);
             return deltakereMapped;
         }
