@@ -1,6 +1,7 @@
 module Pages.Aktiviteter.DeltakerOpprett exposing (..)
 
 import Html exposing (Html, text, div, span, p, a)
+import Html.Attributes exposing (class)
 import Material
 import Material.Grid as Grid exposing (grid, size, cell, Device(..))
 import Material.Elevation as Elevation
@@ -455,10 +456,11 @@ visAktivitetSuksess model aktivitet =
 visOpprettDeltaker : Model -> DeltakerEdit -> List (Grid.Cell Msg)
 visOpprettDeltaker model deltaker =
     [ cell
-        [ size All 12
+        [ size All 4
+        , Options.css "padding" "0px 32px"
         ]
         [ Options.div
-            []
+            [ css "width" "100%" ]
             [ showText p Typo.menu "Utdanningsprogram"
             , visUtdanningsprogram model deltaker
             , showText p Typo.menu "Trinn"
@@ -475,20 +477,35 @@ visOpprettDeltaker model deltaker =
                 []
             , showText p Typo.menu "Fag"
             , visFag model deltaker
-            , Textfield.render Mdl
+            ]
+        ]
+    , cell
+        [ size All 8
+        , Options.css "padding" "16px 32px"
+        ]
+        [ Options.div
+            []
+            [ Textfield.render Mdl
                 [ 2 ]
                 model.mdl
                 [ Textfield.label "Kompetansemål"
                 , Textfield.floatingLabel
                 , Textfield.text_
                 , Textfield.textarea
-                , Textfield.rows 5
+                , Textfield.rows 12
                 , Textfield.value <| Maybe.withDefault "" deltaker.kompetansemaal
                 , Options.onInput EndretKompetansemaal
                 , cs "text-area"
                 ]
                 []
-            , Options.div [] [ showText p Typo.subhead model.statusText ]
+            ]
+        ]
+    , cell
+        [ size All 12
+        ]
+        [ Options.div
+            []
+            [ Options.div [] [ showText p Typo.subhead model.statusText ]
 
             -- , showText p Typo.menu "Aktivitetstype"
             -- , visAktivitetstype model
@@ -504,7 +521,7 @@ visOpprettDeltaker model deltaker =
                 ]
                 [ text "Avbryt" ]
             , Button.render Mdl
-                [ 10, 1 ]
+                [ 10, 11 ]
                 model.mdl
                 [ Button.ripple
                 , Button.colored
@@ -544,9 +561,7 @@ visUtdanningsprogram model deltaker =
 
 visUtdanningsprogramDropdown : Maybe Utdanningsprogram -> List Utdanningsprogram -> Dropdown.State -> Html Msg
 visUtdanningsprogramDropdown selectedUtdanningsprogramId model dropdownStateUtdanningsprogram =
-    span []
-        [ Html.map UtdanningsprogramDropdown (Dropdown.view dropdownConfigUtdanningsprogram dropdownStateUtdanningsprogram model selectedUtdanningsprogramId)
-        ]
+    Html.map UtdanningsprogramDropdown (Dropdown.view dropdownConfigUtdanningsprogram dropdownStateUtdanningsprogram model selectedUtdanningsprogramId)
 
 
 visTrinn : Model -> DeltakerEdit -> Html Msg
@@ -570,9 +585,7 @@ visTrinn model deltaker =
 
 visTrinnDropdown : Maybe Trinn -> List Trinn -> Dropdown.State -> Html Msg
 visTrinnDropdown selectedTrinnId model dropdownStateTrinn =
-    span []
-        [ Html.map TrinnDropdown (Dropdown.view dropdownConfigTrinn dropdownStateTrinn model selectedTrinnId)
-        ]
+    Html.map TrinnDropdown (Dropdown.view dropdownConfigTrinn dropdownStateTrinn model selectedTrinnId)
 
 
 visFag : Model -> DeltakerEdit -> Html Msg
@@ -596,9 +609,7 @@ visFag model deltaker =
 
 visFagDropdown : Maybe Fag -> List Fag -> Dropdown.State -> Html Msg
 visFagDropdown selectedFagId model dropdownStateFag =
-    span []
-        [ Html.map FagDropdown (Dropdown.view dropdownConfigFag dropdownStateFag model selectedFagId)
-        ]
+    Html.map FagDropdown (Dropdown.view dropdownConfigFag dropdownStateFag model selectedFagId)
 
 
 dropdownConfigUtdanningsprogram : Dropdown.Config Msg Utdanningsprogram
@@ -611,7 +622,7 @@ dropdownConfigUtdanningsprogram =
         |> Dropdown.withPromptClass "silver"
         |> Dropdown.withSelectedClass "bold"
         |> Dropdown.withSelectedStyles [ ( "color", "black" ) ]
-        |> Dropdown.withTriggerClass "col-4 border bg-white p1"
+        |> Dropdown.withTriggerClass "col-12 border bg-white p1"
 
 
 dropdownConfigTrinn : Dropdown.Config Msg Trinn
@@ -624,7 +635,7 @@ dropdownConfigTrinn =
         |> Dropdown.withPromptClass "silver"
         |> Dropdown.withSelectedClass "bold"
         |> Dropdown.withSelectedStyles [ ( "color", "black" ) ]
-        |> Dropdown.withTriggerClass "col-4 border bg-white p1"
+        |> Dropdown.withTriggerClass "col-12 border bg-white p1"
 
 
 dropdownConfigFag : Dropdown.Config Msg Fag
@@ -637,4 +648,4 @@ dropdownConfigFag =
         |> Dropdown.withPromptClass "silver"
         |> Dropdown.withSelectedClass "bold"
         |> Dropdown.withSelectedStyles [ ( "color", "black" ) ]
-        |> Dropdown.withTriggerClass "col-4 border bg-white p1"
+        |> Dropdown.withTriggerClass "col-12 border bg-white p1"

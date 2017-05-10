@@ -17,7 +17,7 @@ body {
 }
 
 .dropdown{
-  width: 33.33333% !important;
+  /*width: 33.33333% !important;*/
   z-index: 100000;
 }
 
