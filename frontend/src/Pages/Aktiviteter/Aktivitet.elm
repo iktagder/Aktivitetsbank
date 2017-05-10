@@ -215,82 +215,144 @@ showText elementType displayStyle text_ =
 view : Taco -> Model -> Html Msg
 view taco model =
     grid []
-        [ cell
-            [ size All 12
-            ]
-            [ Button.render Mdl
-                [ 0 ]
-                model.mdl
-                [ Button.fab
-                , Button.ripple
-                , Options.onClick NavigerHjem
-                , Options.css "float" "right"
-                ]
-                [ Icon.i "home" ]
-            , Button.render Mdl
-                [ 0 ]
-                model.mdl
-                [ Button.fab
-                , Button.ripple
+        (visHeading model :: visAktivitet model ++ visAktivitetDeltakere model)
 
-                -- , Options.onClick OpprettAktivitet
-                , Options.css "float" "right"
-                ]
-                [ Icon.i "content_copy" ]
-            , Options.span [ Typo.headline ] [ text "Aktivitet detaljer" ]
-            ]
-        , cell
-            [ size All 12
-            , Elevation.e2
-            , Options.css "padding" "16px 32px"
-            , Options.css "display" "flex"
 
-            -- , Options.css "flex-direction" "column"
-            -- , Options.css "align-items" "left"
+visHeading : Model -> Grid.Cell Msg
+visHeading model =
+    cell
+        [ size All 12
+        ]
+        [ Button.render Mdl
+            [ 0 ]
+            model.mdl
+            [ Button.fab
+            , Button.ripple
+            , Options.onClick NavigerHjem
+            , Options.css "float" "right"
             ]
-            [ visAktivitet model
-            ]
-        , cell
-            [ size All 12
-            , Elevation.e2
-            , Options.css "padding" "16px 32px"
-            , Options.css "display" "flex"
-            , Options.css "flex-direction" "column"
+            [ Icon.i "home" ]
+        , Button.render Mdl
+            [ 0 ]
+            model.mdl
+            [ Button.fab
+            , Button.ripple
 
-            -- , Options.css "align-items" "left"
+            -- , Options.onClick OpprettAktivitet
+            , Options.css "float" "right"
             ]
-            [ showText p Typo.headline "Deltakere"
-            , visAktivitetDeltakere model
-            , Button.render Mdl
-                [ 0, 4, 2 ]
-                model.mdl
-                [ Button.fab
-                , Button.ripple
-                , Options.onClick VisDeltakerOpprett
-                , Options.css "float" "left"
-                ]
-                [ Icon.i "add" ]
-            , Options.span [ Typo.menu ] [ text "Legg til deltaker" ]
-            ]
+            [ Icon.i "content_copy" ]
+        , Options.span [ Typo.headline ] [ text "Aktivitet detaljer" ]
         ]
 
 
-visAktivitet : Model -> Html Msg
+visAktivitet : Model -> List (Grid.Cell Msg)
 visAktivitet model =
     case model.aktivitet of
         NotAsked ->
-            text "Venter på henting av .."
+            [ cell
+                [ size All 12
+                , Elevation.e0
+                , Options.css "padding" "16px 32px"
+                ]
+                [ text "Venter på henting av .."
+                ]
+            ]
 
         Loading ->
-            Options.div []
-                [ Loading.spinner [ Loading.active True ]
+            [ cell
+                [ size All 12
+                , Elevation.e0
+                , Options.css "padding" "16px 32px"
                 ]
+                [ Options.div []
+                    [ Loading.spinner [ Loading.active True ]
+                    ]
+                ]
+            ]
 
         Failure err ->
-            text "Feil ved henting av data"
+            [ cell
+                [ size All 12
+                , Elevation.e0
+                , Options.css "padding" "16px 32px"
+                ]
+                [ text "Feil ved henting av data"
+                ]
+            ]
 
         Success data ->
             visAktivitetSuksess model data
+
+
+visAktivitetSuksess : Model -> Aktivitet -> List (Grid.Cell Msg)
+visAktivitetSuksess model aktivitet =
+    [ cell
+        [ size All 6
+        , Elevation.e0
+        , Options.css "padding" "16px 32px"
+
+        -- , Options.css "display" "flex"
+        -- , Options.css "flex-direction" "column"
+        -- , Options.css "align-items" "left"
+        ]
+        [ Options.div
+            [ css "width" "100%"
+            ]
+            [ Textfield.render Mdl
+                [ 1 ]
+                model.mdl
+                [ Textfield.label "Navn"
+                , Textfield.floatingLabel
+                , Textfield.text_
+                , Textfield.disabled
+                , Textfield.value <| aktivitet.navn
+                ]
+                []
+            , Textfield.render Mdl
+                [ 2 ]
+                model.mdl
+                [ Textfield.label "Beskrivelse"
+                , Textfield.floatingLabel
+                , Textfield.text_
+                , Textfield.disabled
+                , Textfield.textarea
+                , Textfield.rows 4
+                , Textfield.value <| aktivitet.beskrivelse
+                , cs "text-area"
+                ]
+                []
+            ]
+        ]
+    , cell
+        [ size All 6
+        , Elevation.e0
+        , Options.css "padding" "16px 32px"
+
+        -- , Options.css "display" "flex"
+        -- , Options.css "flex-direction" "column"
+        -- , Options.css "align-items" "left"
+        ]
+        [ Options.div
+            [ css "width" "100%"
+            ]
+            [ Textfield.render Mdl
+                [ 3 ]
+                model.mdl
+                [ Textfield.label "Omfang"
+                , Textfield.floatingLabel
+                , Textfield.text_
+                , Textfield.disabled
+                , Textfield.value <| toString aktivitet.omfangTimer
+                ]
+                []
+            , showText p Typo.menu "Skole"
+            , visSkole model aktivitet
+            , showText p Typo.menu "Aktivitetstype"
+            , visAktivitetstype model aktivitet
+            ]
+        ]
+    ]
 
 
 visSkole : Model -> Aktivitet -> Html Msg
@@ -345,98 +407,104 @@ visAktivitetstypeDropdown selectedAktivitetstypeId model dropdownStateAktivitets
         ]
 
 
-visAktivitetSuksess : Model -> Aktivitet -> Html Msg
-visAktivitetSuksess model aktivitet =
-    Options.div
-        [ css "width" "100%"
-        ]
-        [ Textfield.render Mdl
-            [ 1 ]
-            model.mdl
-            [ Textfield.label "Navn"
-            , Textfield.floatingLabel
-            , Textfield.text_
-            , Textfield.disabled
-            , Textfield.value <| aktivitet.navn
-            ]
-            []
-        , Textfield.render Mdl
-            [ 2 ]
-            model.mdl
-            [ Textfield.label "Beskrivelse"
-            , Textfield.floatingLabel
-            , Textfield.text_
-            , Textfield.disabled
-            , Textfield.textarea
-            , Textfield.rows 4
-            , Textfield.value <| aktivitet.beskrivelse
-            , cs "text-area"
-            ]
-            []
-        , Textfield.render Mdl
-            [ 3 ]
-            model.mdl
-            [ Textfield.label "Omfang"
-            , Textfield.floatingLabel
-            , Textfield.text_
-            , Textfield.disabled
-            , Textfield.value <| toString aktivitet.omfangTimer
-            ]
-            []
-        , showText p Typo.menu "Skole"
-        , visSkole model aktivitet
-
-        -- , Textfield.render Mdl
-        --     [ 4 ]
-        --     model.mdl
-        --     [ Textfield.label "Skole"
-        --     , Textfield.floatingLabel
-        --     , Textfield.text_
-        --     , Textfield.disabled
-        --     , Textfield.value <| aktivitet.skoleNavn
-        --     , cs "text-area"
-        --     ]
-        --     []
-        -- , Textfield.render Mdl
-        --     [ 5 ]
-        --     model.mdl
-        --     [ Textfield.label "Aktivitetstype"
-        --     , Textfield.floatingLabel
-        --     , Textfield.text_
-        --     , Textfield.disabled
-        --     , Textfield.value <| aktivitet.aktivitetsTypeNavn
-        --     , cs "text-area"
-        --     ]
-        --     []
-        , showText p Typo.menu "Aktivitetstype"
-        , visAktivitetstype model aktivitet
-        ]
+dropdownConfigSkole : Dropdown.Config Msg Skole
+dropdownConfigSkole =
+    Dropdown.newConfig OnSelectSkole .navn
+        |> Dropdown.withItemClass "border-bottom border-silver p1 gray"
+        |> Dropdown.withMenuClass "border border-gray"
+        |> Dropdown.withMenuStyles [ ( "background", "white" ) ]
+        |> Dropdown.withPrompt "Velg skole"
+        |> Dropdown.withPromptClass "silver"
+        |> Dropdown.withSelectedClass "bold"
+        |> Dropdown.withSelectedStyles [ ( "color", "black" ) ]
+        |> Dropdown.withTriggerClass "col-4 border bg-white p1"
 
 
-visAktivitetDeltakere : Model -> Html Msg
+dropdownConfigAktivitetstype : Dropdown.Config Msg AktivitetsType
+dropdownConfigAktivitetstype =
+    Dropdown.newConfig OnSelectAktivitetstype .navn
+        |> Dropdown.withItemClass "border-bottom border-silver p1 gray"
+        |> Dropdown.withMenuClass "border border-gray"
+        |> Dropdown.withMenuStyles [ ( "background", "white" ) ]
+        |> Dropdown.withPrompt "Velg aktivitetstype"
+        |> Dropdown.withPromptClass "silver"
+        |> Dropdown.withSelectedClass "bold"
+        |> Dropdown.withSelectedStyles [ ( "color", "black" ) ]
+        |> Dropdown.withTriggerClass "col-4 border bg-white p1"
+
+
+visAktivitetDeltakere : Model -> List (Grid.Cell Msg)
 visAktivitetDeltakere model =
     case model.deltakere of
         NotAsked ->
-            text "Venter på henting av deltakere.."
+            [ cell
+                [ size All 12
+                , Elevation.e0
+                , Options.css "padding" "16px 32px"
+                ]
+                [ text "Venter på henting av deltakere.."
+                ]
+            ]
 
         Loading ->
-            Options.div []
-                [ Loading.spinner [ Loading.active True ]
+            [ cell
+                [ size All 12
+                , Elevation.e0
+                , Options.css "padding" "16px 32px"
                 ]
+                [ Options.div []
+                    [ Loading.spinner [ Loading.active True ]
+                    ]
+                ]
+            ]
 
         Failure err ->
-            text "Feil ved henting av data"
+            [ cell
+                [ size All 12
+                , Elevation.e0
+                , Options.css "padding" "16px 32px"
+                ]
+                [ text "Feil ved henting av data"
+                ]
+            ]
 
         Success data ->
             visAktivitetDeltakereSuksess model data
 
 
-visAktivitetDeltakereSuksess : Model -> List Deltaker -> Html Msg
+visAktivitetDeltakereSuksess : Model -> List Deltaker -> List (Grid.Cell Msg)
 visAktivitetDeltakereSuksess model deltakere =
-    Lists.ul [ css "width" "100%" ]
-        (deltakere
-            |> List.map (visAktivitetDeltaker model)
-        )
+    [ cell
+        [ size All 12
+        , Elevation.e0
+        , Options.css "padding" "16px 32px"
+        ]
+        [ Lists.ul [ css "width" "100%" ]
+            (deltakere
+                |> List.map (visAktivitetDeltaker model)
+            )
+        ]
+    , cell
+        [ size All 12
+        , Elevation.e0
+        , Options.css "padding" "16px 32px"
+        , Options.css "display" "flex"
+        , Options.css "flex-direction" "column"
+
+        -- , Options.css "align-items" "left"
+        ]
+        [ Button.render Mdl
+            [ 0, 4, 2 ]
+            model.mdl
+            [ Button.fab
+            , Button.ripple
+            , Options.onClick VisDeltakerOpprett
+            , Options.css "float" "left"
+            ]
+            [ Icon.i "add" ]
+        , Options.span [ Typo.menu ] [ text "Legg til deltaker" ]
+        ]
+    ]
 
 
 visAktivitetDeltaker : Model -> Deltaker -> Html Msg
@@ -475,29 +543,3 @@ visAktivitetDeltaker model deltaker =
                     ]
                 ]
             ]
-
-
-dropdownConfigSkole : Dropdown.Config Msg Skole
-dropdownConfigSkole =
-    Dropdown.newConfig OnSelectSkole .navn
-        |> Dropdown.withItemClass "border-bottom border-silver p1 gray"
-        |> Dropdown.withMenuClass "border border-gray"
-        |> Dropdown.withMenuStyles [ ( "background", "white" ) ]
-        |> Dropdown.withPrompt "Velg skole"
-        |> Dropdown.withPromptClass "silver"
-        |> Dropdown.withSelectedClass "bold"
-        |> Dropdown.withSelectedStyles [ ( "color", "black" ) ]
-        |> Dropdown.withTriggerClass "col-4 border bg-white p1"
-
-
-dropdownConfigAktivitetstype : Dropdown.Config Msg AktivitetsType
-dropdownConfigAktivitetstype =
-    Dropdown.newConfig OnSelectAktivitetstype .navn
-        |> Dropdown.withItemClass "border-bottom border-silver p1 gray"
-        |> Dropdown.withMenuClass "border border-gray"
-        |> Dropdown.withMenuStyles [ ( "background", "white" ) ]
-        |> Dropdown.withPrompt "Velg aktivitetstype"
-        |> Dropdown.withPromptClass "silver"
-        |> Dropdown.withSelectedClass "bold"
-        |> Dropdown.withSelectedStyles [ ( "color", "black" ) ]
-        |> Dropdown.withTriggerClass "col-4 border bg-white p1"
