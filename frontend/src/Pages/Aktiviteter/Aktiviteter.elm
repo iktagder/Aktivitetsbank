@@ -9,6 +9,7 @@ import Material.Button as Button
 import Material.Icon as Icon
 import Material.Options as Options exposing (when, css, cs, Style, onClick)
 import Material.Typography as Typo
+import Material.Table as Table
 import Material.List as Lists
 import Material.Textfield as Textfield
 import Material.Toggles as Toggles
@@ -247,7 +248,8 @@ view taco model =
         , getFilterCell model
         , cell
             [ size All (getAntallAktivietCeller model)
-            , Elevation.e2
+            , Elevation.e0
+            , Options.css "padding" "16px 32px"
             ]
             [ viewMainContent model
             ]
@@ -408,7 +410,8 @@ visAktivitetListe model =
             text "Feil ved henting av data"
 
         Success data ->
-            visAktivitetListeSuksess model data
+            -- visAktivitetListeSuksess model data
+            visAktivitetTabellSuksess model data
 
 
 visAktivitetListeSuksess : Model -> List Aktivitet -> Html Msg
@@ -419,6 +422,38 @@ visAktivitetListeSuksess model aktiviteter =
         )
 
 
+visAktivitetTabellSuksess : Model -> List Aktivitet -> Html Msg
+visAktivitetTabellSuksess model aktiviteter =
+    Table.table [ css "table-layout" "fixed", css "width" "100%" ]
+        [ Table.thead
+            []
+            [ Table.tr []
+                [ Table.th
+                    [ css "width" "20%" ]
+                    [ showText div Typo.body2 "Navn"
+                    ]
+                , Table.th [ css "width" "15%" ]
+                    [ showText div Typo.body2 "Aktivitetstype"
+                    ]
+                , Table.th [ css "width" "10%" ]
+                    [ showText div Typo.body2 "Skole"
+                    ]
+                , Table.th [ css "width" "5%", css "text-align" "left" ]
+                    [ showText span Typo.body2 "Timer"
+                    ]
+                , Table.th [ css "width" "50%", css "text-align" "left" ]
+                    [ showText span Typo.body2 "Beskrivelse"
+                    ]
+                ]
+            ]
+        , Table.tbody []
+            (getAktiviteter model aktiviteter
+                |> List.sortBy .navn
+                |> List.indexedMap (\idx item -> visAktivitetTabellRad idx item model.mdl)
+            )
+        ]
+
+
 getAktiviteter : Model -> List Aktivitet -> List Aktivitet
 getAktiviteter model aktiviteter =
     case model.visFilter of
@@ -427,6 +462,18 @@ getAktiviteter model aktiviteter =
 
         False ->
             aktiviteter
+
+
+visAktivitetTabellRad : Int -> Aktivitet -> Material.Model -> Html Msg
+visAktivitetTabellRad idx model outerMdl =
+    Table.tr
+        [ onClick <| VisAktivitetDetalj model.id, cs "vis-navigering" ]
+        [ Table.td [ css "text-align" "left", cs "wrapword" ] [ text model.navn ]
+        , Table.td [ css "text-align" "left", cs "wrapword" ] [ text model.aktivitetsTypeNavn ]
+        , Table.td [ css "text-align" "left" ] [ text model.skoleNavn ]
+        , Table.td [ Table.numeric ] [ text <| toString model.omfangTimer ]
+        , Table.td [ css "text-align" "left", cs "wrapword" ] [ text (String.left 600 model.beskrivelse) ]
+        ]
 
 
 visAktivitet : Model -> Aktivitet -> Html Msg
