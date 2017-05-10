@@ -349,7 +349,12 @@ visOpprettAktivitet : Model -> AktivitetEdit -> List (Grid.Cell Msg)
 visOpprettAktivitet model aktivitet =
     [ cell
         [ size All 6
-        , Elevation.e2
+        , Elevation.e0
+        , Options.css "padding" "16px 32px"
+
+        -- , Options.css "display" "flex"
+        -- , Options.css "flex-direction" "column"
+        -- , Options.css "align-items" "left"
         ]
         [ Options.div
             []
@@ -378,32 +383,19 @@ visOpprettAktivitet model aktivitet =
                 ]
                 []
             , Options.div [] [ showText p Typo.subhead model.statusText ]
-            , Button.render Mdl
-                [ 10, 1 ]
-                model.mdl
-                [ Button.ripple
-                , Button.colored
-                , Button.raised
-                , Options.when (not model.visLagreKnapp) Button.disabled
-                , Options.onClick (OpprettNyAktivitet)
-                , css "float" "right"
-
-                -- , css "margin-left" "1em"
-                -- , Options.onClick (SearchAnsatt "Test")
-                ]
-                [ text "Lagre" ]
             ]
         ]
     , cell
         [ size All 6
-        , Elevation.e2
+        , Elevation.e0
+        , Options.css "padding" "16px 32px"
         ]
         [ Options.div
             []
             [ Textfield.render Mdl
                 [ 3 ]
                 model.mdl
-                [ Textfield.label "Omfang"
+                [ Textfield.label "Omfang (klokketimer)"
                 , Textfield.floatingLabel
                 , Textfield.text_
                 , Textfield.value <| Maybe.withDefault "0" <| Maybe.map toString aktivitet.omfangTimer
@@ -415,6 +407,26 @@ visOpprettAktivitet model aktivitet =
             , showText p Typo.menu "Aktivitetstype"
             , visAktivitetstype model aktivitet
             ]
+        ]
+    , cell
+        [ size All 6
+        , Elevation.e0
+        , Options.css "padding" "16px 32px"
+        ]
+        [ Button.render Mdl
+            [ 10, 1 ]
+            model.mdl
+            [ Button.ripple
+            , Button.colored
+            , Button.raised
+            , Options.when (not model.visLagreKnapp) Button.disabled
+            , Options.onClick (OpprettNyAktivitet)
+            , css "float" "left"
+
+            -- , css "margin-left" "1em"
+            -- , Options.onClick (SearchAnsatt "Test")
+            ]
+            [ text "Lagre" ]
         ]
     ]
 
