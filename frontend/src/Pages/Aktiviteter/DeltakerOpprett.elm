@@ -468,7 +468,7 @@ visOpprettDeltaker model deltaker =
             , Textfield.render Mdl
                 [ 3 ]
                 model.mdl
-                [ Textfield.label "Timer (skoletimer)"
+                [ Textfield.label "Timer (klokketimer)"
                 , Textfield.floatingLabel
                 , Textfield.text_
                 , Textfield.value <| Maybe.withDefault "0" <| Maybe.map toString deltaker.timer
