@@ -7,6 +7,7 @@ import Material.Elevation as Elevation
 import Material.Textfield as Textfield
 import Material.Icon as Icon
 import Material.List as Lists
+import Material.Table as Table
 import Material.Button as Button
 import Material.Color as Color
 import Material.Options as Options exposing (when, css, cs, Style, onClick)
@@ -470,7 +471,8 @@ visAktivitetDeltakereSuksess model deltakere =
 
         -- , Options.css "padding" "16px 32px"
         ]
-        [ visAktivitetDeltakerListe model deltakere
+        -- [ visAktivitetDeltakerListe model deltakere
+        [ visAktivitetDeltakerTabell model deltakere
         ]
     , cell
         [ size All 12
@@ -494,6 +496,63 @@ visAktivitetDeltakereSuksess model deltakere =
         , Options.span [ Typo.menu ] [ text "Legg til deltaker" ]
         ]
     ]
+
+
+visAktivitetDeltakerTabell : Model -> List Deltaker -> Html Msg
+visAktivitetDeltakerTabell model deltakere =
+    Table.table [ css "table-layout" "fixed", css "width" "100%" ]
+        [ Table.thead
+            []
+            [ Table.tr []
+                [ Table.th
+                    [ css "width" "20%" ]
+                    [ showText div Typo.body2 "Utdanningsprogram"
+                    ]
+                , Table.th [ css "width" "10%" ]
+                    [ showText div Typo.body2 "Årstrinn"
+                    ]
+                , Table.th [ css "width" "20%", css "text-align" "left" ]
+                    [ showText span Typo.body2 "Fag"
+                    ]
+                , Table.th [ css "width" "10%", css "text-align" "left" ]
+                    [ showText span Typo.body2 "Timer"
+                    ]
+                , Table.th [ css "width" "40%", css "text-align" "left" ]
+                    [ showText span Typo.body2 "Kompetansemål"
+                    ]
+                ]
+            ]
+        , Table.tbody []
+            (deltakere
+                |> List.sortBy .trinnNavn
+                |> List.indexedMap (\idx item -> visAktivitetDeltakerTabellRad idx item model.mdl)
+            )
+        ]
+
+
+visAktivitetDeltakerTabellRad : Int -> Deltaker -> Material.Model -> Html msg
+visAktivitetDeltakerTabellRad idx model outerMdl =
+    Table.tr
+        []
+        [ Table.td [ css "text-align" "left" ] [ text model.utdanningsprogramNavn ]
+        , Table.td [ css "text-align" "left" ] [ text model.trinnNavn ]
+        , Table.td [ css "text-align" "left" ] [ text model.fagNavn ]
+        , Table.td [ Table.numeric ] [ text <| toString model.timer ]
+        , Table.td [ css "text-align" "left", cs "wrapword" ] [ text (String.left 600 model.kompetansemaal) ]
+        ]
+
+
+
+-- , Table.td []
+--     [ Button.render Mdl
+--         [ idx ]
+--         outerMdl
+--         [ Button.minifab
+--         , Button.colored
+--         , Options.onClick (selectedMsg model.navn)
+--         ]
+--         [ Icon.view "cancel" [ Tooltip.attach mdlMsg [ idx ] ], Tooltip.render mdlMsg [ idx ] outerMdl [ Tooltip.large ] [ text "Fjern tilgang" ] ]
+--     ]
 
 
 visAktivitetDeltakerListe : Model -> List Deltaker -> Html Msg
