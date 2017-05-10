@@ -348,133 +348,87 @@ showText elementType displayStyle text_ =
 vis : Taco -> Model -> Html Msg
 vis taco model =
     grid []
-        [ cell
-            [ size All 12
-            ]
-            [ Options.span [ Typo.headline ] [ text "Opprett deltaker" ]
-            ]
-        , cell
-            [ size All 12
-            , Elevation.e0
-            ]
-            [ visOpprettDeltaker model model.deltaker
-            ]
+        (visHeading model :: visOpprettDeltaker model model.deltaker)
+
+
+visHeading : Model -> Grid.Cell Msg
+visHeading model =
+    cell
+        [ size All 12
+        ]
+        [ Options.span [ Typo.headline ] [ text "Opprett deltaker" ]
         ]
 
 
-dropdownConfigUtdanningsprogram : Dropdown.Config Msg Utdanningsprogram
-dropdownConfigUtdanningsprogram =
-    Dropdown.newConfig OnSelectUtdanningsprogram .navn
-        |> Dropdown.withItemClass "border-bottom border-silver p1 gray"
-        |> Dropdown.withMenuClass "border border-gray dropdown"
-        |> Dropdown.withMenuStyles [ ( "background", "white" ) ]
-        |> Dropdown.withPrompt "Velg utdanningsprogram"
-        |> Dropdown.withPromptClass "silver"
-        |> Dropdown.withSelectedClass "bold"
-        |> Dropdown.withSelectedStyles [ ( "color", "black" ) ]
-        |> Dropdown.withTriggerClass "col-4 border bg-white p1"
-
-
-dropdownConfigTrinn : Dropdown.Config Msg Trinn
-dropdownConfigTrinn =
-    Dropdown.newConfig OnSelectTrinn .navn
-        |> Dropdown.withItemClass "border-bottom border-silver p1 gray"
-        |> Dropdown.withMenuClass "border border-gray dropdown"
-        |> Dropdown.withMenuStyles [ ( "background", "white" ) ]
-        |> Dropdown.withPrompt "Velg trinn"
-        |> Dropdown.withPromptClass "silver"
-        |> Dropdown.withSelectedClass "bold"
-        |> Dropdown.withSelectedStyles [ ( "color", "black" ) ]
-        |> Dropdown.withTriggerClass "col-4 border bg-white p1"
-
-
-dropdownConfigFag : Dropdown.Config Msg Fag
-dropdownConfigFag =
-    Dropdown.newConfig OnSelectFag .navn
-        |> Dropdown.withItemClass "border-bottom border-silver p1 gray"
-        |> Dropdown.withMenuClass "border border-gray dropdown"
-        |> Dropdown.withMenuStyles [ ( "background", "white" ) ]
-        |> Dropdown.withPrompt "Velg fag"
-        |> Dropdown.withPromptClass "silver"
-        |> Dropdown.withSelectedClass "bold"
-        |> Dropdown.withSelectedStyles [ ( "color", "black" ) ]
-        |> Dropdown.withTriggerClass "col-4 border bg-white p1"
-
-
-visOpprettDeltaker : Model -> DeltakerEdit -> Html Msg
+visOpprettDeltaker : Model -> DeltakerEdit -> List (Grid.Cell Msg)
 visOpprettDeltaker model deltaker =
-    Options.div
-        []
-        [ --   Textfield.render Mdl
-          --     [ 1 ]
-          --     model.mdl
-          --     [ Textfield.label "Navn"
-          --     , Textfield.floatingLabel
-          --     , Textfield.text_
-          --     , Textfield.value <| aktivitet.navn
-          --     , Options.onInput EndretAktivitetsNavn
-          --     ]
-          --     []
-          showText p Typo.menu "Utdanningsprogram"
-        , visUtdanningsprogram model deltaker
-        , showText p Typo.menu "Trinn"
-        , visTrinn model deltaker
-        , Textfield.render Mdl
-            [ 3 ]
-            model.mdl
-            [ Textfield.label "Timer (skoletimer)"
-            , Textfield.floatingLabel
-            , Textfield.text_
-            , Textfield.value <| Maybe.withDefault "0" <| Maybe.map toString deltaker.timer
-            , Options.onInput EndretTimer
-            ]
-            []
-        , showText p Typo.menu "Fag"
-        , visFag model deltaker
-        , Textfield.render Mdl
-            [ 2 ]
-            model.mdl
-            [ Textfield.label "Kompetansemål"
-            , Textfield.floatingLabel
-            , Textfield.text_
-            , Textfield.textarea
-            , Textfield.rows 5
-            , Textfield.value <| Maybe.withDefault "" deltaker.kompetansemaal
-            , Options.onInput EndretKompetansemaal
-            , cs "text-area"
-            ]
-            []
-        , Options.div [] [ showText p Typo.subhead model.statusText ]
-
-        -- , showText p Typo.menu "Aktivitetstype"
-        -- , visAktivitetstype model
-        , Button.render Mdl
-            [ 10, 1 ]
-            model.mdl
-            [ Button.ripple
-            , Button.colored
-            , Button.raised
-            , Options.onClick (NavigerTilbake)
-            , css "float" "left"
-            , Options.css "margin" "6px 6px"
-            ]
-            [ text "Avbryt" ]
-        , Button.render Mdl
-            [ 10, 1 ]
-            model.mdl
-            [ Button.ripple
-            , Button.colored
-            , Options.when (not model.visLagreKnapp) Button.disabled
-            , Button.raised
-            , Options.onClick (OpprettNyDeltaker)
-            , css "float" "left"
-            , Options.css "margin" "6px 6px"
-
-            -- , css "margin-left" "1em"
-            -- , Options.onClick (SearchAnsatt "Test")
-            ]
-            [ text "Lagre" ]
+    [ cell
+        [ size All 12
         ]
+        [ Options.div
+            []
+            [ showText p Typo.menu "Utdanningsprogram"
+            , visUtdanningsprogram model deltaker
+            , showText p Typo.menu "Trinn"
+            , visTrinn model deltaker
+            , Textfield.render Mdl
+                [ 3 ]
+                model.mdl
+                [ Textfield.label "Timer (skoletimer)"
+                , Textfield.floatingLabel
+                , Textfield.text_
+                , Textfield.value <| Maybe.withDefault "0" <| Maybe.map toString deltaker.timer
+                , Options.onInput EndretTimer
+                ]
+                []
+            , showText p Typo.menu "Fag"
+            , visFag model deltaker
+            , Textfield.render Mdl
+                [ 2 ]
+                model.mdl
+                [ Textfield.label "Kompetansemål"
+                , Textfield.floatingLabel
+                , Textfield.text_
+                , Textfield.textarea
+                , Textfield.rows 5
+                , Textfield.value <| Maybe.withDefault "" deltaker.kompetansemaal
+                , Options.onInput EndretKompetansemaal
+                , cs "text-area"
+                ]
+                []
+            , Options.div [] [ showText p Typo.subhead model.statusText ]
+
+            -- , showText p Typo.menu "Aktivitetstype"
+            -- , visAktivitetstype model
+            , Button.render Mdl
+                [ 10, 1 ]
+                model.mdl
+                [ Button.ripple
+                , Button.colored
+                , Button.raised
+                , Options.onClick (NavigerTilbake)
+                , css "float" "left"
+                , Options.css "margin" "6px 6px"
+                ]
+                [ text "Avbryt" ]
+            , Button.render Mdl
+                [ 10, 1 ]
+                model.mdl
+                [ Button.ripple
+                , Button.colored
+                , Options.when (not model.visLagreKnapp) Button.disabled
+                , Button.raised
+                , Options.onClick (OpprettNyDeltaker)
+                , css "float" "left"
+                , Options.css "margin" "6px 6px"
+
+                -- , css "margin-left" "1em"
+                -- , Options.onClick (SearchAnsatt "Test")
+                ]
+                [ text "Lagre" ]
+            ]
+        ]
+    ]
 
 
 visUtdanningsprogram : Model -> DeltakerEdit -> Html Msg
@@ -553,3 +507,42 @@ visFagDropdown selectedFagId model dropdownStateFag =
     span []
         [ Html.map FagDropdown (Dropdown.view dropdownConfigFag dropdownStateFag model selectedFagId)
         ]
+
+
+dropdownConfigUtdanningsprogram : Dropdown.Config Msg Utdanningsprogram
+dropdownConfigUtdanningsprogram =
+    Dropdown.newConfig OnSelectUtdanningsprogram .navn
+        |> Dropdown.withItemClass "border-bottom border-silver p1 gray"
+        |> Dropdown.withMenuClass "border border-gray dropdown"
+        |> Dropdown.withMenuStyles [ ( "background", "white" ) ]
+        |> Dropdown.withPrompt "Velg utdanningsprogram"
+        |> Dropdown.withPromptClass "silver"
+        |> Dropdown.withSelectedClass "bold"
+        |> Dropdown.withSelectedStyles [ ( "color", "black" ) ]
+        |> Dropdown.withTriggerClass "col-4 border bg-white p1"
+
+
+dropdownConfigTrinn : Dropdown.Config Msg Trinn
+dropdownConfigTrinn =
+    Dropdown.newConfig OnSelectTrinn .navn
+        |> Dropdown.withItemClass "border-bottom border-silver p1 gray"
+        |> Dropdown.withMenuClass "border border-gray dropdown"
+        |> Dropdown.withMenuStyles [ ( "background", "white" ) ]
+        |> Dropdown.withPrompt "Velg trinn"
+        |> Dropdown.withPromptClass "silver"
+        |> Dropdown.withSelectedClass "bold"
+        |> Dropdown.withSelectedStyles [ ( "color", "black" ) ]
+        |> Dropdown.withTriggerClass "col-4 border bg-white p1"
+
+
+dropdownConfigFag : Dropdown.Config Msg Fag
+dropdownConfigFag =
+    Dropdown.newConfig OnSelectFag .navn
+        |> Dropdown.withItemClass "border-bottom border-silver p1 gray"
+        |> Dropdown.withMenuClass "border border-gray dropdown"
+        |> Dropdown.withMenuStyles [ ( "background", "white" ) ]
+        |> Dropdown.withPrompt "Velg fag"
+        |> Dropdown.withPromptClass "silver"
+        |> Dropdown.withSelectedClass "bold"
+        |> Dropdown.withSelectedStyles [ ( "color", "black" ) ]
+        |> Dropdown.withTriggerClass "col-4 border bg-white p1"
