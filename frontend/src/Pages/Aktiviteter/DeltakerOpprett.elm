@@ -9,6 +9,7 @@ import Material.Textfield as Textfield
 import Material.Options as Options exposing (when, css, cs, Style, onClick)
 import Material.Typography as Typo
 import Material.Typography as Typography
+import Material.Spinner as Loading
 import RemoteData exposing (WebData, RemoteData(..))
 import Types exposing (..)
 import Http exposing (Error)
@@ -348,7 +349,7 @@ showText elementType displayStyle text_ =
 vis : Taco -> Model -> Html Msg
 vis taco model =
     grid []
-        (visHeading model :: visOpprettDeltaker model model.deltaker)
+        (visHeading model :: visAktivitet model ++ visOpprettDeltaker model model.deltaker)
 
 
 visHeading : Model -> Grid.Cell Msg
@@ -358,6 +359,97 @@ visHeading model =
         ]
         [ Options.span [ Typo.headline ] [ text "Opprett deltaker" ]
         ]
+
+
+visAktivitet : Model -> List (Grid.Cell Msg)
+visAktivitet model =
+    case model.aktivitet of
+        NotAsked ->
+            [ cell
+                [ size All 12
+                , Elevation.e0
+                , Options.css "padding" "16px 32px"
+                ]
+                [ text "Venter på henting av .."
+                ]
+            ]
+
+        Loading ->
+            [ cell
+                [ size All 12
+                , Elevation.e0
+                , Options.css "padding" "16px 32px"
+                ]
+                [ Options.div []
+                    [ Loading.spinner [ Loading.active True ]
+                    ]
+                ]
+            ]
+
+        Failure err ->
+            [ cell
+                [ size All 12
+                , Elevation.e0
+                , Options.css "padding" "16px 32px"
+                ]
+                [ text "Feil ved henting av data"
+                ]
+            ]
+
+        Success data ->
+            visAktivitetSuksess model data
+
+
+visAktivitetSuksess : Model -> Aktivitet -> List (Grid.Cell Msg)
+visAktivitetSuksess model aktivitet =
+    [ cell
+        [ size All 4
+        , Elevation.e0
+        , Options.css "padding" "0px 32px"
+
+        -- , Options.css "display" "flex"
+        -- , Options.css "flex-direction" "column"
+        -- , Options.css "align-items" "left"
+        ]
+        [ Options.div
+            [ css "width" "100%"
+            ]
+            [ p []
+                [ Options.styled div [ Typo.title ] [ text aktivitet.navn ]
+                ]
+            , p []
+                [ Options.styled div [ Typo.caption ] [ text "Beskrivelse: " ]
+                , Options.styled div [ Typo.subhead ] [ text (aktivitet.beskrivelse) ]
+                ]
+            ]
+        ]
+    , cell
+        [ size All 8
+        , Elevation.e0
+        , Options.css "padding" "16px 32px"
+
+        -- , Options.css "display" "flex"
+        -- , Options.css "flex-direction" "column"
+        -- , Options.css "align-items" "left"
+        ]
+        [ Options.div
+            [ css "width" "100%"
+            ]
+            [ p []
+                [ Options.styled div [ Typo.caption ] [ text "Klokketimer: " ]
+                , Options.styled div [ Typo.subhead ] [ text (toString aktivitet.omfangTimer) ]
+                ]
+            , p []
+                [ Options.styled div [ Typo.caption ] [ text "Skole: " ]
+                , Options.styled div [ Typo.subhead ] [ text (aktivitet.skoleNavn) ]
+                ]
+            , p []
+                [ Options.styled div [ Typo.caption ] [ text "Aktivitetstype" ]
+                , Options.styled div [ Typo.subhead ] [ text aktivitet.aktivitetsTypeNavn ]
+                ]
+            ]
+        ]
+    ]
 
 
 visOpprettDeltaker : Model -> DeltakerEdit -> List (Grid.Cell Msg)
