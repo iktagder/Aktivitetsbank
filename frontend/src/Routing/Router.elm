@@ -117,19 +117,19 @@ update msg model =
 
         UrlChange location ->
             let
-                ( snackModel, snackCmd ) =
-                    Snackbar.add (Snackbar.toast Nothing "Endret url") model.snackbar
-
+                -- ( snackModel, snackCmd ) =
+                --     Snackbar.add (Snackbar.toast Nothing "Endret url") model.snackbar
                 route =
                     parseLocation location
 
                 ( pageModel, pageCmd ) =
                     urlUpdate model.apiEndpoint route
             in
-                ( { model | route = route, currentPage = pageModel, snackbar = snackModel }
+                -- ( { model | route = route, currentPage = pageModel, snackbar = snackModel }
+                ( { model | route = route, currentPage = pageModel }
                 , Cmd.batch
-                    [ Cmd.map Snackbar snackCmd
-                    , pageCmd
+                    [ --Cmd.map Snackbar snackCmd
+                      pageCmd
                     ]
                 , NoUpdate
                 )
