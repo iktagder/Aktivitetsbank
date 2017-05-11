@@ -28,7 +28,7 @@ type alias Model =
     , aktivitetId : String
     , deltakerId : String
     , aktivitet : WebData Aktivitet
-    , deltaker : DeltakerEdit
+    , deltaker : WebData DeltakerEdit
     , dropdownStateUtdanningsprogram : Dropdown.State
     , dropdownStateTrinn : Dropdown.State
     , dropdownStateFag : Dropdown.State
@@ -39,6 +39,7 @@ type Msg
     = Mdl (Material.Msg Msg)
     | AppMetadataResponse (WebData AppMetadata)
     | AktivitetResponse (WebData Aktivitet)
+    | DeltakerResponse (WebData DeltakerEdit)
     | OnSelectUtdanningsprogram (Maybe Utdanningsprogram)
     | OnSelectTrinn (Maybe Trinn)
     | OnSelectFag (Maybe Fag)
@@ -47,8 +48,8 @@ type Msg
     | FagDropdown (Dropdown.Msg Fag)
     | EndretKompetansemaal String
     | EndretTimer String
-    | OpprettNyDeltaker
-    | NyDeltakerRespons (Result Error NyDeltaker)
+    | EndreDeltaker
+    | EndreDeltakerRespons (Result Error ())
     | NavigerTilbake
 
 
@@ -65,25 +66,14 @@ init apiEndpoint aktivitetId deltakerId =
       , dropdownStateUtdanningsprogram = Dropdown.newState "1"
       , dropdownStateTrinn = Dropdown.newState "1"
       , dropdownStateFag = Dropdown.newState "1"
-      , deltaker = initDeltaker
+      , deltaker = RemoteData.NotAsked
       }
     , Cmd.batch
         [ (fetchAppMetadata apiEndpoint)
         , (hentAktivitetDetalj aktivitetId apiEndpoint)
+        , (hentDeltaker aktivitetId deltakerId apiEndpoint)
         ]
     )
-
-
-initDeltaker : DeltakerEdit
-initDeltaker =
-    { id = Nothing
-    , aktivitet = Nothing
-    , utdanningsprogram = Nothing
-    , trinn = Nothing
-    , fag = Nothing
-    , timer = Nothing
-    , kompetansemaal = Nothing
-    }
 
 
 hentAktivitetDetalj : String -> String -> Cmd Msg
@@ -108,6 +98,28 @@ hentAktivitetDetalj id endPoint =
             |> Cmd.map AktivitetResponse
 
 
+hentDeltaker : String -> String -> String -> Cmd Msg
+hentDeltaker aktivitetId deltakerId endPoint =
+    let
+        queryUrl =
+            endPoint ++ "aktiviteter/" ++ aktivitetId ++ "/deltakere/" ++ deltakerId
+
+        req =
+            Http.request
+                { method = "GET"
+                , headers = []
+                , url = queryUrl
+                , body = Http.emptyBody
+                , expect = Http.expectJson Decoders.decodeDeltakerEdit
+                , timeout = Nothing
+                , withCredentials = True
+                }
+    in
+        req
+            |> RemoteData.sendRequest
+            |> Cmd.map DeltakerResponse
+
+
 fetchAppMetadata : String -> Cmd Msg
 fetchAppMetadata endPoint =
     let
@@ -130,22 +142,22 @@ fetchAppMetadata endPoint =
             |> Cmd.map AppMetadataResponse
 
 
-postOpprettNyDeltaker : String -> String -> DeltakerGyldigNy -> (Result Error NyDeltaker -> msg) -> Cmd msg
-postOpprettNyDeltaker endPoint aktivitetId deltaker responseMsg =
+putEndreDeltaker : String -> String -> String -> DeltakerGyldigEndre -> (Result Error () -> msg) -> Cmd msg
+putEndreDeltaker endPoint aktivitetId deltakerId deltaker responseMsg =
     let
         url =
-            endPoint ++ "aktiviteter/" ++ aktivitetId ++ "/opprettDeltaker"
+            endPoint ++ "aktiviteter/" ++ aktivitetId ++ "/deltakere/" ++ deltakerId
 
         body =
-            encodeOpprettNyDeltaker aktivitetId deltaker |> Http.jsonBody
+            encodeEndreDeltaker aktivitetId deltaker |> Http.jsonBody
 
         req =
             Http.request
-                { method = "POST"
+                { method = "PUT"
                 , headers = []
                 , url = url
                 , body = body
-                , expect = Http.expectJson decodeNyDeltaker
+                , expect = Http.expectStringResponse (\_ -> Ok ())
                 , timeout = Nothing
                 , withCredentials = True
                 }
@@ -167,57 +179,66 @@ update msg model =
         AppMetadataResponse response ->
             ( { model | appMetadata = response }, Cmd.none, NoSharedMsg )
 
-        AktivitetResponse response ->
-            let
-                deltaker =
-                    model.deltaker
+        AktivitetResponse aktivitet ->
+            ( { model | aktivitet = aktivitet }, Cmd.none, NoSharedMsg )
 
-                oppdatertDeltaker =
-                    case response of
-                        Success aktivitet ->
-                            { deltaker | aktivitet = Just aktivitet }
-
-                        _ ->
-                            { deltaker | aktivitet = Nothing }
-            in
-                ( { model | aktivitet = response, deltaker = oppdatertDeltaker }, Cmd.none, NoSharedMsg )
+        DeltakerResponse response ->
+            ( { model | deltaker = response }, Cmd.none, NoSharedMsg )
 
         OnSelectUtdanningsprogram valg ->
             let
-                gammelDeltaker =
-                    model.deltaker
+                ( oppdatertDeltaker, visLagreKnapp, statusTekst ) =
+                    case model.deltaker of
+                        Success data ->
+                            let
+                                oppdatertDeltaker_ =
+                                    { data | utdanningsprogram = valg }
 
-                oppdatertDeltaker =
-                    { gammelDeltaker | utdanningsprogram = valg }
+                                ( visLagreKnapp_, statusTekst_ ) =
+                                    valideringsInfo oppdatertDeltaker_
+                            in
+                                ( RemoteData.Success oppdatertDeltaker_, visLagreKnapp_, statusTekst_ )
 
-                ( visLagreKnapp, statusTekst ) =
-                    valideringsInfo oppdatertDeltaker
+                        _ ->
+                            ( model.deltaker, model.visLagreKnapp, model.statusText )
             in
                 ( { model | deltaker = oppdatertDeltaker, statusText = statusTekst, visLagreKnapp = visLagreKnapp }, Cmd.none, NoSharedMsg )
 
         OnSelectTrinn valg ->
             let
-                gammelDeltaker =
-                    model.deltaker
+                ( oppdatertDeltaker, visLagreKnapp, statusTekst ) =
+                    case model.deltaker of
+                        Success data ->
+                            let
+                                oppdatertDeltaker_ =
+                                    { data | trinn = valg }
 
-                oppdatertDeltaker =
-                    { gammelDeltaker | trinn = valg }
+                                ( visLagreKnapp_, statusTekst_ ) =
+                                    valideringsInfo oppdatertDeltaker_
+                            in
+                                ( RemoteData.Success oppdatertDeltaker_, visLagreKnapp_, statusTekst_ )
 
-                ( visLagreKnapp, statusTekst ) =
-                    valideringsInfo oppdatertDeltaker
+                        _ ->
+                            ( model.deltaker, model.visLagreKnapp, model.statusText )
             in
                 ( { model | deltaker = oppdatertDeltaker, statusText = statusTekst, visLagreKnapp = visLagreKnapp }, Cmd.none, NoSharedMsg )
 
         OnSelectFag valg ->
             let
-                gammelDeltaker =
-                    model.deltaker
+                ( oppdatertDeltaker, visLagreKnapp, statusTekst ) =
+                    case model.deltaker of
+                        Success data ->
+                            let
+                                oppdatertDeltaker_ =
+                                    { data | fag = valg }
 
-                oppdatertDeltaker =
-                    { gammelDeltaker | fag = valg }
+                                ( visLagreKnapp_, statusTekst_ ) =
+                                    valideringsInfo oppdatertDeltaker_
+                            in
+                                ( RemoteData.Success oppdatertDeltaker_, visLagreKnapp_, statusTekst_ )
 
-                ( visLagreKnapp, statusTekst ) =
-                    valideringsInfo oppdatertDeltaker
+                        _ ->
+                            ( model.deltaker, model.visLagreKnapp, model.statusText )
             in
                 ( { model | deltaker = oppdatertDeltaker, statusText = statusTekst, visLagreKnapp = visLagreKnapp }, Cmd.none, NoSharedMsg )
 
@@ -244,61 +265,67 @@ update msg model =
 
         EndretKompetansemaal endretKompetansemaal ->
             let
-                gammelDeltaker =
-                    model.deltaker
+                ( oppdatertDeltaker, visLagreKnapp, statusTekst ) =
+                    case model.deltaker of
+                        Success data ->
+                            let
+                                oppdatertDeltaker_ =
+                                    { data | kompetansemaal = Just endretKompetansemaal }
 
-                oppdatertDeltaker =
-                    { gammelDeltaker | kompetansemaal = Just endretKompetansemaal }
+                                ( visLagreKnapp_, statusTekst_ ) =
+                                    valideringsInfo oppdatertDeltaker_
+                            in
+                                ( RemoteData.Success oppdatertDeltaker_, visLagreKnapp_, statusTekst_ )
 
-                ( visLagreKnapp, statusTekst ) =
-                    valideringsInfo oppdatertDeltaker
+                        _ ->
+                            ( model.deltaker, model.visLagreKnapp, model.statusText )
             in
                 ( { model | deltaker = oppdatertDeltaker, statusText = statusTekst, visLagreKnapp = visLagreKnapp }, Cmd.none, NoSharedMsg )
 
         EndretTimer endretOmfangTimer ->
             let
-                gammelDeltaker =
-                    model.deltaker
+                ( oppdatertDeltaker, visLagreKnapp, statusTekst ) =
+                    case model.deltaker of
+                        Success data ->
+                            let
+                                oppdatertDeltaker_ =
+                                    { data | timer = Just <| Result.withDefault 0 (String.toInt endretOmfangTimer) }
 
-                oppdatertDeltaker =
-                    { gammelDeltaker | timer = Just <| Result.withDefault 0 (String.toInt endretOmfangTimer) }
+                                ( visLagreKnapp_, statusTekst_ ) =
+                                    valideringsInfo oppdatertDeltaker_
+                            in
+                                ( RemoteData.Success oppdatertDeltaker_, visLagreKnapp_, statusTekst_ )
 
-                ( visLagreKnapp, statusTekst ) =
-                    valideringsInfo oppdatertDeltaker
+                        _ ->
+                            ( model.deltaker, model.visLagreKnapp, model.statusText )
             in
                 ( { model | deltaker = oppdatertDeltaker, statusText = statusTekst, visLagreKnapp = visLagreKnapp }, Cmd.none, NoSharedMsg )
 
-        OpprettNyDeltaker ->
+        EndreDeltaker ->
             let
-                validering =
-                    validerDeltakerGyldigNy model.deltaker
-
                 ( statusTekst, cmd ) =
-                    case validering of
-                        Ok resultat ->
-                            ( "", postOpprettNyDeltaker model.apiEndpoint resultat.aktivitet.id resultat NyDeltakerRespons )
+                    case model.deltaker of
+                        Success data ->
+                            case validerDeltakerGyldigEndre data of
+                                Ok resultat ->
+                                    ( "", putEndreDeltaker model.apiEndpoint model.aktivitetId model.deltakerId resultat EndreDeltakerRespons )
 
-                        Err feil ->
-                            ( feil, Cmd.none )
+                                Err feil ->
+                                    ( feil, Cmd.none )
+
+                        _ ->
+                            ( model.statusText, Cmd.none )
             in
                 ( { model | statusText = statusTekst }, cmd, NoSharedMsg )
 
-        NyDeltakerRespons (Ok nyId) ->
+        EndreDeltakerRespons (Ok _) ->
             let
                 tmp =
-                    Debug.log "ny deltaker" nyId
-
-                cmdShared =
-                    case model.aktivitet of
-                        Success data ->
-                            NavigateToAktivitet data.id
-
-                        _ ->
-                            NoSharedMsg
+                    Debug.log "endret deltaker" model.deltakerId
             in
-                ( model, Cmd.none, cmdShared )
+                ( model, Cmd.none, NavigateToAktivitet model.aktivitetId )
 
-        NyDeltakerRespons (Err error) ->
+        EndreDeltakerRespons (Err error) ->
             let
                 ( cmd, statusText, _ ) =
                     case error of
@@ -325,7 +352,7 @@ update msg model =
 
 valideringsInfo : DeltakerEdit -> ( Bool, String )
 valideringsInfo deltaker =
-    case validerDeltakerGyldigNy deltaker of
+    case validerDeltakerGyldigEndre deltaker of
         Ok _ ->
             ( True, "" )
 
@@ -333,14 +360,15 @@ valideringsInfo deltaker =
             ( False, feil )
 
 
-validerDeltakerGyldigNy : DeltakerEdit -> Result String DeltakerGyldigNy
-validerDeltakerGyldigNy form =
-    Ok DeltakerGyldigNy
-        |: required "Mangler gyldig aktivitet" form.aktivitet
-        |: required "Velg utdanningsprogram" form.utdanningsprogram
-        |: required "Velg trinn" form.trinn
+validerDeltakerGyldigEndre : DeltakerEdit -> Result String DeltakerGyldigEndre
+validerDeltakerGyldigEndre form =
+    Ok DeltakerGyldigEndre
+        |: required "Mangler gyldig deltaker id." form.id
+        |: required "Mangler gyldig aktivitet." form.aktivitetId
+        |: required "Velg utdanningsprogram." form.utdanningsprogram
+        |: required "Velg trinn." form.trinn
         |: required "Timer må fylles ut." form.timer
-        |: required "Velg fag" form.fag
+        |: required "Velg fag." form.fag
         |: notBlank "Kompetansemål må fylles ut." form.kompetansemaal
 
 
@@ -352,7 +380,7 @@ showText elementType displayStyle text_ =
 vis : Taco -> Model -> Html Msg
 vis taco model =
     grid []
-        (visHeading model :: visAktivitet model ++ visOpprettDeltaker model model.deltaker)
+        (visHeading model :: visAktivitet model ++ visDeltaker model)
 
 
 visHeading : Model -> Grid.Cell Msg
@@ -455,8 +483,47 @@ visAktivitetSuksess model aktivitet =
     ]
 
 
-visOpprettDeltaker : Model -> DeltakerEdit -> List (Grid.Cell Msg)
-visOpprettDeltaker model deltaker =
+visDeltaker : Model -> List (Grid.Cell Msg)
+visDeltaker model =
+    case model.deltaker of
+        NotAsked ->
+            [ cell
+                [ size All 12
+                , Elevation.e0
+                , Options.css "padding" "16px 32px"
+                ]
+                [ text "Venter på henting av deltaker"
+                ]
+            ]
+
+        Loading ->
+            [ cell
+                [ size All 12
+                , Elevation.e0
+                , Options.css "padding" "16px 32px"
+                ]
+                [ Options.div []
+                    [ Loading.spinner [ Loading.active True ]
+                    ]
+                ]
+            ]
+
+        Failure err ->
+            [ cell
+                [ size All 12
+                , Elevation.e0
+                , Options.css "padding" "16px 32px"
+                ]
+                [ text "Feil ved henting av data"
+                ]
+            ]
+
+        Success data ->
+            visOpprettDeltakerSuksess model data
+
+
+visOpprettDeltakerSuksess : Model -> DeltakerEdit -> List (Grid.Cell Msg)
+visOpprettDeltakerSuksess model deltaker =
     [ cell
         [ size All 4
         , Options.css "padding" "0px 32px"
@@ -529,7 +596,7 @@ visOpprettDeltaker model deltaker =
                 , Button.colored
                 , Options.when (not model.visLagreKnapp) Button.disabled
                 , Button.raised
-                , Options.onClick (OpprettNyDeltaker)
+                , Options.onClick (EndreDeltaker)
                 , css "float" "left"
                 , Options.css "margin" "6px 6px"
 

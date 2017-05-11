@@ -75,7 +75,7 @@ init apiEndpoint id =
 initDeltaker : DeltakerEdit
 initDeltaker =
     { id = Nothing
-    , aktivitet = Nothing
+    , aktivitetId = Nothing
     , utdanningsprogram = Nothing
     , trinn = Nothing
     , fag = Nothing
@@ -173,10 +173,10 @@ update msg model =
                 oppdatertDeltaker =
                     case response of
                         Success aktivitet ->
-                            { deltaker | aktivitet = Just aktivitet }
+                            { deltaker | aktivitetId = Just aktivitet.id }
 
                         _ ->
-                            { deltaker | aktivitet = Nothing }
+                            { deltaker | aktivitetId = Nothing }
             in
                 ( { model | aktivitet = response, deltaker = oppdatertDeltaker }, Cmd.none, NoSharedMsg )
 
@@ -274,7 +274,7 @@ update msg model =
                 ( statusTekst, cmd ) =
                     case validering of
                         Ok resultat ->
-                            ( "", postOpprettNyDeltaker model.apiEndpoint resultat.aktivitet.id resultat NyDeltakerRespons )
+                            ( "", postOpprettNyDeltaker model.apiEndpoint resultat.aktivitetId resultat NyDeltakerRespons )
 
                         Err feil ->
                             ( feil, Cmd.none )
@@ -334,7 +334,7 @@ valideringsInfo deltaker =
 validerDeltakerGyldigNy : DeltakerEdit -> Result String DeltakerGyldigNy
 validerDeltakerGyldigNy form =
     Ok DeltakerGyldigNy
-        |: required "Mangler gyldig aktivitet" form.aktivitet
+        |: required "Mangler gyldig aktivitet" form.aktivitetId
         |: required "Velg utdanningsprogram" form.utdanningsprogram
         |: required "Velg trinn" form.trinn
         |: required "Timer må fylles ut." form.timer

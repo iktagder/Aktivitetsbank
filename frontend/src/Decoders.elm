@@ -273,6 +273,18 @@ decodeDeltaker =
         |> Json.Decode.Pipeline.required "kompetansemaal" (Json.string)
 
 
+decodeDeltakerEdit : Json.Decoder DeltakerEdit
+decodeDeltakerEdit =
+    Json.Decode.Pipeline.decode DeltakerEdit
+        |> Json.Decode.Pipeline.custom ((field "id" Json.string) |> Json.andThen (\x -> Json.succeed <| Just x))
+        |> Json.Decode.Pipeline.custom ((field "aktivitetId" Json.string) |> Json.andThen (\x -> Json.succeed <| Just x))
+        |> Json.Decode.Pipeline.custom ((decodeDeltakerUtdanningsprogram) |> Json.andThen (\x -> Json.succeed <| Just x))
+        |> Json.Decode.Pipeline.custom ((decodeDeltakerTrinn) |> Json.andThen (\x -> Json.succeed <| Just x))
+        |> Json.Decode.Pipeline.custom ((decodeDeltakerFag) |> Json.andThen (\x -> Json.succeed <| Just x))
+        |> Json.Decode.Pipeline.custom ((field "timer" Json.int) |> Json.andThen (\x -> Json.succeed <| Just x))
+        |> Json.Decode.Pipeline.custom ((field "kompetansemaal" Json.string) |> Json.andThen (\x -> Json.succeed <| Just x))
+
+
 decodeDeltakerUtdanningsprogram : Json.Decoder Utdanningsprogram
 decodeDeltakerUtdanningsprogram =
     Json.map3 Utdanningsprogram

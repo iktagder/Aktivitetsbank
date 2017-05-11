@@ -123,7 +123,7 @@ type alias Deltaker =
 
 type alias DeltakerEdit =
     { id : Maybe String
-    , aktivitet : Maybe Aktivitet
+    , aktivitetId : Maybe String
     , utdanningsprogram : Maybe Utdanningsprogram
     , trinn : Maybe Trinn
     , fag : Maybe Fag
@@ -133,7 +133,7 @@ type alias DeltakerEdit =
 
 
 type alias DeltakerGyldigNy =
-    { aktivitet : Aktivitet
+    { aktivitetId : String
     , utdanningsprogram : Utdanningsprogram
     , trinn : Trinn
     , timer : Int
@@ -144,7 +144,7 @@ type alias DeltakerGyldigNy =
 
 type alias DeltakerGyldigEndre =
     { id : String
-    , aktivitet : Aktivitet
+    , aktivitetId : String
     , utdanningsprogram : Utdanningsprogram
     , trinn : Trinn
     , timer : Int
