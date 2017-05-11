@@ -164,6 +164,22 @@ encodeOpprettNyAktivitet model =
             |> Json.Encode.object
 
 
+encodeEndreAktivitet : AktivitetGyldigEndre -> Json.Encode.Value
+encodeEndreAktivitet model =
+    let
+        encodings =
+            [ ( "id", Json.Encode.string model.id )
+            , ( "navn", Json.Encode.string model.navn )
+            , ( "beskrivelse", Json.Encode.string model.beskrivelse )
+            , ( "omfangTimer", Json.Encode.int model.omfangTimer )
+            , ( "skoleId", Json.Encode.string model.skole.id )
+            , ( "aktivitetsTypeId", Json.Encode.string model.aktivitetsType.id )
+            ]
+    in
+        encodings
+            |> Json.Encode.object
+
+
 
 -- encodeOpprettNyAktivitet : Aktivitet -> Json.Encode.Value
 -- encodeOpprettNyAktivitet model =

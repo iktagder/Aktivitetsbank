@@ -93,6 +93,16 @@ type alias AktivitetGyldigNy =
     }
 
 
+type alias AktivitetGyldigEndre =
+    { id : String
+    , navn : String
+    , beskrivelse : String
+    , omfangTimer : Int
+    , skole : Skole
+    , aktivitetsType : AktivitetsType
+    }
+
+
 type alias Deltaker =
     { id : String
     , aktivitetId : String

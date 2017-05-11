@@ -43,8 +43,8 @@ type Msg
     | EndretAktivitetsBeskrivelse String
     | EndretAktivitetsOmfangTimer String
     | EndreAktivitet
-    | NyAktivitetRespons (Result Error NyAktivitet)
-    | NavigerHjem
+    | EndreAktivitetRespons (Result Error ())
+    | NavigerTilbake
 
 
 init : String -> String -> ( Model, Cmd Msg )
@@ -110,22 +110,22 @@ hentAktivitetDetalj id endPoint =
             |> Cmd.map AktivitetResponse
 
 
-postOpprettNyAktivitet : String -> AktivitetGyldigNy -> (Result Error NyAktivitet -> msg) -> Cmd msg
-postOpprettNyAktivitet endPoint aktivitet responseMsg =
+putEndreAktivitet : String -> String -> AktivitetGyldigEndre -> (Result Error () -> msg) -> Cmd msg
+putEndreAktivitet endPoint aktivitetId aktivitet responseMsg =
     let
         url =
-            endPoint ++ "aktiviteter/endre"
+            endPoint ++ "aktiviteter/" ++ aktivitetId
 
         body =
-            encodeOpprettNyAktivitet aktivitet |> Http.jsonBody
+            encodeEndreAktivitet aktivitet |> Http.jsonBody
 
         req =
             Http.request
-                { method = "POST"
+                { method = "PUT"
                 , headers = []
                 , url = url
                 , body = body
-                , expect = Http.expectJson decodeNyAktivitet
+                , expect = Http.expectStringResponse (\_ -> Ok ())
                 , timeout = Nothing
                 , withCredentials = True
                 }
@@ -264,9 +264,9 @@ update msg model =
                 ( statusTekst, cmd ) =
                     case model.aktivitet of
                         Success data ->
-                            case validerAktivitetGyldigNy data of
+                            case validerAktivitetGyldigEndre data of
                                 Ok resultat ->
-                                    ( "", postOpprettNyAktivitet model.apiEndpoint resultat NyAktivitetRespons )
+                                    ( "", putEndreAktivitet model.apiEndpoint model.aktivitetId resultat EndreAktivitetRespons )
 
                                 Err feil ->
                                     ( feil, Cmd.none )
@@ -276,14 +276,14 @@ update msg model =
             in
                 ( { model | statusText = statusTekst }, cmd, NoSharedMsg )
 
-        NyAktivitetRespons (Ok nyId) ->
+        EndreAktivitetRespons (Ok _) ->
             let
                 tmp =
-                    Debug.log "ny aktivitet" nyId
+                    Debug.log "endret aktivitet" model.aktivitetId
             in
-                ( model, Cmd.none, NavigateToAktivitet nyId.id )
+                ( model, Cmd.none, NavigateToAktivitet model.aktivitetId )
 
-        NyAktivitetRespons (Err error) ->
+        EndreAktivitetRespons (Err error) ->
             let
                 ( cmd, statusText, _ ) =
                     case error of
@@ -304,13 +304,13 @@ update msg model =
             in
                 ( { model | statusText = statusText }, cmd, NoSharedMsg )
 
-        NavigerHjem ->
-            ( model, Cmd.none, NavigerTilHjem )
+        NavigerTilbake ->
+            ( model, Cmd.none, NavigateToAktivitet model.aktivitetId )
 
 
 valideringsInfo : AktivitetEdit -> ( Bool, String )
 valideringsInfo aktivitet =
-    case validerAktivitetGyldigNy aktivitet of
+    case validerAktivitetGyldigEndre aktivitet of
         Ok _ ->
             ( True, "" )
 
@@ -318,9 +318,10 @@ valideringsInfo aktivitet =
             ( False, feil )
 
 
-validerAktivitetGyldigNy : AktivitetEdit -> Result String AktivitetGyldigNy
-validerAktivitetGyldigNy form =
-    Ok AktivitetGyldigNy
+validerAktivitetGyldigEndre : AktivitetEdit -> Result String AktivitetGyldigEndre
+validerAktivitetGyldigEndre form =
+    Ok AktivitetGyldigEndre
+        |: notBlank "Mangler id på aktivitet." form.id
         |: notBlank "Navn må fylles ut" form.navn
         |: notBlank "Beskrivelse må fylles ut" form.beskrivelse
         |: required "Timer må fylles ut" form.omfangTimer
@@ -461,7 +462,7 @@ visAktivitetEndreSuksess model aktivitet =
             [ Button.ripple
             , Button.colored
             , Button.raised
-            , Options.onClick (NavigerHjem)
+            , Options.onClick (NavigerTilbake)
             , css "float" "left"
             , Options.css "margin" "6px 6px"
             ]
