@@ -127,5 +127,31 @@ namespace VAF.Aktivitetsbank.Infrastructure
                 _logger.LogError("Kunne ikke lagre endret aktivitet til databasen.", e); 
             }
         }
+
+        public void EndreDeltaker(EndreDeltakerDto commandEndreDeltakerDto)
+        {
+            try
+            {
+                var gammelDeltaker = _context.DeltakerSet.Find(commandEndreDeltakerDto.Id);
+                if (gammelDeltaker != null)
+                {
+                    gammelDeltaker.Timer = commandEndreDeltakerDto.Timer;
+                    gammelDeltaker.Kompetansemaal = commandEndreDeltakerDto.Kompetansemaal;
+                    gammelDeltaker.UtdanningsprogramId = commandEndreDeltakerDto.UtdanningsprogramId;
+                    gammelDeltaker.TrinnId = commandEndreDeltakerDto.TrinnId;
+                    gammelDeltaker.FagId = commandEndreDeltakerDto.FagId;
+                    _context.SaveChanges();
+                }
+                else
+                {
+                    _logger.LogError("Kunne ikke lagre endret deltaker til databasen.", commandEndreDeltakerDto); 
+                }
+
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("Kunne ikke lagre endret deltaker til databasen.", e); 
+            }
+        }
     }
 }

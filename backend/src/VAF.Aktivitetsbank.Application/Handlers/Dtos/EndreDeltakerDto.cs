@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace VAF.Aktivitetsbank.Application.Handlers.Dtos
 {
-    public class OpprettDeltakerDto
+    public class EndreDeltakerDto
     {
         [Required]
         public Guid Id { get; set; }

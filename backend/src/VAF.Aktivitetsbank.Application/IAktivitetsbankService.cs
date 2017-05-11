@@ -14,5 +14,6 @@ namespace VAF.Aktivitetsbank.Application
         void OpprettAktivitet(OpprettAktivitetDto commandOpprettAktivitetDto);
         void OpprettDeltaker(OpprettDeltakerDto commandOpprettDeltakerDto);
         void EndreAktivitet(EndreAktivitetDto commandEndreAktivitetDto);
+        void EndreDeltaker(EndreDeltakerDto commandEndreDeltakerDto);
     }
 }

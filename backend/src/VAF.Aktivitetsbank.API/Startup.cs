@@ -111,6 +111,7 @@ namespace VAF.Aktivitetsbank.API
             builder.RegisterType<OpprettAktivitetCommandHandler>().As<ICommandHandler<OpprettAktivitetCommand>>();
             builder.RegisterType<EndreAktivitetCommandHandler>().As<ICommandHandler<EndreAktivitetCommand>>();
             builder.RegisterType<OpprettDeltakerCommandHandler>().As<ICommandHandler<OpprettDeltakerCommand>>();
+            builder.RegisterType<EndreDeltakerCommandHandler>().As<ICommandHandler<EndreDeltakerCommand>>();
             builder.RegisterType<AktivitetsbankService>().As<IAktivitetsbankService>();
             builder.RegisterType<RabbitMqNotificationService>().As<INotificationService<NumberChangedEvent>>();
 

@@ -80,5 +80,33 @@ namespace VAF.Aktivitetsbank.API.Controllers
             }
         }
 
+        [HttpPut("{aktivitetId}/deltakere/{deltakerId}")]
+        public IActionResult EndreDeltaker(Guid aktivitetId, Guid deltakerId, [FromBody] EndreDeltakerDto endreDeltakerDto)
+        {
+            if (endreDeltakerDto == null || endreDeltakerDto.Id != deltakerId || endreDeltakerDto.AktivitetId != aktivitetId)
+            {
+                _logger.LogError("Feil data ved endring av deltaker. Mangler input data.");
+                return BadRequest();
+            }
+            if (!ModelState.IsValid)
+            {
+                _logger.LogError("Feil data ved endring av deltaker. Feil i input data.", ModelState);
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                _commandDispatcher.Execute(new EndreDeltakerCommand(endreDeltakerDto));
+                return new NoContentResult();
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                _logger.LogError("Feil i endring av deltaker. Serverfeil.", e);
+                return new StatusCodeResult(500);
+            }
+        }
+
     }
 }
