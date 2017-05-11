@@ -345,7 +345,11 @@ visHeading =
     cell
         [ size All 12
         ]
-        [ Options.span [ Typo.headline ] [ text "Endre aktivitet" ]
+        [ Options.span
+            [ Typo.headline
+            , Options.css "padding" "16px 32px"
+            ]
+            [ text "Endre aktivitet" ]
         ]
 
 

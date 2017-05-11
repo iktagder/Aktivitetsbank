@@ -388,7 +388,11 @@ visHeading model =
     cell
         [ size All 12
         ]
-        [ Options.span [ Typo.headline ] [ text "Endre deltaker" ]
+        [ Options.span
+            [ Typo.headline
+            , Options.css "padding" "16px 32px"
+            ]
+            [ text "Endre deltaker" ]
         ]
 
 

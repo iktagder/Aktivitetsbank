@@ -275,7 +275,11 @@ visHeading model =
             , cs "vis-navigering"
             ]
         , Tooltip.render Mdl [ 125, 100 ] model.mdl [ Tooltip.large ] [ text "Endre aktivitet" ]
-        , Options.span [ Typo.headline ] [ text "Aktivitet detaljer" ]
+        , Options.span
+            [ Typo.headline
+            , Options.css "padding" "16px 32px"
+            ]
+            [ text "Aktivitet detaljer" ]
         ]
 
 

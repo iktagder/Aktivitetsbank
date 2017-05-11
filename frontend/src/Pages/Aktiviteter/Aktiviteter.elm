@@ -257,6 +257,11 @@ view taco model =
                 model.mdl
                 [ Tooltip.large ]
                 [ text "Filtrer aktiviteter" ]
+            , Options.span
+                [ Typo.headline
+                , Options.css "padding" "16px 32px"
+                ]
+                [ text "Aktiviteter" ]
             ]
 
         -- [ Button.render Mdl
