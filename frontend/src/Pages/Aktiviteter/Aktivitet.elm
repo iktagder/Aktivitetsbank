@@ -6,6 +6,7 @@ import Material.Grid as Grid exposing (grid, size, cell, Device(..))
 import Material.Elevation as Elevation
 import Material.Textfield as Textfield
 import Material.Icon as Icon
+import Material.Tooltip as Tooltip
 import Material.List as Lists
 import Material.Table as Table
 import Material.Button as Button
@@ -47,6 +48,7 @@ type Msg
     | AktivitetstypeDropdown (Dropdown.Msg AktivitetsType)
     | VisDeltakerOpprett
     | NavigerHjem
+    | NavigerTilEndreDeltaker String String
 
 
 init : String -> String -> ( Model, Cmd Msg )
@@ -212,6 +214,9 @@ update msg model =
 
         NavigerHjem ->
             ( model, Cmd.none, NavigerTilHjem )
+
+        NavigerTilEndreDeltaker aktivitetId deltakerId ->
+            ( model, Cmd.none, NavigerTilDeltakerEndre aktivitetId deltakerId )
 
 
 showText : (List (Html.Attribute m) -> List (Html msg) -> a) -> Options.Property c m -> String -> a
@@ -531,7 +536,7 @@ visAktivitetDeltakerTabell model deltakere =
                 , Table.th [ css "width" "10%" ]
                     [ showText div Typo.body2 "Årstrinn"
                     ]
-                , Table.th [ css "width" "20%", css "text-align" "left" ]
+                , Table.th [ css "width" "15%", css "text-align" "left" ]
                     [ showText span Typo.body2 "Fag"
                     ]
                 , Table.th [ css "width" "10%", css "text-align" "left" ]
@@ -540,24 +545,28 @@ visAktivitetDeltakerTabell model deltakere =
                 , Table.th [ css "width" "40%", css "text-align" "left" ]
                     [ showText span Typo.body2 "Kompetansemål"
                     ]
+                , Table.th [ css "width" "5%" ]
+                    [ showText div Typo.body2 "Handling"
+                    ]
                 ]
             ]
         , Table.tbody []
             (deltakere
-                |> List.indexedMap (\idx item -> visAktivitetDeltakerTabellRad idx item model.mdl)
+                |> List.indexedMap (\idx item -> visAktivitetDeltakerTabellRad idx model.aktivitetId item model.mdl)
             )
         ]
 
 
-visAktivitetDeltakerTabellRad : Int -> Deltaker -> Material.Model -> Html msg
-visAktivitetDeltakerTabellRad idx model outerMdl =
+visAktivitetDeltakerTabellRad : Int -> String -> Deltaker -> Material.Model -> Html Msg
+visAktivitetDeltakerTabellRad idx aktivitetId model outerMdl =
     Table.tr
         []
-        [ Table.td [ css "text-align" "left" ] [ text model.utdanningsprogramNavn ]
-        , Table.td [ css "text-align" "left" ] [ text model.trinnNavn ]
-        , Table.td [ css "text-align" "left" ] [ text model.fagNavn ]
+        [ Table.td [ css "text-align" "left", cs "wrapword" ] [ text model.utdanningsprogramNavn ]
+        , Table.td [ css "text-align" "left", cs "wrapword" ] [ text model.trinnNavn ]
+        , Table.td [ css "text-align" "left", cs "wrapword" ] [ text model.fagNavn ]
         , Table.td [ Table.numeric ] [ text <| toString model.timer ]
         , Table.td [ css "text-align" "left", cs "wrapword" ] [ text (String.left 600 model.kompetansemaal) ]
+        , Table.td [] [ Icon.view "mode_edit" [ cs "vis-navigering", Options.onClick (NavigerTilEndreDeltaker aktivitetId model.id), Tooltip.attach Mdl [ 120 ] ], Tooltip.render Mdl [ 120 ] outerMdl [ Tooltip.large ] [ text "Endre deltaker" ] ]
         ]
 
 

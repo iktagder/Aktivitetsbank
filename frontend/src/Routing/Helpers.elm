@@ -1,7 +1,7 @@
 module Routing.Helpers exposing (..)
 
 import Navigation exposing (Location)
-import UrlParser as Url exposing ((</>))
+import UrlParser as Url exposing ((</>), s, string)
 import Types exposing (..)
 
 
@@ -23,6 +23,9 @@ reverseRoute route =
         RouteDeltakerOpprett id ->
             "#/opprettdeltaker/" ++ id
 
+        RouteDeltakerEndre aktivitetId deltakerId ->
+            "#/aktiviteter/" ++ aktivitetId ++ "/endredeltaker/" ++ deltakerId
+
         _ ->
             "#/"
 
@@ -34,6 +37,7 @@ routeParser =
         , Url.map RouteAktivitetsListe (Url.s "aktiviteter")
         , Url.map RouteAktivitetOpprett (Url.s "opprettaktivitet")
         , Url.map RouteAktivitetsDetalj (Url.s "aktiviteter" </> Url.string)
+        , Url.map RouteDeltakerEndre (Url.s "aktiviteter" </> Url.string </> s "endredeltaker" </> Url.string)
         , Url.map RouteDeltakerOpprett (Url.s "opprettdeltaker" </> Url.string)
         , Url.map RouteAktivitetEndre (Url.s "endreaktivitet" </> Url.string)
         ]

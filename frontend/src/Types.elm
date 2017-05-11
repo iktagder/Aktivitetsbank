@@ -142,12 +142,24 @@ type alias DeltakerGyldigNy =
     }
 
 
+type alias DeltakerGyldigEndre =
+    { id : String
+    , aktivitet : Aktivitet
+    , utdanningsprogram : Utdanningsprogram
+    , trinn : Trinn
+    , timer : Int
+    , fag : Fag
+    , kompetansemaal : String
+    }
+
+
 type Route
     = RouteAktivitetsListe
     | RouteAktivitetsDetalj String
     | RouteAktivitetEndre String
     | RouteAktivitetOpprett
     | RouteDeltakerOpprett String
+    | RouteDeltakerEndre String String
     | NotFoundRoute
 
 
@@ -164,6 +176,7 @@ type SharedMsg
     | NavigerTilAktivitetOpprett
     | NavigerTilAktivitetEndre String
     | NavigerTilDeltakerOpprett String
+    | NavigerTilDeltakerEndre String String
     | NavigerTilHjem
 
 

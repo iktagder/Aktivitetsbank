@@ -220,6 +220,23 @@ encodeOpprettNyDeltaker aktivitetId model =
             |> Json.Encode.object
 
 
+encodeEndreDeltaker : String -> DeltakerGyldigEndre -> Json.Encode.Value
+encodeEndreDeltaker aktivitetId model =
+    let
+        encodings =
+            [ ( "id", Json.Encode.string model.id )
+            , ( "aktivitetId", Json.Encode.string aktivitetId )
+            , ( "kompetansemaal", Json.Encode.string model.kompetansemaal )
+            , ( "timer", Json.Encode.int model.timer )
+            , ( "utdanningsprogramId", Json.Encode.string model.utdanningsprogram.id )
+            , ( "trinnId", Json.Encode.string model.trinn.id )
+            , ( "fagId", Json.Encode.string model.fag.id )
+            ]
+    in
+        encodings
+            |> Json.Encode.object
+
+
 decodeAktivitetListe : Json.Decoder (List Aktivitet)
 decodeAktivitetListe =
     Json.list decodeAktivitet
