@@ -39,7 +39,7 @@ namespace VAF.Aktivitetsbank.API.Controllers
         {
             var userInfo = new UserInfo();
             //userInfo.brukernavn = "Username: " + WindowsIdentity.GetCurrent().Name;
-            userInfo.brukernavn = "Username: " + HttpContext.User.Identity.Name;
+            userInfo.brukernavn = HttpContext.User.Identity.Name;
             _logger.LogInformation("Current ad api:{0}", _options.AdApi);
             _logger.LogInformation("Current ad api path:{0}", _options.AdApiPath);
             _logger.LogWarning("user logged in: {0}", userInfo.brukernavn);
