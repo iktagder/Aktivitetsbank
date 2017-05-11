@@ -9,6 +9,7 @@ import Material.Textfield as Textfield
 import Material.Options as Options exposing (when, css, cs, Style, onClick)
 import Material.Typography as Typo
 import Material.Typography as Typography
+import Material.Spinner as Loading
 import RemoteData exposing (WebData, RemoteData(..))
 import Types exposing (..)
 import Http exposing (Error)
@@ -24,7 +25,7 @@ type alias Model =
     , visLagreKnapp : Bool
     , appMetadata : WebData AppMetadata
     , aktivitetId : String
-    , aktivitet : AktivitetEdit
+    , aktivitet : WebData AktivitetEdit
     , dropdownStateSkole : Dropdown.State
     , dropdownStateAktivitetstype : Dropdown.State
     }
@@ -33,6 +34,7 @@ type alias Model =
 type Msg
     = Mdl (Material.Msg Msg)
     | AppMetadataResponse (WebData AppMetadata)
+    | AktivitetResponse (WebData AktivitetEdit)
     | OnSelectSkole (Maybe Skole)
     | SkoleDropdown (Dropdown.Msg Skole)
     | OnSelectAktivitetstype (Maybe AktivitetsType)
@@ -40,7 +42,7 @@ type Msg
     | EndretAktivitetsNavn String
     | EndretAktivitetsBeskrivelse String
     | EndretAktivitetsOmfangTimer String
-    | OpprettNyAktivitet
+    | EndreAktivitet
     | NyAktivitetRespons (Result Error NyAktivitet)
     | NavigerHjem
 
@@ -55,21 +57,13 @@ init apiEndpoint id =
       , dropdownStateSkole = Dropdown.newState "1"
       , dropdownStateAktivitetstype = Dropdown.newState "1"
       , aktivitetId = id
-      , aktivitet = initAktivitet
+      , aktivitet = RemoteData.NotAsked
       }
-    , fetchAppMetadata apiEndpoint
+    , Cmd.batch
+        [ (hentAktivitetDetalj id apiEndpoint)
+        , fetchAppMetadata apiEndpoint
+        ]
     )
-
-
-initAktivitet : AktivitetEdit
-initAktivitet =
-    { id = Nothing
-    , navn = Nothing
-    , beskrivelse = Nothing
-    , omfangTimer = Nothing
-    , skole = Nothing
-    , aktivitetsType = Nothing
-    }
 
 
 fetchAppMetadata : String -> Cmd Msg
@@ -92,6 +86,28 @@ fetchAppMetadata endPoint =
         req
             |> RemoteData.sendRequest
             |> Cmd.map AppMetadataResponse
+
+
+hentAktivitetDetalj : String -> String -> Cmd Msg
+hentAktivitetDetalj id endPoint =
+    let
+        queryUrl =
+            endPoint ++ "aktiviteter/" ++ id
+
+        req =
+            Http.request
+                { method = "GET"
+                , headers = []
+                , url = queryUrl
+                , body = Http.emptyBody
+                , expect = Http.expectJson Decoders.decodeAktivitetEdit
+                , timeout = Nothing
+                , withCredentials = True
+                }
+    in
+        req
+            |> RemoteData.sendRequest
+            |> Cmd.map AktivitetResponse
 
 
 postOpprettNyAktivitet : String -> AktivitetGyldigNy -> (Result Error NyAktivitet -> msg) -> Cmd msg
@@ -131,16 +147,25 @@ update msg model =
         AppMetadataResponse response ->
             ( { model | appMetadata = response }, Cmd.none, NoSharedMsg )
 
+        AktivitetResponse response ->
+            ( { model | aktivitet = response }, Cmd.none, NoSharedMsg )
+
         OnSelectSkole skole ->
             let
-                gammelAktivitet =
-                    model.aktivitet
+                ( oppdatertAktivitet, visLagreKnapp, statusTekst ) =
+                    case model.aktivitet of
+                        Success data ->
+                            let
+                                oppdatertAktivitet_ =
+                                    { data | skole = skole }
 
-                oppdatertAktivitet =
-                    { gammelAktivitet | skole = skole }
+                                ( visLagreKnapp_, statusTekst_ ) =
+                                    valideringsInfo oppdatertAktivitet_
+                            in
+                                ( RemoteData.Success oppdatertAktivitet_, visLagreKnapp_, statusTekst_ )
 
-                ( visLagreKnapp, statusTekst ) =
-                    valideringsInfo oppdatertAktivitet
+                        _ ->
+                            ( model.aktivitet, model.visLagreKnapp, model.statusText )
             in
                 ( { model | aktivitet = oppdatertAktivitet, statusText = statusTekst, visLagreKnapp = visLagreKnapp }, Cmd.none, NoSharedMsg )
 
@@ -153,14 +178,20 @@ update msg model =
 
         OnSelectAktivitetstype aktivitetstype ->
             let
-                gammelAktivitet =
-                    model.aktivitet
+                ( oppdatertAktivitet, visLagreKnapp, statusTekst ) =
+                    case model.aktivitet of
+                        Success data ->
+                            let
+                                oppdatertAktivitet_ =
+                                    { data | aktivitetsType = aktivitetstype }
 
-                oppdatertAktivitet =
-                    { gammelAktivitet | aktivitetsType = aktivitetstype }
+                                ( visLagreKnapp_, statusTekst_ ) =
+                                    valideringsInfo oppdatertAktivitet_
+                            in
+                                ( RemoteData.Success oppdatertAktivitet_, visLagreKnapp_, statusTekst_ )
 
-                ( visLagreKnapp, statusTekst ) =
-                    valideringsInfo oppdatertAktivitet
+                        _ ->
+                            ( model.aktivitet, model.visLagreKnapp, model.statusText )
             in
                 ( { model | aktivitet = oppdatertAktivitet, statusText = statusTekst, visLagreKnapp = visLagreKnapp }, Cmd.none, NoSharedMsg )
 
@@ -173,55 +204,75 @@ update msg model =
 
         EndretAktivitetsNavn endretNavn ->
             let
-                gammelAktivitet =
-                    model.aktivitet
+                ( oppdatertAktivitet, visLagreKnapp, statusTekst ) =
+                    case model.aktivitet of
+                        Success data ->
+                            let
+                                oppdatertAktivitet_ =
+                                    { data | navn = Just endretNavn }
 
-                oppdatertAktivitet =
-                    { gammelAktivitet | navn = Just endretNavn }
+                                ( visLagreKnapp_, statusTekst_ ) =
+                                    valideringsInfo oppdatertAktivitet_
+                            in
+                                ( RemoteData.Success oppdatertAktivitet_, visLagreKnapp_, statusTekst_ )
 
-                ( visLagreKnapp, statusTekst ) =
-                    valideringsInfo oppdatertAktivitet
+                        _ ->
+                            ( model.aktivitet, model.visLagreKnapp, model.statusText )
             in
                 ( { model | aktivitet = oppdatertAktivitet, statusText = statusTekst, visLagreKnapp = visLagreKnapp }, Cmd.none, NoSharedMsg )
 
         EndretAktivitetsBeskrivelse endretBeskrivelse ->
             let
-                gammelAktivitet =
-                    model.aktivitet
+                ( oppdatertAktivitet, visLagreKnapp, statusTekst ) =
+                    case model.aktivitet of
+                        Success data ->
+                            let
+                                oppdatertAktivitet_ =
+                                    { data | beskrivelse = Just endretBeskrivelse }
 
-                oppdatertAktivitet =
-                    { gammelAktivitet | beskrivelse = Just endretBeskrivelse }
+                                ( visLagreKnapp_, statusTekst_ ) =
+                                    valideringsInfo oppdatertAktivitet_
+                            in
+                                ( RemoteData.Success oppdatertAktivitet_, visLagreKnapp_, statusTekst_ )
 
-                ( visLagreKnapp, statusTekst ) =
-                    valideringsInfo oppdatertAktivitet
+                        _ ->
+                            ( model.aktivitet, model.visLagreKnapp, model.statusText )
             in
                 ( { model | aktivitet = oppdatertAktivitet, statusText = statusTekst, visLagreKnapp = visLagreKnapp }, Cmd.none, NoSharedMsg )
 
         EndretAktivitetsOmfangTimer endretOmfangTimer ->
             let
-                gammelAktivitet =
-                    model.aktivitet
+                ( oppdatertAktivitet, visLagreKnapp, statusTekst ) =
+                    case model.aktivitet of
+                        Success data ->
+                            let
+                                oppdatertAktivitet_ =
+                                    { data | omfangTimer = Just <| Result.withDefault 0 (String.toInt endretOmfangTimer) }
 
-                oppdatertAktivitet =
-                    { gammelAktivitet | omfangTimer = Just <| Result.withDefault 0 (String.toInt endretOmfangTimer) }
+                                ( visLagreKnapp_, statusTekst_ ) =
+                                    valideringsInfo oppdatertAktivitet_
+                            in
+                                ( RemoteData.Success oppdatertAktivitet_, visLagreKnapp_, statusTekst_ )
 
-                ( visLagreKnapp, statusTekst ) =
-                    valideringsInfo oppdatertAktivitet
+                        _ ->
+                            ( model.aktivitet, model.visLagreKnapp, model.statusText )
             in
                 ( { model | aktivitet = oppdatertAktivitet, statusText = statusTekst, visLagreKnapp = visLagreKnapp }, Cmd.none, NoSharedMsg )
 
-        OpprettNyAktivitet ->
+        EndreAktivitet ->
             let
-                validering =
-                    validerAktivitetGyldigNy model.aktivitet
-
                 ( statusTekst, cmd ) =
-                    case validering of
-                        Ok resultat ->
-                            ( "", postOpprettNyAktivitet model.apiEndpoint resultat NyAktivitetRespons )
+                    case model.aktivitet of
+                        Success data ->
+                            case validerAktivitetGyldigNy data of
+                                Ok resultat ->
+                                    ( "", postOpprettNyAktivitet model.apiEndpoint resultat NyAktivitetRespons )
 
-                        Err feil ->
-                            ( feil, Cmd.none )
+                                Err feil ->
+                                    ( feil, Cmd.none )
+
+                        _ ->
+                            ( model.statusText, Cmd.none )
             in
                 ( { model | statusText = statusTekst }, cmd, NoSharedMsg )
 
@@ -285,9 +336,7 @@ showText elementType displayStyle text_ =
 view : Taco -> Model -> Html Msg
 view taco model =
     grid []
-        (visHeading
-            :: visOpprettAktivitet model model.aktivitet
-        )
+        (visHeading :: visAktivitet model)
 
 
 visHeading : Grid.Cell Msg
@@ -299,8 +348,47 @@ visHeading =
         ]
 
 
-visOpprettAktivitet : Model -> AktivitetEdit -> List (Grid.Cell Msg)
-visOpprettAktivitet model aktivitet =
+visAktivitet : Model -> List (Grid.Cell Msg)
+visAktivitet model =
+    case model.aktivitet of
+        NotAsked ->
+            [ cell
+                [ size All 12
+                , Elevation.e0
+                , Options.css "padding" "16px 32px"
+                ]
+                [ text "Venter på henting av .."
+                ]
+            ]
+
+        Loading ->
+            [ cell
+                [ size All 12
+                , Elevation.e0
+                , Options.css "padding" "16px 32px"
+                ]
+                [ Options.div []
+                    [ Loading.spinner [ Loading.active True ]
+                    ]
+                ]
+            ]
+
+        Failure err ->
+            [ cell
+                [ size All 12
+                , Elevation.e0
+                , Options.css "padding" "16px 32px"
+                ]
+                [ text "Feil ved henting av data"
+                ]
+            ]
+
+        Success data ->
+            visAktivitetEndreSuksess model data
+
+
+visAktivitetEndreSuksess : Model -> AktivitetEdit -> List (Grid.Cell Msg)
+visAktivitetEndreSuksess model aktivitet =
     [ cell
         [ size All 6
         , Elevation.e0
@@ -385,7 +473,7 @@ visOpprettAktivitet model aktivitet =
             , Button.colored
             , Button.raised
             , Options.when (not model.visLagreKnapp) Button.disabled
-            , Options.onClick (OpprettNyAktivitet)
+            , Options.onClick (EndreAktivitet)
             , css "float" "left"
             , Options.css "margin" "6px 6px"
 

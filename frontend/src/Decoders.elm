@@ -123,6 +123,17 @@ decodeAktivitet =
         |> Json.Decode.Pipeline.custom ((decodeAktivitetAktivitetsType) |> Json.andThen (\x -> Json.succeed <| Just x))
 
 
+decodeAktivitetEdit : Json.Decoder AktivitetEdit
+decodeAktivitetEdit =
+    Json.Decode.Pipeline.decode AktivitetEdit
+        |> Json.Decode.Pipeline.custom ((field "id" Json.string) |> Json.andThen (\x -> Json.succeed <| Just x))
+        |> Json.Decode.Pipeline.custom ((field "navn" Json.string) |> Json.andThen (\x -> Json.succeed <| Just x))
+        |> Json.Decode.Pipeline.custom ((field "beskrivelse" Json.string) |> Json.andThen (\x -> Json.succeed <| Just x))
+        |> Json.Decode.Pipeline.custom ((field "omfangTimer" Json.int) |> Json.andThen (\x -> Json.succeed <| Just x))
+        |> Json.Decode.Pipeline.custom ((decodeAktivitetSkole) |> Json.andThen (\x -> Json.succeed <| Just x))
+        |> Json.Decode.Pipeline.custom ((decodeAktivitetAktivitetsType) |> Json.andThen (\x -> Json.succeed <| Just x))
+
+
 decodeAktivitetSkole : Json.Decoder Skole
 decodeAktivitetSkole =
     Json.map3 Skole
