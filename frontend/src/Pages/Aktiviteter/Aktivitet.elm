@@ -235,34 +235,46 @@ visHeading model =
     cell
         [ size All 12
         ]
-        [ Button.render Mdl
-            [ 199, 1 ]
-            model.mdl
-            [ Button.fab
-            , Button.ripple
+        [ Icon.view "home"
+            [ Tooltip.attach Mdl [ 123, 100 ]
+            , Options.css "float" "right"
+            , Icon.size36
             , Options.onClick NavigerHjem
-            , Options.css "float" "right"
+            , cs "vis-navigering"
             ]
-            [ Icon.i "home" ]
-        , Button.render Mdl
-            [ 199, 2 ]
-            model.mdl
-            [ Button.fab
-            , Button.ripple
-
-            -- , Options.onClick OpprettAktivitet
-            , Options.css "float" "right"
+        , Tooltip.render Mdl
+            [ 123
+            , 100
             ]
-            [ Icon.i "content_copy" ]
-        , Button.render Mdl
-            [ 199, 3 ]
             model.mdl
-            [ Button.fab
-            , Button.ripple
+            [ Tooltip.large
+            ]
+            [ text "Gå til hovedside"
+            ]
+        , Icon.view "content_copy"
+            [ Tooltip.attach Mdl
+                [ 124
+                , 100
+                ]
+            , Options.css "float" "right"
+            , Icon.size36
+            , cs "vis-navigering"
+            ]
+        , Tooltip.render Mdl
+            [ 124
+            , 100
+            ]
+            model.mdl
+            [ Tooltip.large ]
+            [ text "Kopier aktivitet" ]
+        , Icon.view "mode_edit"
+            [ Tooltip.attach Mdl [ 125, 100 ]
+            , Options.css "float" "right"
             , Options.onClick <| VisAktivitetEndre model.aktivitetId
-            , Options.css "float" "right"
+            , Icon.size36
+            , cs "vis-navigering"
             ]
-            [ Icon.i "mode_edit" ]
+        , Tooltip.render Mdl [ 125, 100 ] model.mdl [ Tooltip.large ] [ text "Endre aktivitet" ]
         , Options.span [ Typo.headline ] [ text "Aktivitet detaljer" ]
         ]
 
@@ -480,10 +492,32 @@ visAktivitetDeltakereSuksess model deltakere =
     [ cell
         [ size All 12
         , Elevation.e0
+        , css "flex-direction" "row"
+        , css "align-items" "stretch"
+        , css "justify-content" "flex-start"
+        , css "align-content" "stretch"
 
         -- , Options.css "padding" "16px 32px"
         ]
-        [ showText p Typo.headline "Deltakere"
+        -- [ showText span Typo.headline "Deltakere"
+        -- , Tooltip.attach Mdl [ 120 ] ], Tooltip.render Mdl [ 120 ] outerMdl [ Tooltip.large ] [ text "Endre deltaker" ]
+        [ Options.span
+            [ Typo.headline
+            , Options.css "float" "left"
+            , Options.css "margin" "16px 16px"
+            ]
+            [ text "Deltakere" ]
+        , Icon.view "add"
+            [ Tooltip.attach Mdl
+                [ 121
+                ]
+            , Options.css "float" "left"
+            , Options.onClick VisDeltakerOpprett
+            , Icon.size36
+            , Options.css "margin" "12px 16px"
+            , cs "vis-navigering"
+            ]
+        , Tooltip.render Mdl [ 121 ] model.mdl [ Tooltip.large ] [ text "Opprett deltaker på aktiviteten" ]
         ]
     , cell
         [ size All 12
@@ -494,32 +528,31 @@ visAktivitetDeltakereSuksess model deltakere =
         -- [ visAktivitetDeltakerListe model deltakere
         [ visAktivitetDeltakerTabell model deltakere
         ]
-    , cell
-        [ size All 12
-        , Elevation.e0
 
-        -- , Options.css "padding" "16px 32px"
-        -- , Options.css "display" "flex"
-        -- , Options.css "flex-direction" "column"
-        -- , Options.css "float" "left"
-        , css "flex-direction" "row"
-        , css "align-items" "stretch"
-        , css "justify-content" "flex-start"
-        , css "align-content" "stretch"
-
-        -- , Options.css "align-items" "left"
-        ]
-        [ Options.span [ Typo.menu, Options.css "float" "left" ] [ text "Legg til deltaker" ]
-        , Button.render Mdl
-            [ 0, 4, 2 ]
-            model.mdl
-            [ Button.fab
-            , Button.ripple
-            , Options.onClick VisDeltakerOpprett
-            , Options.css "float" "left"
-            ]
-            [ Icon.i "add" ]
-        ]
+    -- , cell
+    --     [ size All 12
+    --     , Elevation.e0
+    --     -- , Options.css "padding" "16px 32px"
+    --     -- , Options.css "display" "flex"
+    --     -- , Options.css "flex-direction" "column"
+    --     -- , Options.css "float" "left"
+    --     , css "flex-direction" "row"
+    --     , css "align-items" "stretch"
+    --     , css "justify-content" "flex-start"
+    --     , css "align-content" "stretch"
+    --     -- , Options.css "align-items" "left"
+    --     ]
+    --     [ Options.span [ Typo.menu, Options.css "float" "left" ] [ text "Legg til deltaker" ]
+    --     , Button.render Mdl
+    --         [ 0, 4, 2 ]
+    --         model.mdl
+    --         [ Button.fab
+    --         , Button.ripple
+    --         , Options.onClick VisDeltakerOpprett
+    --         , Options.css "float" "left"
+    --         ]
+    --         [ Icon.i "add" ]
+    --     ]
     ]
 
 

@@ -7,6 +7,7 @@ import Material.Elevation as Elevation
 import Material.Color as Color
 import Material.Button as Button
 import Material.Icon as Icon
+import Material.Tooltip as Tooltip
 import Material.Options as Options exposing (when, css, cs, Style, onClick)
 import Material.Typography as Typo
 import Material.Table as Table
@@ -223,28 +224,63 @@ view taco model =
         [ cell
             [ size All 12
             ]
-            [ Button.render Mdl
-                [ 0 ]
-                model.mdl
-                [ Button.fab
-                , Button.ripple
+            [ Icon.view "add"
+                [ Tooltip.attach Mdl [ 123, 100 ]
+                , Options.css "float" "right"
+                , Icon.size36
                 , Options.onClick OpprettAktivitet
-                , Options.css "float" "right"
-                , Options.css "margin-left" "3px"
+                , cs "vis-navigering"
                 ]
-                [ Icon.i "add" ]
-            , Button.render Mdl
-                [ 1 ]
+            , Tooltip.render Mdl
+                [ 123
+                , 100
+                ]
                 model.mdl
-                [ Button.fab
-                , Button.ripple
-                , Options.onClick VisFilter
-                , Options.css "float" "right"
+                [ Tooltip.large
                 ]
-                [ Icon.i "search" ]
-            , Options.span [ Typo.title ]
-                [ text "Aktiviteter" ]
+                [ text "Opprett aktivitet"
+                ]
+            , Icon.view "search"
+                [ Tooltip.attach Mdl
+                    [ 124
+                    , 100
+                    ]
+                , Options.css "float" "right"
+                , Icon.size36
+                , Options.onClick VisFilter
+                , cs "vis-navigering"
+                ]
+            , Tooltip.render Mdl
+                [ 124
+                , 100
+                ]
+                model.mdl
+                [ Tooltip.large ]
+                [ text "Filtrer aktiviteter" ]
             ]
+
+        -- [ Button.render Mdl
+        --     [ 0 ]
+        --     model.mdl
+        --     [ Button.fab
+        --     , Button.ripple
+        --     , Options.onClick OpprettAktivitet
+        --     , Options.css "float" "right"
+        --     , Options.css "margin-left" "3px"
+        --     ]
+        --     [ Icon.i "add" ]
+        -- , Button.render Mdl
+        --     [ 1 ]
+        --     model.mdl
+        --     [ Button.fab
+        --     , Button.ripple
+        --     , Options.onClick VisFilter
+        --     , Options.css "float" "right"
+        --     ]
+        --     [ Icon.i "" ]
+        -- , Options.span [ Typo.title ]
+        --     [ text "Aktiviteter" ]
+        -- ]
         , getFilterCell model
         , cell
             [ size All (getAntallAktivietCeller model)
