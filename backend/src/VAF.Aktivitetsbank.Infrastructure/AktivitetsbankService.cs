@@ -181,7 +181,7 @@ namespace VAF.Aktivitetsbank.Infrastructure
             try
             {
                 var gammelAktivitet =
-                    _context.AktivitetSet.Include(x => x.Deltakere)
+                    _context.AktivitetSet.Include(x => x.Deltakere).Include(x => x.Skole)
                         .FirstOrDefault(x => x.Id == commandKopierAktivitetDto.Id);
                 if (gammelAktivitet != null)
                 {
@@ -189,7 +189,7 @@ namespace VAF.Aktivitetsbank.Infrastructure
                     {
                         Id = commandKopierAktivitetDto.NyAktivitetId,
                         Navn = gammelAktivitet.Navn,
-                        Beskrivelse = gammelAktivitet.Beskrivelse,
+                        Beskrivelse = gammelAktivitet.Beskrivelse + " - kopiert " + DateTime.Now.ToString("d/M/yyyy HH:mm") + " fra " + gammelAktivitet.Skole.Navn,
                         OmfangTimer = gammelAktivitet.OmfangTimer,
                         SkoleId = commandKopierAktivitetDto.SkoleId,
                         AktivitetstypeId = gammelAktivitet.AktivitetstypeId
