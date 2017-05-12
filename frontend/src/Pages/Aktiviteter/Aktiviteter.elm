@@ -511,7 +511,7 @@ visAktivitetTabellRad idx model outerMdl =
         [ onClick <| VisAktivitetDetalj model.id, cs "vis-navigering" ]
         [ Table.td [ css "text-align" "left", cs "wrapword" ] [ text model.navn ]
         , Table.td [ css "text-align" "left", cs "wrapword" ] [ text model.aktivitetsTypeNavn ]
-        , Table.td [ css "text-align" "left" ] [ text model.skoleNavn ]
+        , Table.td [ css "text-align" "left", cs "wrapword" ] [ text model.skoleNavn ]
         , Table.td [ Table.numeric ] [ text <| toString model.omfangTimer ]
         , Table.td [ css "text-align" "left", cs "wrapword" ] [ text (String.left 600 model.beskrivelse) ]
         ]
