@@ -74,32 +74,50 @@ namespace VAF.Aktivitetsbank.Infrastructure
 
         public void OpprettAktivitet(OpprettAktivitetDto commandOpprettAktivitetDto)
         {
-            var aktivitet = _context.AktivitetSet.Add(new Aktivitet
-                {
-                    Id = commandOpprettAktivitetDto.Id,
-                    Navn = commandOpprettAktivitetDto.Navn,
-                    Beskrivelse = commandOpprettAktivitetDto.Beskrivelse,
-                    OmfangTimer = commandOpprettAktivitetDto.OmfangTimer,
-                    SkoleId = commandOpprettAktivitetDto.SkoleId,
-                    AktivitetstypeId = commandOpprettAktivitetDto.AktivitetstypeId
-                }
-            );
-            _context.SaveChanges();
+            try
+            {
+                var aktivitet = _context.AktivitetSet.Add(new Aktivitet
+                    {
+                        Id = commandOpprettAktivitetDto.Id,
+                        Navn = commandOpprettAktivitetDto.Navn,
+                        Beskrivelse = commandOpprettAktivitetDto.Beskrivelse,
+                        OmfangTimer = commandOpprettAktivitetDto.OmfangTimer,
+                        SkoleId = commandOpprettAktivitetDto.SkoleId,
+                        AktivitetstypeId = commandOpprettAktivitetDto.AktivitetstypeId
+                    }
+                );
+                _context.SaveChanges();
+
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("Kunne ikke opprette aktivitet til databasen.", e); 
+                throw;
+            }
         }
 
         public void OpprettDeltaker(OpprettDeltakerDto commandOpprettDeltakerDto)
         {
-            var deltaker = _context.DeltakerSet.Add(new Deltaker
+            try
             {
-                Id = commandOpprettDeltakerDto.Id,
-                AktivitetId = commandOpprettDeltakerDto.AktivitetId,
-                FagId = commandOpprettDeltakerDto.FagId,
-                TrinnId = commandOpprettDeltakerDto.TrinnId,
-                UtdanningsprogramId = commandOpprettDeltakerDto.UtdanningsprogramId,
-                Timer = commandOpprettDeltakerDto.Timer,
-                Kompetansemaal = commandOpprettDeltakerDto.Kompetansemaal
-            });
-            _context.SaveChanges();
+                var deltaker = _context.DeltakerSet.Add(new Deltaker
+                {
+                    Id = commandOpprettDeltakerDto.Id,
+                    AktivitetId = commandOpprettDeltakerDto.AktivitetId,
+                    FagId = commandOpprettDeltakerDto.FagId,
+                    TrinnId = commandOpprettDeltakerDto.TrinnId,
+                    UtdanningsprogramId = commandOpprettDeltakerDto.UtdanningsprogramId,
+                    Timer = commandOpprettDeltakerDto.Timer,
+                    Kompetansemaal = commandOpprettDeltakerDto.Kompetansemaal
+                });
+                _context.SaveChanges();
+
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("Kunne ikke opprette deltaker til databasen.", e); 
+                throw;
+            }
         }
 
         public void EndreAktivitet(EndreAktivitetDto commandEndreAktivitetDto)
@@ -119,12 +137,14 @@ namespace VAF.Aktivitetsbank.Infrastructure
                 else
                 {
                     _logger.LogError("Kunne ikke lagre endret aktivitet til databasen.", commandEndreAktivitetDto); 
+                    throw new NullReferenceException();
                 }
 
             }
             catch (Exception e)
             {
                 _logger.LogError("Kunne ikke lagre endret aktivitet til databasen.", e); 
+                throw;
             }
         }
 
@@ -145,12 +165,64 @@ namespace VAF.Aktivitetsbank.Infrastructure
                 else
                 {
                     _logger.LogError("Kunne ikke lagre endret deltaker til databasen.", commandEndreDeltakerDto); 
+                    throw new NullReferenceException();
                 }
 
             }
             catch (Exception e)
             {
                 _logger.LogError("Kunne ikke lagre endret deltaker til databasen.", e); 
+                throw;
+            }
+        }
+
+        public void KopierAktivitet(KopierAktivitetDto commandKopierAktivitetDto)
+        {
+            try
+            {
+                var gammelAktivitet =
+                    _context.AktivitetSet.Include(x => x.Deltakere)
+                        .FirstOrDefault(x => x.Id == commandKopierAktivitetDto.Id);
+                if (gammelAktivitet != null)
+                {
+                    var nyAktivitet = new Aktivitet
+                    {
+                        Id = commandKopierAktivitetDto.NyAktivitetId,
+                        Navn = gammelAktivitet.Navn,
+                        Beskrivelse = gammelAktivitet.Beskrivelse,
+                        OmfangTimer = gammelAktivitet.OmfangTimer,
+                        SkoleId = commandKopierAktivitetDto.SkoleId,
+                        AktivitetstypeId = gammelAktivitet.AktivitetstypeId
+                    };
+                    foreach (var deltaker in gammelAktivitet.Deltakere)
+                    {
+                        nyAktivitet.Deltakere = new List<Deltaker>();
+                        nyAktivitet.Deltakere.Add(
+                            new Deltaker
+                            {
+                                Id = Guid.NewGuid(),
+                                FagId = deltaker.FagId,
+                                TrinnId = deltaker.TrinnId,
+                                UtdanningsprogramId = deltaker.UtdanningsprogramId,
+                                Timer = deltaker.Timer,
+                                Kompetansemaal = deltaker.Kompetansemaal
+
+                            });
+                    }
+                    _context.AktivitetSet.Add(nyAktivitet);
+                    _context.SaveChanges();
+                }
+                else
+                {
+                    _logger.LogError("Kunne ikke kopiere aktivitet til databasen.", commandKopierAktivitetDto); 
+                    throw new NullReferenceException();
+                }
+
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("Kunne ikke kopiere aktivitet til databasen.", e);
+                throw;
             }
         }
     }

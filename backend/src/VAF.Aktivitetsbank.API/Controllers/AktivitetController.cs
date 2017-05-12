@@ -80,6 +80,39 @@ namespace VAF.Aktivitetsbank.API.Controllers
                 return new StatusCodeResult(500);
             }
         }
+
+
+        [HttpPost("{aktivitetId}/kopier")]
+        public IActionResult KopierAktivitet(Guid aktivitetId, [FromBody] KopierAktivitetDto kopierAktivitetDto)
+        {
+            if (kopierAktivitetDto == null || kopierAktivitetDto.Id != aktivitetId)
+            {
+                _logger.LogError("Feil data ved kopiering av aktivitet. Mangler input data.");
+                return BadRequest();
+            }
+            if (!ModelState.IsValid)
+            {
+                _logger.LogError("Feil data ved kopiering av aktivitet. Feil i input data.", ModelState);
+                return BadRequest(ModelState);
+            }
+            kopierAktivitetDto.NyAktivitetId = Guid.NewGuid();
+
+            try
+            {
+                _commandDispatcher.Execute(new KopierAktivitetCommand(kopierAktivitetDto));
+                //return new NoContentResult();
+                return new CreatedAtRouteResult("kopier", new {id = kopierAktivitetDto.NyAktivitetId});
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                _logger.LogError("Feil i kopiering av aktivitet. Serverfeil.", e);
+                return new StatusCodeResult(500);
+            }
+        }
+
+
         [HttpPut("{id}")]
         public IActionResult EndreAktivitet(Guid id, [FromBody] EndreAktivitetDto endreAktivitetDto)
         {
