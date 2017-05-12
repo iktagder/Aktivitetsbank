@@ -2,6 +2,7 @@ module Pages.Aktiviteter.Aktivitet exposing (..)
 
 import Html exposing (Html, text, div, span, p, a)
 import Material
+import Material.Menu as Menu
 import Material.Grid as Grid exposing (grid, size, cell, Device(..))
 import Material.Elevation as Elevation
 import Material.Textfield as Textfield
@@ -49,6 +50,7 @@ type Msg
     | VisDeltakerOpprett
     | NavigerHjem
     | NavigerTilEndreDeltaker String String
+    | KopierAktivitetTilSkole Skole
 
 
 init : String -> String -> ( Model, Cmd Msg )
@@ -218,6 +220,9 @@ update msg model =
         NavigerTilEndreDeltaker aktivitetId deltakerId ->
             ( model, Cmd.none, NavigerTilDeltakerEndre aktivitetId deltakerId )
 
+        KopierAktivitetTilSkole skole ->
+            ( model, Cmd.none, NoSharedMsg )
+
 
 showText : (List (Html.Attribute m) -> List (Html msg) -> a) -> Options.Property c m -> String -> a
 showText elementType displayStyle text_ =
@@ -238,9 +243,9 @@ visHeading model =
         [ Icon.view "home"
             [ Tooltip.attach Mdl [ 123, 100 ]
             , Options.css "float" "right"
-            , Icon.size36
+            , Icon.size24
+            , cs "standard-ikon"
             , Options.onClick NavigerHjem
-            , cs "vis-navigering"
             ]
         , Tooltip.render Mdl
             [ 123
@@ -251,28 +256,30 @@ visHeading model =
             ]
             [ text "Gå til hovedside"
             ]
-        , Icon.view "content_copy"
-            [ Tooltip.attach Mdl
-                [ 124
-                , 100
-                ]
-            , Options.css "float" "right"
-            , Icon.size36
-            , cs "vis-navigering"
-            ]
-        , Tooltip.render Mdl
-            [ 124
-            , 100
-            ]
-            model.mdl
-            [ Tooltip.large ]
-            [ text "Kopier aktivitet" ]
+
+        -- , Icon.view "content_copy"
+        --     [ Tooltip.attach Mdl
+        --         [ 124
+        --         , 100
+        --         ]
+        --     , Options.css "float" "right"
+        --     , Icon.size24
+        --     , cs "vis-navigering"
+        --     ]
+        -- , Tooltip.render Mdl
+        --     [ 124
+        --     , 100
+        --     ]
+        --     model.mdl
+        --     [ Tooltip.large ]
+        --     [ text "Kopier aktivitet" ]
+        , (visKopierAktivitetMeny model)
         , Icon.view "mode_edit"
             [ Tooltip.attach Mdl [ 125, 100 ]
             , Options.css "float" "right"
             , Options.onClick <| VisAktivitetEndre model.aktivitetId
-            , Icon.size36
-            , cs "vis-navigering"
+            , Icon.size24
+            , cs "standard-ikon"
             ]
         , Tooltip.render Mdl [ 125, 100 ] model.mdl [ Tooltip.large ] [ text "Endre aktivitet" ]
         , Options.span
@@ -517,7 +524,7 @@ visAktivitetDeltakereSuksess model deltakere =
                 ]
             , Options.css "float" "left"
             , Options.onClick VisDeltakerOpprett
-            , Icon.size36
+            , Icon.size24
             , Options.css "margin" "12px 16px"
             , cs "vis-navigering"
             ]
@@ -664,3 +671,69 @@ visAktivitetDeltaker model deltaker =
                     ]
                 ]
             ]
+
+
+visKopierAktivitetMeny : Model -> Html Msg
+visKopierAktivitetMeny model =
+    Options.div []
+        [ Menu.render Mdl
+            [ 22, 33, 44 ]
+            model.mdl
+            [ css "float" "right"
+            , Tooltip.attach Mdl
+                [ 3124
+                , 100
+                ]
+            , Menu.ripple
+            , Menu.bottomRight
+            , Menu.icon "content_copy"
+
+            -- , Menu.icon "keyboard_arrow_down"
+            ]
+            (visKopiAktivitetSkoler model)
+        , Tooltip.render Mdl
+            [ 3124
+            , 100
+            ]
+            model.mdl
+            [ Tooltip.large ]
+            [ text "Kopier aktivitet" ]
+        ]
+
+
+
+-- , Icon.view "content_copy"
+--     [ Tooltip.attach Mdl
+--         [ 124
+--         , 100
+--         ]
+--     , Options.css "float" "right"
+--     , Icon.size24
+--     , cs "vis-navigering"
+--     ]
+-- , Tooltip.render Mdl
+--     [ 124
+--     , 100
+--     ]
+--     model.mdl
+--     [ Tooltip.large ]
+--     [ text "Kopier aktivitet" ]
+
+
+visKopiAktivitetSkoler : Model -> List (Menu.Item Msg)
+visKopiAktivitetSkoler model =
+    case model.appMetadata of
+        Success metadata ->
+            metadata.skoler
+                -- |> List.filter (\availableLanguage -> not (List.any (\language -> language == availableLanguage.name) displayLanguages))
+                |> List.map (\skole -> visKopierAktivitetSkole skole)
+
+        _ ->
+            []
+
+
+visKopierAktivitetSkole : Skole -> Menu.Item Msg
+visKopierAktivitetSkole skole =
+    Menu.item
+        [ Menu.onSelect (KopierAktivitetTilSkole skole) ]
+        [ text skole.navn ]

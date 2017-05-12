@@ -12,6 +12,14 @@ body {
   cursor: pointer;
 }
 
+.standard-ikon {
+  height: 32px;
+  min-width: 32px;
+  width: 32px;
+  margin-top: 4px;
+  cursor: pointer;
+}
+
 .text-area{
   width:  100%;
 }

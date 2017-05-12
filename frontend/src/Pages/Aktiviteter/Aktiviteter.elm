@@ -227,9 +227,9 @@ view taco model =
             [ Icon.view "add"
                 [ Tooltip.attach Mdl [ 123, 100 ]
                 , Options.css "float" "right"
-                , Icon.size36
+                , Icon.size24
+                , cs "standard-ikon"
                 , Options.onClick OpprettAktivitet
-                , cs "vis-navigering"
                 ]
             , Tooltip.render Mdl
                 [ 123
@@ -246,9 +246,9 @@ view taco model =
                     , 100
                     ]
                 , Options.css "float" "right"
-                , Icon.size36
+                , Icon.size24
+                , cs "standard-ikon"
                 , Options.onClick VisFilter
-                , cs "vis-navigering"
                 ]
             , Tooltip.render Mdl
                 [ 124
