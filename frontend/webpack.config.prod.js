@@ -54,7 +54,7 @@ module.exports = {
   plugins: [
     new webpack.DefinePlugin({
       // API_URL: JSON.stringify('http://vaf-root-apit/telefonskjema-api/api/')
-      API_URL: JSON.stringify('https://aktivitetsbanktest.vaf.no/aktivitetsbank-api/api/')
+      API_URL: JSON.stringify('https://aktivitetsbanktest.vaf.no/api/')
     }),
     new HtmlWebpackPlugin({
       inject: true,
