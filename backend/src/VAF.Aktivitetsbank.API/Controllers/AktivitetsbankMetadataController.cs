@@ -13,7 +13,7 @@ using VAF.Aktivitetsbank.Application.Queries;
 
 namespace VAF.Aktivitetsbank.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     public class AktivitetsbankMetadataController : Controller
     {
         private readonly IQueryDispatcher _queryDispatcher;

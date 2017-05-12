@@ -22,7 +22,7 @@ namespace VAF.Aktivitetsbank.API.Controllers
 
 
     [Authorize(Policy = "CanChangePhoneNumbers")]
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     public class UserController : Controller
     {
         private readonly ILogger<UserController> _logger;

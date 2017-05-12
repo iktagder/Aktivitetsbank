@@ -13,7 +13,7 @@ using VAF.Aktivitetsbank.Application.Queries;
 
 namespace VAF.Aktivitetsbank.API.Controllers
 {
-    [Route("api/aktiviteter")]
+    [Route("aktiviteter")]
     public class DeltakereController : Controller
     {
         private readonly IQueryDispatcher _queryDispatcher;
