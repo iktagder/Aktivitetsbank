@@ -54,6 +54,11 @@ type alias NyDeltaker =
     }
 
 
+type alias KopiertAktivitet =
+    { id : String
+    }
+
+
 type alias AktivitetsType =
     { id : String
     , navn : String
@@ -90,6 +95,12 @@ type alias AktivitetGyldigNy =
     , omfangTimer : Int
     , skole : Skole
     , aktivitetsType : AktivitetsType
+    }
+
+
+type alias AktivitetGyldigKopier =
+    { id : String
+    , skoleId : String
     }
 
 

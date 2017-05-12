@@ -51,6 +51,7 @@ type Msg
     | NavigerHjem
     | NavigerTilEndreDeltaker String String
     | KopierAktivitetTilSkole Skole
+    | KopierAktivitetRespons (Result Error KopiertAktivitet)
 
 
 init : String -> String -> ( Model, Cmd Msg )
@@ -139,6 +140,30 @@ fetchAppMetadata endPoint =
             |> Cmd.map AppMetadataResponse
 
 
+postKopierAktivitet : String -> String -> AktivitetGyldigKopier -> (Result Error KopiertAktivitet -> msg) -> Cmd msg
+postKopierAktivitet endPoint aktivitetId aktivitetKopi responseMsg =
+    let
+        url =
+            endPoint ++ "aktiviteter/" ++ aktivitetId ++ "/kopier"
+
+        body =
+            encodeKopierAktivitet aktivitetKopi |> Http.jsonBody
+
+        req =
+            Http.request
+                { method = "POST"
+                , headers = []
+                , url = url
+                , body = body
+                , expect = Http.expectJson decodeNyAktivitet
+                , timeout = Nothing
+                , withCredentials = True
+                }
+    in
+        req
+            |> Http.send responseMsg
+
+
 update : Msg -> Model -> ( Model, Cmd Msg, SharedMsg )
 update msg model =
     case msg of
@@ -221,7 +246,39 @@ update msg model =
             ( model, Cmd.none, NavigerTilDeltakerEndre aktivitetId deltakerId )
 
         KopierAktivitetTilSkole skole ->
-            ( model, Cmd.none, NoSharedMsg )
+            let
+                aktivitetKopi =
+                    { id = model.aktivitetId, skoleId = skole.id }
+            in
+                ( model, postKopierAktivitet model.apiEndpoint model.aktivitetId aktivitetKopi KopierAktivitetRespons, NoSharedMsg )
+
+        KopierAktivitetRespons (Ok nyId) ->
+            let
+                tmp =
+                    Debug.log "ny aktivitet" nyId
+            in
+                ( model, Cmd.none, NavigateToAktivitet nyId.id )
+
+        KopierAktivitetRespons (Err error) ->
+            let
+                ( cmd, statusText, _ ) =
+                    case error of
+                        Http.BadUrl info ->
+                            ( Cmd.none, "Feil i url til API.", 0 )
+
+                        Http.BadPayload _ _ ->
+                            ( Cmd.none, "Feil i innhold ved sending av data til API.", 0 )
+
+                        Http.BadStatus status ->
+                            ( Cmd.none, "Feil i sending av data til API.", 0 )
+
+                        Http.NetworkError ->
+                            ( Cmd.none, "Feil i sending av data til API. Nettverksfeil.", 0 )
+
+                        Http.Timeout ->
+                            ( Cmd.none, "Nettverksfeil - timet ut ved kall til API.", 0 )
+            in
+                ( { model | statusText = statusText }, cmd, NoSharedMsg )
 
 
 showText : (List (Html.Attribute m) -> List (Html msg) -> a) -> Options.Property c m -> String -> a

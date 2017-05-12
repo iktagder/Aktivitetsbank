@@ -180,6 +180,18 @@ encodeEndreAktivitet model =
             |> Json.Encode.object
 
 
+encodeKopierAktivitet : AktivitetGyldigKopier -> Json.Encode.Value
+encodeKopierAktivitet model =
+    let
+        encodings =
+            [ ( "id", Json.Encode.string model.id )
+            , ( "skoleId", Json.Encode.string model.skoleId )
+            ]
+    in
+        encodings
+            |> Json.Encode.object
+
+
 
 -- encodeOpprettNyAktivitet : Aktivitet -> Json.Encode.Value
 -- encodeOpprettNyAktivitet model =

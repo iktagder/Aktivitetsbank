@@ -194,9 +194,9 @@ namespace VAF.Aktivitetsbank.Infrastructure
                         SkoleId = commandKopierAktivitetDto.SkoleId,
                         AktivitetstypeId = gammelAktivitet.AktivitetstypeId
                     };
+                    nyAktivitet.Deltakere = new List<Deltaker>();
                     foreach (var deltaker in gammelAktivitet.Deltakere)
                     {
-                        nyAktivitet.Deltakere = new List<Deltaker>();
                         nyAktivitet.Deltakere.Add(
                             new Deltaker
                             {
