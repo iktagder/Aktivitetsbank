@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26403.7
+VisualStudioVersion = 15.0.26430.6
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A59B302C-5FCC-49F8-8487-7C766864B04C}"
 EndProject
@@ -22,6 +22,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VAF.Aktivitetsbank.Data", "src\VAF.Aktivitetsbank.Data\VAF.Aktivitetsbank.Data.csproj", "{BD07AD0F-5822-48B0-BDAF-5C9FFF617ADE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VAF.Aktivitetsbank.Data.UI", "src\VAF.Aktivitetsbank.Data.UI\VAF.Aktivitetsbank.Data.UI.csproj", "{FE7976C1-94B2-4445-B864-F316A439BC98}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VAF.Aktivitetsbank.Data.Migrations", "src\VAF.Aktivitetsbank.Data.Migrations\VAF.Aktivitetsbank.Data.Migrations.csproj", "{FB202F1F-54F1-4B94-AAC4-81F14D1D1F7E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -53,6 +55,10 @@ Global
 		{FE7976C1-94B2-4445-B864-F316A439BC98}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FE7976C1-94B2-4445-B864-F316A439BC98}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FE7976C1-94B2-4445-B864-F316A439BC98}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB202F1F-54F1-4B94-AAC4-81F14D1D1F7E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB202F1F-54F1-4B94-AAC4-81F14D1D1F7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB202F1F-54F1-4B94-AAC4-81F14D1D1F7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB202F1F-54F1-4B94-AAC4-81F14D1D1F7E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -64,5 +70,6 @@ Global
 		{53733DAF-19CC-4FE9-B87B-18171BAEB679} = {A59B302C-5FCC-49F8-8487-7C766864B04C}
 		{BD07AD0F-5822-48B0-BDAF-5C9FFF617ADE} = {A59B302C-5FCC-49F8-8487-7C766864B04C}
 		{FE7976C1-94B2-4445-B864-F316A439BC98} = {A59B302C-5FCC-49F8-8487-7C766864B04C}
+		{FB202F1F-54F1-4B94-AAC4-81F14D1D1F7E} = {A59B302C-5FCC-49F8-8487-7C766864B04C}
 	EndGlobalSection
 EndGlobal
