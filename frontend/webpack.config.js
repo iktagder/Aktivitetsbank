@@ -48,7 +48,7 @@ module.exports = {
   },
   plugins: [
      new webpack.DefinePlugin({
-      API_URL: JSON.stringify('http://localhost:5100/api/')
+      API_URL: JSON.stringify('http://localhost:5100/')
     }),
     new HtmlWebpackPlugin({
       inject: true,
