@@ -8,9 +8,10 @@ using VAF.Aktivitetsbank.Data;
 namespace VAF.Aktivitetsbank.Data.Migrations
 {
     [DbContext(typeof(AktivitetsbankContext))]
-    partial class AktivitetsbankContextModelSnapshot : ModelSnapshot
+    [Migration("20170514210218_not_nullable_user_timestamp")]
+    partial class not_nullable_user_timestamp
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
                 .HasAnnotation("ProductVersion", "1.1.1")
@@ -28,8 +29,7 @@ namespace VAF.Aktivitetsbank.Data.Migrations
 
                     b.Property<DateTime>("Endret");
 
-                    b.Property<string>("EndretAv")
-                        .IsRequired();
+                    b.Property<string>("EndretAv");
 
                     b.Property<string>("Navn")
                         .IsRequired()
@@ -39,8 +39,7 @@ namespace VAF.Aktivitetsbank.Data.Migrations
 
                     b.Property<DateTime>("Opprettet");
 
-                    b.Property<string>("OpprettetAv")
-                        .IsRequired();
+                    b.Property<string>("OpprettetAv");
 
                     b.Property<Guid>("SkoleId");
 
@@ -75,8 +74,7 @@ namespace VAF.Aktivitetsbank.Data.Migrations
 
                     b.Property<DateTime>("Endret");
 
-                    b.Property<string>("EndretAv")
-                        .IsRequired();
+                    b.Property<string>("EndretAv");
 
                     b.Property<Guid>("FagId");
 
@@ -85,8 +83,7 @@ namespace VAF.Aktivitetsbank.Data.Migrations
 
                     b.Property<DateTime>("Opprettet");
 
-                    b.Property<string>("OpprettetAv")
-                        .IsRequired();
+                    b.Property<string>("OpprettetAv");
 
                     b.Property<int>("Timer");
 

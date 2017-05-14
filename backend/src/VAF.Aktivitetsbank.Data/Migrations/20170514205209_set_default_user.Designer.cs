@@ -8,9 +8,10 @@ using VAF.Aktivitetsbank.Data;
 namespace VAF.Aktivitetsbank.Data.Migrations
 {
     [DbContext(typeof(AktivitetsbankContext))]
-    partial class AktivitetsbankContextModelSnapshot : ModelSnapshot
+    [Migration("20170514205209_set_default_user")]
+    partial class set_default_user
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
                 .HasAnnotation("ProductVersion", "1.1.1")
@@ -26,10 +27,9 @@ namespace VAF.Aktivitetsbank.Data.Migrations
                     b.Property<string>("Beskrivelse")
                         .IsRequired();
 
-                    b.Property<DateTime>("Endret");
+                    b.Property<DateTime?>("Endret");
 
-                    b.Property<string>("EndretAv")
-                        .IsRequired();
+                    b.Property<string>("EndretAv");
 
                     b.Property<string>("Navn")
                         .IsRequired()
@@ -37,10 +37,9 @@ namespace VAF.Aktivitetsbank.Data.Migrations
 
                     b.Property<int>("OmfangTimer");
 
-                    b.Property<DateTime>("Opprettet");
+                    b.Property<DateTime?>("Opprettet");
 
-                    b.Property<string>("OpprettetAv")
-                        .IsRequired();
+                    b.Property<string>("OpprettetAv");
 
                     b.Property<Guid>("SkoleId");
 
@@ -73,20 +72,18 @@ namespace VAF.Aktivitetsbank.Data.Migrations
 
                     b.Property<Guid>("AktivitetId");
 
-                    b.Property<DateTime>("Endret");
+                    b.Property<DateTime?>("Endret");
 
-                    b.Property<string>("EndretAv")
-                        .IsRequired();
+                    b.Property<string>("EndretAv");
 
                     b.Property<Guid>("FagId");
 
                     b.Property<string>("Kompetansemaal")
                         .IsRequired();
 
-                    b.Property<DateTime>("Opprettet");
+                    b.Property<DateTime?>("Opprettet");
 
-                    b.Property<string>("OpprettetAv")
-                        .IsRequired();
+                    b.Property<string>("OpprettetAv");
 
                     b.Property<int>("Timer");
 

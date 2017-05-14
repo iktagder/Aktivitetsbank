@@ -83,7 +83,11 @@ namespace VAF.Aktivitetsbank.Infrastructure
                         Beskrivelse = commandOpprettAktivitetDto.Beskrivelse,
                         OmfangTimer = commandOpprettAktivitetDto.OmfangTimer,
                         SkoleId = commandOpprettAktivitetDto.SkoleId,
-                        AktivitetstypeId = commandOpprettAktivitetDto.AktivitetstypeId
+                        AktivitetstypeId = commandOpprettAktivitetDto.AktivitetstypeId,
+                        Opprettet = DateTime.Now,
+                        Endret = DateTime.Now,
+                        OpprettetAv = "System",
+                        EndretAv = "System"
                     }
                 );
                 _context.SaveChanges();
@@ -108,7 +112,11 @@ namespace VAF.Aktivitetsbank.Infrastructure
                     TrinnId = commandOpprettDeltakerDto.TrinnId,
                     UtdanningsprogramId = commandOpprettDeltakerDto.UtdanningsprogramId,
                     Timer = commandOpprettDeltakerDto.Timer,
-                    Kompetansemaal = commandOpprettDeltakerDto.Kompetansemaal
+                    Kompetansemaal = commandOpprettDeltakerDto.Kompetansemaal,
+                        Opprettet = DateTime.Now,
+                        Endret = DateTime.Now,
+                        OpprettetAv = "System",
+                        EndretAv = "System"
                 });
                 _context.SaveChanges();
 
@@ -132,6 +140,9 @@ namespace VAF.Aktivitetsbank.Infrastructure
                     gammelAktivitet.OmfangTimer = commandEndreAktivitetDto.OmfangTimer;
                     gammelAktivitet.SkoleId = commandEndreAktivitetDto.SkoleId;
                     gammelAktivitet.AktivitetstypeId = commandEndreAktivitetDto.AktivitetstypeId;
+
+                    gammelAktivitet.Endret = DateTime.Now;
+                    gammelAktivitet.EndretAv = "System";
                     _context.SaveChanges();
                 }
                 else
@@ -160,6 +171,8 @@ namespace VAF.Aktivitetsbank.Infrastructure
                     gammelDeltaker.UtdanningsprogramId = commandEndreDeltakerDto.UtdanningsprogramId;
                     gammelDeltaker.TrinnId = commandEndreDeltakerDto.TrinnId;
                     gammelDeltaker.FagId = commandEndreDeltakerDto.FagId;
+                    gammelDeltaker.Endret = DateTime.Now;
+                    gammelDeltaker.EndretAv = "System";
                     _context.SaveChanges();
                 }
                 else
@@ -192,7 +205,11 @@ namespace VAF.Aktivitetsbank.Infrastructure
                         Beskrivelse = gammelAktivitet.Beskrivelse + " - kopiert " + DateTime.Now.ToString("d/M/yyyy HH:mm") + " fra " + gammelAktivitet.Skole.Navn,
                         OmfangTimer = gammelAktivitet.OmfangTimer,
                         SkoleId = commandKopierAktivitetDto.SkoleId,
-                        AktivitetstypeId = gammelAktivitet.AktivitetstypeId
+                        AktivitetstypeId = gammelAktivitet.AktivitetstypeId,
+                        OpprettetAv = "System",
+                        Opprettet = DateTime.Now,
+                        EndretAv = "System",
+                        Endret = DateTime.Now
                     };
                     nyAktivitet.Deltakere = new List<Deltaker>();
                     foreach (var deltaker in gammelAktivitet.Deltakere)
@@ -205,8 +222,11 @@ namespace VAF.Aktivitetsbank.Infrastructure
                                 TrinnId = deltaker.TrinnId,
                                 UtdanningsprogramId = deltaker.UtdanningsprogramId,
                                 Timer = deltaker.Timer,
-                                Kompetansemaal = deltaker.Kompetansemaal
-
+                                Kompetansemaal = deltaker.Kompetansemaal,
+                                OpprettetAv = "System",
+                                Opprettet = DateTime.Now,
+                                EndretAv = "System",
+                                Endret = DateTime.Now
                             });
                     }
                     _context.AktivitetSet.Add(nyAktivitet);

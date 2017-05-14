@@ -19,6 +19,12 @@ namespace VAF.Aktivitetsbank.Data.Entiteter
         public Guid AktivitetstypeId { get; set; }
         public Aktivitetstype Aktivitetstype { get; set; }
         public List<Deltaker> Deltakere { get; set; }
+        [Required]
+        public string OpprettetAv { get; set; }
+        [Required]
+        public string EndretAv { get; set; }
+        public DateTime Opprettet { get; set; }
+        public DateTime Endret { get; set; }
     }
 
     public class Deltaker
@@ -35,6 +41,12 @@ namespace VAF.Aktivitetsbank.Data.Entiteter
         public int Timer { get; set; }
         [Required]
         public string Kompetansemaal { get; set; }
+        [Required]
+        public string OpprettetAv { get; set; }
+        [Required]
+        public string EndretAv { get; set; }
+        public DateTime Opprettet { get; set; }
+        public DateTime Endret { get; set; }
     }
     public class Skole
     {
