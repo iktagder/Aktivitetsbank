@@ -93,5 +93,9 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Scripts\Script00003 - UserTimestamp fields.sql" />
+    <EmbeddedResource Include="Scripts\Script00004 - UserTimestamp fields not null.sql" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
