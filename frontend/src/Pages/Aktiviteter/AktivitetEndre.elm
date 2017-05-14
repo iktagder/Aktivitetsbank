@@ -472,7 +472,7 @@ visAktivitetEndreSuksess model aktivitet =
             ]
             [ text "Avbryt" ]
         , Button.render Mdl
-            [ 10, 1 ]
+            [ 10, 104 ]
             model.mdl
             [ Button.ripple
             , Button.colored
