@@ -33,6 +33,7 @@ namespace VAF.Aktivitetsbank.Data.Migrations
                 Console.ResetColor();
 #if DEBUG
                 Console.ReadLine();
+                Console.ReadLine();
 #endif
                 return -1;
             }
