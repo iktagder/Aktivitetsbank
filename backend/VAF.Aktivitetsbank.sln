@@ -58,7 +58,6 @@ Global
 		{FB202F1F-54F1-4B94-AAC4-81F14D1D1F7E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{FB202F1F-54F1-4B94-AAC4-81F14D1D1F7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FB202F1F-54F1-4B94-AAC4-81F14D1D1F7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FB202F1F-54F1-4B94-AAC4-81F14D1D1F7E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
