@@ -60,6 +60,7 @@ namespace VAF.Aktivitetsbank.API.Controllers
                 return BadRequest();
             }
             opprettAktivitetDto.Id = Guid.NewGuid();
+            opprettAktivitetDto.BrukerId = HttpContext.User.Identity.Name;
             if (!ModelState.IsValid)
             {
                 _logger.LogError("Feil data ved oppretting av aktivitet. Feil i input data.", ModelState);
@@ -96,6 +97,7 @@ namespace VAF.Aktivitetsbank.API.Controllers
                 return BadRequest(ModelState);
             }
             kopierAktivitetDto.NyAktivitetId = Guid.NewGuid();
+            kopierAktivitetDto.BrukerId = HttpContext.User.Identity.Name;
 
             try
             {
@@ -127,6 +129,7 @@ namespace VAF.Aktivitetsbank.API.Controllers
                 return BadRequest(ModelState);
             }
 
+            endreAktivitetDto.BrukerId = HttpContext.User.Identity.Name;
             try
             {
                 _commandDispatcher.Execute(new EndreAktivitetCommand(endreAktivitetDto));

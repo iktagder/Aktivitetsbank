@@ -86,8 +86,8 @@ namespace VAF.Aktivitetsbank.Infrastructure
                         AktivitetstypeId = commandOpprettAktivitetDto.AktivitetstypeId,
                         Opprettet = DateTime.Now,
                         Endret = DateTime.Now,
-                        OpprettetAv = "System",
-                        EndretAv = "System"
+                        OpprettetAv = commandOpprettAktivitetDto.BrukerId,
+                        EndretAv = commandOpprettAktivitetDto.BrukerId
                     }
                 );
                 _context.SaveChanges();
@@ -115,8 +115,8 @@ namespace VAF.Aktivitetsbank.Infrastructure
                     Kompetansemaal = commandOpprettDeltakerDto.Kompetansemaal,
                         Opprettet = DateTime.Now,
                         Endret = DateTime.Now,
-                        OpprettetAv = "System",
-                        EndretAv = "System"
+                        OpprettetAv = commandOpprettDeltakerDto.BrukerId,
+                        EndretAv = commandOpprettDeltakerDto.BrukerId
                 });
                 _context.SaveChanges();
 
@@ -142,7 +142,7 @@ namespace VAF.Aktivitetsbank.Infrastructure
                     gammelAktivitet.AktivitetstypeId = commandEndreAktivitetDto.AktivitetstypeId;
 
                     gammelAktivitet.Endret = DateTime.Now;
-                    gammelAktivitet.EndretAv = "System";
+                    gammelAktivitet.EndretAv = commandEndreAktivitetDto.BrukerId;
                     _context.SaveChanges();
                 }
                 else
@@ -172,7 +172,7 @@ namespace VAF.Aktivitetsbank.Infrastructure
                     gammelDeltaker.TrinnId = commandEndreDeltakerDto.TrinnId;
                     gammelDeltaker.FagId = commandEndreDeltakerDto.FagId;
                     gammelDeltaker.Endret = DateTime.Now;
-                    gammelDeltaker.EndretAv = "System";
+                    gammelDeltaker.EndretAv = commandEndreDeltakerDto.BrukerId;
                     _context.SaveChanges();
                 }
                 else
@@ -206,9 +206,9 @@ namespace VAF.Aktivitetsbank.Infrastructure
                         OmfangTimer = gammelAktivitet.OmfangTimer,
                         SkoleId = commandKopierAktivitetDto.SkoleId,
                         AktivitetstypeId = gammelAktivitet.AktivitetstypeId,
-                        OpprettetAv = "System",
+                        OpprettetAv = commandKopierAktivitetDto.BrukerId,
                         Opprettet = DateTime.Now,
-                        EndretAv = "System",
+                        EndretAv = commandKopierAktivitetDto.BrukerId,
                         Endret = DateTime.Now
                     };
                     nyAktivitet.Deltakere = new List<Deltaker>();
@@ -223,9 +223,9 @@ namespace VAF.Aktivitetsbank.Infrastructure
                                 UtdanningsprogramId = deltaker.UtdanningsprogramId,
                                 Timer = deltaker.Timer,
                                 Kompetansemaal = deltaker.Kompetansemaal,
-                                OpprettetAv = "System",
+                                OpprettetAv = commandKopierAktivitetDto.BrukerId,
                                 Opprettet = DateTime.Now,
-                                EndretAv = "System",
+                                EndretAv = commandKopierAktivitetDto.BrukerId,
                                 Endret = DateTime.Now
                             });
                     }

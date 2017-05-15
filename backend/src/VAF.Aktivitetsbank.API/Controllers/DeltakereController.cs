@@ -23,6 +23,7 @@ namespace VAF.Aktivitetsbank.API.Controllers
 
         public DeltakereController(IQueryDispatcher queryDispatcher, ICommandDispatcher commandDispatcher, IOptions<AppOptions> options, ILogger<UserController> logger )
         {
+
             _queryDispatcher = queryDispatcher;
             _commandDispatcher = commandDispatcher;
             _logger = logger;
@@ -59,6 +60,7 @@ namespace VAF.Aktivitetsbank.API.Controllers
                 return BadRequest();
             }
             opprettDeltakerDto.Id = Guid.NewGuid();
+            opprettDeltakerDto.BrukerId = HttpContext.User.Identity.Name;
             if (!ModelState.IsValid)
             {
                 _logger.LogError("Feil data ved oppretting av deltaker. Feil i input data.", ModelState);
@@ -93,6 +95,7 @@ namespace VAF.Aktivitetsbank.API.Controllers
                 _logger.LogError("Feil data ved endring av deltaker. Feil i input data.", ModelState);
                 return BadRequest(ModelState);
             }
+            endreDeltakerDto.BrukerId = HttpContext.User.Identity.Name;
 
             try
             {
