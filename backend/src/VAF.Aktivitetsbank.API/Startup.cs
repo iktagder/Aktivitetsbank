@@ -171,6 +171,7 @@ namespace VAF.Aktivitetsbank.API
                 cfg.CreateMap<Utdanningsprogram, UtdanningsprogramDto>();
                 cfg.CreateMap<Aktivitet, AktivitetDto>();
                 cfg.CreateMap<Deltaker, DeltakerDto>();
+                cfg.CreateMap<SkoleAar, SkoleAarDto>();
 
             });
             

@@ -12,5 +12,7 @@ namespace VAF.Aktivitetsbank.Application.Handlers.Dtos
         public string SkoleNavn { get; set; }
         public Guid AktivitetstypeId { get; set; }
         public string AktivitetstypeNavn { get; set; }
+        public Guid SkoleAarId { get; set; }
+        public string SkoleAarNavn { get; set; }
     }
 }

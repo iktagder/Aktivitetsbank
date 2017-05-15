@@ -33,6 +33,8 @@ namespace VAF.Aktivitetsbank.Infrastructure
             var aktivitetsTyperMapped = Mapper.Map<IEnumerable<AktivitetstypeDto>>(aktivitetsTyper);
             var utdanningsProgrammer = _context.UtdanningsprogramSet.OrderBy(x => x.Navn).AsEnumerable();
             var utdanningsProgrammerMapped = Mapper.Map<IEnumerable<UtdanningsprogramDto>>(utdanningsProgrammer);
+            var skoleAar = _context.SkoleAarSet.OrderBy(x => x.Navn).AsEnumerable();
+            var skoleAarMapped = Mapper.Map<IEnumerable<SkoleAarDto>>(skoleAar);
 
 
             var metadata = new AktivitetsbankMetadata();
@@ -41,12 +43,13 @@ namespace VAF.Aktivitetsbank.Infrastructure
             metadata.FagListe = fagMapped;
             metadata.Aktivitetstyper = aktivitetsTyperMapped;
             metadata.Utdanningsprogrammer = utdanningsProgrammerMapped;
+            metadata.SkoleAar = skoleAarMapped;
             return metadata;
         }
 
         public IList<AktivitetDto> HentAktiviteter(string queryQueryTerm)
         {
-            var aktiviteter = _context.AktivitetSet.Include(x => x.Skole).Where(x => x.Aktiv).OrderBy(x => x.Navn).Include(x => x.Aktivitetstype).ToList();
+            var aktiviteter = _context.AktivitetSet.Include(x => x.Skole).Where(x => x.Aktiv).OrderBy(x => x.Navn).Include(x => x.Aktivitetstype).Include(x => x.SkoleAar).ToList();
             var aktiviteterMapped = Mapper.Map<IList<AktivitetDto>>(aktiviteter);
             return aktiviteterMapped;
         }
@@ -60,7 +63,7 @@ namespace VAF.Aktivitetsbank.Infrastructure
 
         public AktivitetDto HentAktivitet(Guid queryId)
         {
-            var aktivitet = _context.AktivitetSet.Where(x => x.Id.Equals(queryId)).Include(x => x.Skole).Include(x => x.Aktivitetstype).FirstOrDefault();
+            var aktivitet = _context.AktivitetSet.Where(x => x.Id.Equals(queryId)).Include(x => x.Skole).Include(x => x.Aktivitetstype).Include(x => x.SkoleAar).FirstOrDefault();
             var aktivitetMapped = Mapper.Map<AktivitetDto>(aktivitet);
             return aktivitetMapped;
         }
@@ -84,6 +87,7 @@ namespace VAF.Aktivitetsbank.Infrastructure
                         OmfangTimer = commandOpprettAktivitetDto.OmfangTimer,
                         SkoleId = commandOpprettAktivitetDto.SkoleId,
                         AktivitetstypeId = commandOpprettAktivitetDto.AktivitetstypeId,
+                        SkoleAarId = commandOpprettAktivitetDto.SkoleAarId,
                         Opprettet = DateTime.Now,
                         Endret = DateTime.Now,
                         OpprettetAv = commandOpprettAktivitetDto.BrukerId,
@@ -142,6 +146,7 @@ namespace VAF.Aktivitetsbank.Infrastructure
                     gammelAktivitet.OmfangTimer = commandEndreAktivitetDto.OmfangTimer;
                     gammelAktivitet.SkoleId = commandEndreAktivitetDto.SkoleId;
                     gammelAktivitet.AktivitetstypeId = commandEndreAktivitetDto.AktivitetstypeId;
+                    gammelAktivitet.SkoleAarId = commandEndreAktivitetDto.SkoleAarId;
 
                     gammelAktivitet.Endret = DateTime.Now;
                     gammelAktivitet.EndretAv = commandEndreAktivitetDto.BrukerId;
@@ -208,6 +213,7 @@ namespace VAF.Aktivitetsbank.Infrastructure
                         OmfangTimer = gammelAktivitet.OmfangTimer,
                         SkoleId = commandKopierAktivitetDto.SkoleId,
                         AktivitetstypeId = gammelAktivitet.AktivitetstypeId,
+                        SkoleAarId =  gammelAktivitet.SkoleAarId,
                         Aktiv = true,
                         OpprettetAv = commandKopierAktivitetDto.BrukerId,
                         Opprettet = DateTime.Now,

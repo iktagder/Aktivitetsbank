@@ -9,6 +9,7 @@ namespace VAF.Aktivitetsbank.Application.Handlers.Dtos
         public IEnumerable<TrinnDto> TrinnListe { get; set; }
         public IEnumerable<AktivitetstypeDto> Aktivitetstyper { get; set; }
         public IEnumerable<UtdanningsprogramDto> Utdanningsprogrammer { get; set; }
+        public IEnumerable<SkoleAarDto> SkoleAar { get; set; }
 
     }
 }

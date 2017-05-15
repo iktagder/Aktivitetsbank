@@ -20,5 +20,7 @@ namespace VAF.Aktivitetsbank.Application.Handlers.Dtos
         [Required]
         public Guid AktivitetstypeId { get; set; }
         public string BrukerId { get; set; }
+        [Required]
+        public Guid SkoleAarId { get; set; }
     }
 }
