@@ -8,9 +8,10 @@ using VAF.Aktivitetsbank.Data;
 namespace VAF.Aktivitetsbank.Data.Migrations
 {
     [DbContext(typeof(AktivitetsbankContext))]
-    partial class AktivitetsbankContextModelSnapshot : ModelSnapshot
+    [Migration("20170515102221_aktiv_status_field")]
+    partial class aktiv_status_field
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
                 .HasAnnotation("ProductVersion", "1.1.1")
@@ -21,7 +22,7 @@ namespace VAF.Aktivitetsbank.Data.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<bool>("Aktiv");
+                    b.Property<bool?>("Aktiv");
 
                     b.Property<Guid>("AktivitetstypeId");
 
@@ -73,7 +74,7 @@ namespace VAF.Aktivitetsbank.Data.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<bool>("Aktiv");
+                    b.Property<bool?>("Aktiv");
 
                     b.Property<Guid>("AktivitetId");
 

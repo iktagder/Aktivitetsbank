@@ -46,14 +46,14 @@ namespace VAF.Aktivitetsbank.Infrastructure
 
         public IList<AktivitetDto> HentAktiviteter(string queryQueryTerm)
         {
-            var aktiviteter = _context.AktivitetSet.Include(x => x.Skole).OrderBy(x => x.Navn).Include(x => x.Aktivitetstype).ToList();
+            var aktiviteter = _context.AktivitetSet.Include(x => x.Skole).Where(x => x.Aktiv).OrderBy(x => x.Navn).Include(x => x.Aktivitetstype).ToList();
             var aktiviteterMapped = Mapper.Map<IList<AktivitetDto>>(aktiviteter);
             return aktiviteterMapped;
         }
 
         public IList<DeltakerDto> HentDeltakere(Guid queryAktivitetId)
         {
-            var deltakere = _context.DeltakerSet.Where(x => x.AktivitetId.Equals(queryAktivitetId)).OrderBy(x => x.Utdanningsprogram.Navn).ThenBy(x => x.Trinn.Navn).Include(x => x.Utdanningsprogram).Include(x => x.Fag).Include(x => x.Trinn).Include(x => x.Aktivitet).ToList();
+            var deltakere = _context.DeltakerSet.Where(x => x.AktivitetId.Equals(queryAktivitetId) && x.Aktiv).OrderBy(x => x.Utdanningsprogram.Navn).ThenBy(x => x.Trinn.Navn).Include(x => x.Utdanningsprogram).Include(x => x.Fag).Include(x => x.Trinn).Include(x => x.Aktivitet).ToList();
             var deltakereMapped = Mapper.Map<IList<DeltakerDto>>(deltakere);
             return deltakereMapped;
         }

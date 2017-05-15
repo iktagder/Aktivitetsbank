@@ -25,6 +25,7 @@ namespace VAF.Aktivitetsbank.Data.Entiteter
         public string EndretAv { get; set; }
         public DateTime Opprettet { get; set; }
         public DateTime Endret { get; set; }
+        public Boolean Aktiv { get; set; }
     }
 
     public class Deltaker
@@ -47,6 +48,7 @@ namespace VAF.Aktivitetsbank.Data.Entiteter
         public string EndretAv { get; set; }
         public DateTime Opprettet { get; set; }
         public DateTime Endret { get; set; }
+        public Boolean Aktiv { get; set; }
     }
     public class Skole
     {
