@@ -87,7 +87,8 @@ namespace VAF.Aktivitetsbank.Infrastructure
                         Opprettet = DateTime.Now,
                         Endret = DateTime.Now,
                         OpprettetAv = commandOpprettAktivitetDto.BrukerId,
-                        EndretAv = commandOpprettAktivitetDto.BrukerId
+                        EndretAv = commandOpprettAktivitetDto.BrukerId,
+                        Aktiv = true,
                     }
                 );
                 _context.SaveChanges();
@@ -113,10 +114,11 @@ namespace VAF.Aktivitetsbank.Infrastructure
                     UtdanningsprogramId = commandOpprettDeltakerDto.UtdanningsprogramId,
                     Timer = commandOpprettDeltakerDto.Timer,
                     Kompetansemaal = commandOpprettDeltakerDto.Kompetansemaal,
-                        Opprettet = DateTime.Now,
-                        Endret = DateTime.Now,
-                        OpprettetAv = commandOpprettDeltakerDto.BrukerId,
-                        EndretAv = commandOpprettDeltakerDto.BrukerId
+                    Opprettet = DateTime.Now,
+                    Endret = DateTime.Now,
+                    OpprettetAv = commandOpprettDeltakerDto.BrukerId,
+                    EndretAv = commandOpprettDeltakerDto.BrukerId,
+                    Aktiv = true,
                 });
                 _context.SaveChanges();
 
