@@ -407,6 +407,10 @@ visAktivitetSuksess model aktivitet =
                 [ Options.styled div [ Typo.caption ] [ text "Beskrivelse: " ]
                 , Options.styled div [ Typo.subhead ] [ text (aktivitet.beskrivelse) ]
                 ]
+            , p []
+                [ Options.styled div [ Typo.caption ] [ text "Skoleår: " ]
+                , Options.styled div [ Typo.subhead ] [ text (aktivitet.skoleAarNavn) ]
+                ]
             ]
         ]
     , cell

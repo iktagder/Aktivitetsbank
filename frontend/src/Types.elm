@@ -16,6 +16,12 @@ type alias Skole =
     }
 
 
+type alias SkoleAar =
+    { id : String
+    , navn : String
+    }
+
+
 type alias Fag =
     { id : String
     , navn : String
@@ -41,6 +47,7 @@ type alias AppMetadata =
     , trinnListe : List Trinn
     , aktivitetstyper : List AktivitetsType
     , utdanningsprogrammer : List Utdanningsprogram
+    , skoleAar : List SkoleAar
     }
 
 
@@ -76,6 +83,9 @@ type alias Aktivitet =
     , aktivitetsTypeId : String
     , aktivitetsTypeNavn : String
     , aktivitetsType : Maybe AktivitetsType
+    , skoleAarId : String
+    , skoleAarNavn : String
+    , skoleAar : Maybe SkoleAar
     }
 
 
@@ -86,6 +96,7 @@ type alias AktivitetEdit =
     , omfangTimer : Maybe Int
     , skole : Maybe Skole
     , aktivitetsType : Maybe AktivitetsType
+    , skoleAar : Maybe SkoleAar
     }
 
 
@@ -95,6 +106,7 @@ type alias AktivitetGyldigNy =
     , omfangTimer : Int
     , skole : Skole
     , aktivitetsType : AktivitetsType
+    , skoleAar : SkoleAar
     }
 
 
@@ -111,6 +123,7 @@ type alias AktivitetGyldigEndre =
     , omfangTimer : Int
     , skole : Skole
     , aktivitetsType : AktivitetsType
+    , skoleAar : SkoleAar
     }
 
 

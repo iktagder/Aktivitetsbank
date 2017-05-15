@@ -25,6 +25,7 @@ type alias Model =
     , appMetadata : WebData AppMetadata
     , aktivitet : AktivitetEdit
     , dropdownStateSkole : Dropdown.State
+    , dropdownStateSkoleAar : Dropdown.State
     , dropdownStateAktivitetstype : Dropdown.State
     }
 
@@ -33,7 +34,9 @@ type Msg
     = Mdl (Material.Msg Msg)
     | AppMetadataResponse (WebData AppMetadata)
     | OnSelectSkole (Maybe Skole)
+    | OnSelectSkoleAar (Maybe SkoleAar)
     | SkoleDropdown (Dropdown.Msg Skole)
+    | SkoleAarDropdown (Dropdown.Msg SkoleAar)
     | OnSelectAktivitetstype (Maybe AktivitetsType)
     | AktivitetstypeDropdown (Dropdown.Msg AktivitetsType)
     | EndretAktivitetsNavn String
@@ -52,6 +55,7 @@ init apiEndpoint =
       , visLagreKnapp = False
       , appMetadata = RemoteData.NotAsked
       , dropdownStateSkole = Dropdown.newState "1"
+      , dropdownStateSkoleAar = Dropdown.newState "1"
       , dropdownStateAktivitetstype = Dropdown.newState "1"
       , aktivitet = initAktivitet
       }
@@ -67,6 +71,7 @@ initAktivitet =
     , omfangTimer = Nothing
     , skole = Nothing
     , aktivitetsType = Nothing
+    , skoleAar = Nothing
     }
 
 
@@ -142,12 +147,32 @@ update msg model =
             in
                 ( { model | aktivitet = oppdatertAktivitet, statusText = statusTekst, visLagreKnapp = visLagreKnapp }, Cmd.none, NoSharedMsg )
 
+        OnSelectSkoleAar skoleAar ->
+            let
+                gammelAktivitet =
+                    model.aktivitet
+
+                oppdatertAktivitet =
+                    { gammelAktivitet | skoleAar = skoleAar }
+
+                ( visLagreKnapp, statusTekst ) =
+                    valideringsInfo oppdatertAktivitet
+            in
+                ( { model | aktivitet = oppdatertAktivitet, statusText = statusTekst, visLagreKnapp = visLagreKnapp }, Cmd.none, NoSharedMsg )
+
         SkoleDropdown skole ->
             let
                 ( updated, cmd ) =
                     Dropdown.update dropdownConfigSkole skole model.dropdownStateSkole
             in
                 ( { model | dropdownStateSkole = updated }, cmd, NoSharedMsg )
+
+        SkoleAarDropdown skoleAar ->
+            let
+                ( updated, cmd ) =
+                    Dropdown.update dropdownConfigSkoleAar skoleAar model.dropdownStateSkoleAar
+            in
+                ( { model | dropdownStateSkoleAar = updated }, cmd, NoSharedMsg )
 
         OnSelectAktivitetstype aktivitetstype ->
             let
@@ -273,6 +298,7 @@ validerAktivitetGyldigNy form =
         |: required "Timer må fylles ut" form.omfangTimer
         |: required "Velg skole" form.skole
         |: required "Aktivitetstype må velges" form.aktivitetsType
+        |: required "Skoleår må velges" form.skoleAar
 
 
 showText : (List (Html.Attribute m) -> List (Html msg) -> a) -> Options.Property c m -> String -> a
@@ -338,6 +364,16 @@ visOpprettAktivitet model aktivitet =
                 , cs "text-area"
                 ]
                 []
+            , Textfield.render Mdl
+                [ 3 ]
+                model.mdl
+                [ Textfield.label "Omfang (klokketimer)"
+                , Textfield.floatingLabel
+                , Textfield.text_
+                , Textfield.value <| Maybe.withDefault "0" <| Maybe.map toString aktivitet.omfangTimer
+                , Options.onInput EndretAktivitetsOmfangTimer
+                ]
+                []
             , Options.div [] [ showText p Typo.subhead model.statusText ]
             ]
         ]
@@ -348,20 +384,12 @@ visOpprettAktivitet model aktivitet =
         ]
         [ Options.div
             []
-            [ Textfield.render Mdl
-                [ 3 ]
-                model.mdl
-                [ Textfield.label "Omfang (klokketimer)"
-                , Textfield.floatingLabel
-                , Textfield.text_
-                , Textfield.value <| Maybe.withDefault "0" <| Maybe.map toString aktivitet.omfangTimer
-                , Options.onInput EndretAktivitetsOmfangTimer
-                ]
-                []
-            , showText p Typo.menu "Skole"
+            [ showText p Typo.menu "Skole"
             , visSkole model aktivitet
             , showText p Typo.menu "Aktivitetstype"
             , visAktivitetstype model aktivitet
+            , showText p Typo.menu "Skoleår"
+            , visSkoleAar model aktivitet
             ]
         ]
     , cell
@@ -451,6 +479,32 @@ visAktivitetstypeDropdown selectedAktivitetstypeId model dropdownStateAktivitets
         ]
 
 
+visSkoleAar : Model -> AktivitetEdit -> Html Msg
+visSkoleAar model aktivitet =
+    case model.appMetadata of
+        NotAsked ->
+            text "Initialising."
+
+        Loading ->
+            text "Loading."
+
+        Failure err ->
+            text ("Error: " ++ toString err)
+
+        Success data ->
+            visSkoleAarDropdown
+                aktivitet.skoleAar
+                data.skoleAar
+                model.dropdownStateSkoleAar
+
+
+visSkoleAarDropdown : Maybe SkoleAar -> List SkoleAar -> Dropdown.State -> Html Msg
+visSkoleAarDropdown selectedSkoleAarId model dropdownStateSkoleAar =
+    span []
+        [ Html.map SkoleAarDropdown (Dropdown.view dropdownConfigSkoleAar dropdownStateSkoleAar model selectedSkoleAarId)
+        ]
+
+
 dropdownConfigSkole : Dropdown.Config Msg Skole
 dropdownConfigSkole =
     Dropdown.newConfig OnSelectSkole .navn
@@ -471,6 +525,19 @@ dropdownConfigAktivitetstype =
         |> Dropdown.withMenuClass "border border-gray dropdown"
         |> Dropdown.withMenuStyles [ ( "background", "white" ) ]
         |> Dropdown.withPrompt "Velg aktivitetstype"
+        |> Dropdown.withPromptClass "silver"
+        |> Dropdown.withSelectedClass "bold"
+        |> Dropdown.withSelectedStyles [ ( "color", "black" ) ]
+        |> Dropdown.withTriggerClass "col-4 border bg-white p1"
+
+
+dropdownConfigSkoleAar : Dropdown.Config Msg SkoleAar
+dropdownConfigSkoleAar =
+    Dropdown.newConfig OnSelectSkoleAar .navn
+        |> Dropdown.withItemClass "border-bottom border-silver p1 gray"
+        |> Dropdown.withMenuClass "border border-gray dropdown"
+        |> Dropdown.withMenuStyles [ ( "background", "white" ) ]
+        |> Dropdown.withPrompt "Velg skoleår"
         |> Dropdown.withPromptClass "silver"
         |> Dropdown.withSelectedClass "bold"
         |> Dropdown.withSelectedStyles [ ( "color", "black" ) ]

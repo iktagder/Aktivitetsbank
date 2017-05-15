@@ -79,6 +79,13 @@ decodeAktivitetsType =
         |> Json.Decode.Pipeline.required "navn" (Json.string)
 
 
+decodeSkoleAar : Json.Decoder SkoleAar
+decodeSkoleAar =
+    Json.Decode.Pipeline.decode SkoleAar
+        |> Json.Decode.Pipeline.required "id" (Json.string)
+        |> Json.Decode.Pipeline.required "navn" (Json.string)
+
+
 decodeFag : Json.Decoder Fag
 decodeFag =
     Json.Decode.Pipeline.decode Fag
@@ -106,6 +113,7 @@ decodeAppMetadata =
         |> Json.Decode.Pipeline.required "trinnListe" (Json.list decodeTrinn)
         |> Json.Decode.Pipeline.required "aktivitetstyper" (Json.list decodeAktivitetsType)
         |> Json.Decode.Pipeline.required "utdanningsprogrammer" (Json.list decodeUtdanningsprogram)
+        |> Json.Decode.Pipeline.required "skoleAar" (Json.list decodeSkoleAar)
 
 
 decodeAktivitet : Json.Decoder Aktivitet
@@ -121,6 +129,9 @@ decodeAktivitet =
         |> Json.Decode.Pipeline.required "aktivitetstypeId" (Json.string)
         |> Json.Decode.Pipeline.required "aktivitetstypeNavn" (Json.string)
         |> Json.Decode.Pipeline.custom ((decodeAktivitetAktivitetsType) |> Json.andThen (\x -> Json.succeed <| Just x))
+        |> Json.Decode.Pipeline.required "skoleAarId" (Json.string)
+        |> Json.Decode.Pipeline.required "skoleAarNavn" (Json.string)
+        |> Json.Decode.Pipeline.custom ((decodeAktivitetSkoleAar) |> Json.andThen (\x -> Json.succeed <| Just x))
 
 
 decodeAktivitetEdit : Json.Decoder AktivitetEdit
@@ -132,6 +143,7 @@ decodeAktivitetEdit =
         |> Json.Decode.Pipeline.custom ((field "omfangTimer" Json.int) |> Json.andThen (\x -> Json.succeed <| Just x))
         |> Json.Decode.Pipeline.custom ((decodeAktivitetSkole) |> Json.andThen (\x -> Json.succeed <| Just x))
         |> Json.Decode.Pipeline.custom ((decodeAktivitetAktivitetsType) |> Json.andThen (\x -> Json.succeed <| Just x))
+        |> Json.Decode.Pipeline.custom ((decodeAktivitetSkoleAar) |> Json.andThen (\x -> Json.succeed <| Just x))
 
 
 decodeAktivitetSkole : Json.Decoder Skole
@@ -149,6 +161,13 @@ decodeAktivitetAktivitetsType =
         (field "aktivitetstypeNavn" Json.string)
 
 
+decodeAktivitetSkoleAar : Json.Decoder SkoleAar
+decodeAktivitetSkoleAar =
+    Json.map2 SkoleAar
+        (field "skoleAarId" Json.string)
+        (field "skoleAarNavn" Json.string)
+
+
 encodeOpprettNyAktivitet : AktivitetGyldigNy -> Json.Encode.Value
 encodeOpprettNyAktivitet model =
     let
@@ -158,6 +177,7 @@ encodeOpprettNyAktivitet model =
             , ( "omfangTimer", Json.Encode.int model.omfangTimer )
             , ( "skoleId", Json.Encode.string model.skole.id )
             , ( "aktivitetsTypeId", Json.Encode.string model.aktivitetsType.id )
+            , ( "skoleAarId", Json.Encode.string model.skoleAar.id )
             ]
     in
         encodings
@@ -174,6 +194,7 @@ encodeEndreAktivitet model =
             , ( "omfangTimer", Json.Encode.int model.omfangTimer )
             , ( "skoleId", Json.Encode.string model.skole.id )
             , ( "aktivitetsTypeId", Json.Encode.string model.aktivitetsType.id )
+            , ( "skoleAarId", Json.Encode.string model.skoleAar.id )
             ]
     in
         encodings
