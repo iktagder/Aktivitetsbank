@@ -26,6 +26,8 @@ namespace VAF.Aktivitetsbank.Data.Entiteter
         public DateTime Opprettet { get; set; }
         public DateTime Endret { get; set; }
         public Boolean Aktiv { get; set; }
+        public Guid SkoleAarId { get; set; }
+        public SkoleAar SkoleAar { get; set; }
     }
 
     public class Deltaker
@@ -84,6 +86,13 @@ namespace VAF.Aktivitetsbank.Data.Entiteter
         public List<Deltaker> Deltakere { get; set; }
     }
     public class Aktivitetstype
+    {
+        public Guid Id { get; set; }
+        [Required]
+        public string Navn { get; set; }
+        public List<Aktivitet> Aktiviteter { get; set; }
+    }
+    public class SkoleAar
     {
         public Guid Id { get; set; }
         [Required]

@@ -8,12 +8,13 @@ using VAF.Aktivitetsbank.Data;
 namespace VAF.Aktivitetsbank.Data.Migrations
 {
     [DbContext(typeof(AktivitetsbankContext))]
-    partial class AktivitetsbankContextModelSnapshot : ModelSnapshot
+    [Migration("20170515120311_skoleaar_table")]
+    partial class skoleaar_table
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
-                .HasAnnotation("ProductVersion", "1.1.2")
+                .HasAnnotation("ProductVersion", "1.1.1")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
             modelBuilder.Entity("VAF.Aktivitetsbank.Data.Entiteter.Aktivitet", b =>
@@ -44,15 +45,11 @@ namespace VAF.Aktivitetsbank.Data.Migrations
                     b.Property<string>("OpprettetAv")
                         .IsRequired();
 
-                    b.Property<Guid>("SkoleAarId");
-
                     b.Property<Guid>("SkoleId");
 
                     b.HasKey("Id");
 
                     b.HasIndex("AktivitetstypeId");
-
-                    b.HasIndex("SkoleAarId");
 
                     b.HasIndex("SkoleId");
 
@@ -190,11 +187,6 @@ namespace VAF.Aktivitetsbank.Data.Migrations
                     b.HasOne("VAF.Aktivitetsbank.Data.Entiteter.Aktivitetstype", "Aktivitetstype")
                         .WithMany("Aktiviteter")
                         .HasForeignKey("AktivitetstypeId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("VAF.Aktivitetsbank.Data.Entiteter.SkoleAar", "SkoleAar")
-                        .WithMany("Aktiviteter")
-                        .HasForeignKey("SkoleAarId")
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("VAF.Aktivitetsbank.Data.Entiteter.Skole", "Skole")

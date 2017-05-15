@@ -1,0 +1,19 @@
+﻿CREATE TABLE [SkoleAar] (
+    [Id] uniqueidentifier NOT NULL,
+    [Navn] nvarchar(max) NOT NULL,
+    CONSTRAINT [PK_SkoleAar] PRIMARY KEY ([Id])
+);
+
+GO
+
+INSERT INTO [SkoleAar] ([Id], [Navn]) VALUES('2720F51B-F73F-4C05-8784-07F230F952A5', '17/18'); ;
+
+GO
+
+INSERT INTO [SkoleAar] ([Id], [Navn]) VALUES('38C52DF9-3324-490E-8ED8-A82B7EEE4D12', '18/19'); ;
+
+GO
+
+INSERT INTO [SkoleAar] ([Id], [Navn]) VALUES('B8033B67-439A-4748-992B-E1AB5099F982', '19/20'); ;
+
+GO

@@ -100,5 +100,11 @@
   <ItemGroup>
     <EmbeddedResource Include="Scripts\Script00005 - Aktiv status field.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Scripts\Script00006 - SkoleAar table with content.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Scripts\Script00007 - SkoleAar - Aktivitet.sql" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

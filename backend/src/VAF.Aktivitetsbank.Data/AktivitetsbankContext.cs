@@ -21,6 +21,7 @@ namespace VAF.Aktivitetsbank.Data
         public DbSet<Utdanningsprogram> UtdanningsprogramSet { get; set; }
         public DbSet<Aktivitet> AktivitetSet { get; set; }
         public DbSet<Deltaker> DeltakerSet { get; set; }
+        public DbSet<SkoleAar> SkoleAarSet { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -31,6 +32,7 @@ namespace VAF.Aktivitetsbank.Data
             modelBuilder.Entity<Utdanningsprogram>().ToTable("Utdanningsprogram");
             modelBuilder.Entity<Aktivitet>().ToTable("Aktivitet");
             modelBuilder.Entity<Deltaker>().ToTable("Deltaker");
+            modelBuilder.Entity<SkoleAar>().ToTable("SkoleAar");
         }
 
         //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
