@@ -25,17 +25,17 @@ namespace VAF.Aktivitetsbank.API.Authorization
             //    _logger.LogInformation("Got role {0}", name);
             //}
 
-            context.Succeed(requirement);
-            return Task.CompletedTask;
-            //if (context.User.HasClaim(c => c.Type == ClaimTypes.Name) && context.User.IsInRole("BOUVET\\Dep.AlleKristiansand"))
-            //{
-            //    context.Succeed(requirement);
-            //}
-            //else
-            //{
-            //    context.Fail();
-            //}
+            //context.Succeed(requirement);
             //return Task.CompletedTask;
+            if (context.User.HasClaim(c => c.Type == ClaimTypes.Name) && context.User.IsInRole("BOUVET\\Dep.AlleKristiansand3"))
+            {
+                context.Succeed(requirement);
+            }
+            else
+            {
+                context.Fail();
+            }
+            return Task.CompletedTask;
         }
     }
 }

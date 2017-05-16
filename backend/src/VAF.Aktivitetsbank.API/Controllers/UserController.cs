@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Security.Principal;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -21,7 +22,6 @@ namespace VAF.Aktivitetsbank.API.Controllers
     }
 
 
-    [Authorize(Policy = "CanChangePhoneNumbers")]
     [Route("[controller]")]
     public class UserController : Controller
     {
@@ -40,6 +40,15 @@ namespace VAF.Aktivitetsbank.API.Controllers
             var userInfo = new UserInfo();
             //userInfo.brukernavn = "Username: " + WindowsIdentity.GetCurrent().Name;
             userInfo.brukernavn = HttpContext.User.Identity.Name;
+
+            if (HttpContext.User.HasClaim(c => c.Type == ClaimTypes.Name) && HttpContext.User.IsInRole("ADM\\RES_Aktivitetsbank"))
+            {
+                userInfo.rolle = "Rediger";
+            }
+            else
+            {
+                userInfo.rolle = "Les";
+            }
             _logger.LogInformation("Current ad api:{0}", _options.AdApi);
             _logger.LogInformation("Current ad api path:{0}", _options.AdApiPath);
             _logger.LogWarning("user logged in: {0}", userInfo.brukernavn);

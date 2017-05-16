@@ -14,7 +14,6 @@ using VAF.Aktivitetsbank.Application.Queries;
 
 namespace VAF.Aktivitetsbank.API.Controllers
 {
-    [Authorize(Policy = "CanChangePhoneNumbers")]
     [Route("aktiviteter")]
     public class DeltakereController : Controller
     {
@@ -32,7 +31,6 @@ namespace VAF.Aktivitetsbank.API.Controllers
             _options = options.Value;
         }
 
-        //[HttpGet("{query}")]
         [HttpGet("{aktivitetId}/deltakere")]
         public IEnumerable<DeltakerDto> Get(Guid aktivitetId)
         {
@@ -53,6 +51,7 @@ namespace VAF.Aktivitetsbank.API.Controllers
             return Ok();
         }
 
+        [Authorize(Policy = "CanChangePhoneNumbers")]
         [HttpPost("{aktivitetId}/opprettDeltaker")]
         public IActionResult OpprettDeltaker(Guid aktivitetId, [FromBody] OpprettDeltakerDto opprettDeltakerDto)
         {
@@ -84,6 +83,7 @@ namespace VAF.Aktivitetsbank.API.Controllers
             }
         }
 
+        [Authorize(Policy = "CanChangePhoneNumbers")]
         [HttpPut("{aktivitetId}/deltakere/{deltakerId}")]
         public IActionResult EndreDeltaker(Guid aktivitetId, Guid deltakerId, [FromBody] EndreDeltakerDto endreDeltakerDto)
         {
@@ -113,6 +113,7 @@ namespace VAF.Aktivitetsbank.API.Controllers
             }
         }
 
+        [Authorize(Policy = "CanChangePhoneNumbers")]
         [HttpDelete("{aktivitetId}/deltakere/{deltakerId}")]
         public IActionResult SlettDeltaker(Guid aktivitetId, Guid deltakerId)
         {

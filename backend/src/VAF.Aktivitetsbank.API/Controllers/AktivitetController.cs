@@ -14,7 +14,6 @@ using VAF.Aktivitetsbank.Application.Queries;
 
 namespace VAF.Aktivitetsbank.API.Controllers
 {
-    [Authorize(Policy = "CanChangePhoneNumbers")]
     [Route("aktiviteter")]
     public class AktivitetController : Controller
     {
@@ -46,6 +45,7 @@ namespace VAF.Aktivitetsbank.API.Controllers
         }
 
         //[AllowAnonymous]
+        [Authorize(Policy = "CanChangePhoneNumbers")]
         [HttpOptions("opprettAktivitet")]
         public IActionResult GetOptions()
         {
@@ -53,6 +53,7 @@ namespace VAF.Aktivitetsbank.API.Controllers
             return Ok();
         }
 
+        [Authorize(Policy = "CanChangePhoneNumbers")]
         [HttpPost("opprettAktivitet")]
         public IActionResult OpprettAktivitet([FromBody] OpprettAktivitetDto opprettAktivitetDto)
         {
@@ -85,6 +86,7 @@ namespace VAF.Aktivitetsbank.API.Controllers
         }
 
 
+        [Authorize(Policy = "CanChangePhoneNumbers")]
         [HttpPost("{aktivitetId}/kopier")]
         public IActionResult KopierAktivitet(Guid aktivitetId, [FromBody] KopierAktivitetDto kopierAktivitetDto)
         {
@@ -117,6 +119,7 @@ namespace VAF.Aktivitetsbank.API.Controllers
         }
 
 
+        [Authorize(Policy = "CanChangePhoneNumbers")]
         [HttpPut("{id}")]
         public IActionResult EndreAktivitet(Guid id, [FromBody] EndreAktivitetDto endreAktivitetDto)
         {
@@ -145,6 +148,7 @@ namespace VAF.Aktivitetsbank.API.Controllers
                 return new StatusCodeResult(500);
             }
         }
+        [Authorize(Policy = "CanChangePhoneNumbers")]
         [HttpDelete("{id}")]
         public IActionResult SlettAktivitet(Guid id)
         {
