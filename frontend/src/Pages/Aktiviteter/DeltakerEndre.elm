@@ -17,6 +17,8 @@ import Http exposing (Error)
 import Decoders exposing (..)
 import Dropdown
 import Shared.Validation exposing (..)
+import Shared.Tilgang exposing (..)
+import Pages.Aktiviteter.FellesVis exposing (..)
 
 
 type alias Model =
@@ -32,6 +34,7 @@ type alias Model =
     , dropdownStateUtdanningsprogram : Dropdown.State
     , dropdownStateTrinn : Dropdown.State
     , dropdownStateFag : Dropdown.State
+    , bekreftSletting : BekreftSlettingMsg
     }
 
 
@@ -51,6 +54,8 @@ type Msg
     | EndreDeltaker
     | EndreDeltakerRespons (Result Error ())
     | NavigerTilbake
+    | SlettDeltaker BekreftSlettingMsg
+    | SlettDeltakerRespons (Result Error ())
 
 
 init : String -> String -> String -> ( Model, Cmd Msg )
@@ -67,6 +72,7 @@ init apiEndpoint aktivitetId deltakerId =
       , dropdownStateTrinn = Dropdown.newState "1"
       , dropdownStateFag = Dropdown.newState "1"
       , deltaker = RemoteData.NotAsked
+      , bekreftSletting = Av
       }
     , Cmd.batch
         [ (fetchAppMetadata apiEndpoint)
@@ -154,6 +160,30 @@ putEndreDeltaker endPoint aktivitetId deltakerId deltaker responseMsg =
         req =
             Http.request
                 { method = "PUT"
+                , headers = []
+                , url = url
+                , body = body
+                , expect = Http.expectStringResponse (\_ -> Ok ())
+                , timeout = Nothing
+                , withCredentials = True
+                }
+    in
+        req
+            |> Http.send responseMsg
+
+
+deleteSlettDeltaker : String -> String -> String -> (Result Error () -> msg) -> Cmd msg
+deleteSlettDeltaker endPoint aktivitetId deltakerId responseMsg =
+    let
+        url =
+            endPoint ++ "aktiviteter/" ++ aktivitetId ++ "/deltakere/" ++ deltakerId
+
+        body =
+            Http.emptyBody
+
+        req =
+            Http.request
+                { method = "DELETE"
                 , headers = []
                 , url = url
                 , body = body
@@ -349,6 +379,52 @@ update msg model =
         NavigerTilbake ->
             ( model, Cmd.none, NavigateToAktivitet model.aktivitetId )
 
+        SlettDeltaker bekreft ->
+            let
+                ( bekreftStatus, cmd ) =
+                    case bekreft of
+                        Av ->
+                            ( bekreft, Cmd.none )
+
+                        VisBekreftSletting ->
+                            ( bekreft, Cmd.none )
+
+                        SlettingBekreftet ->
+                            ( bekreft, deleteSlettDeltaker model.apiEndpoint model.aktivitetId model.deltakerId SlettDeltakerRespons )
+
+                        SlettingAvbrutt ->
+                            ( Av, Cmd.none )
+            in
+                ( { model | bekreftSletting = bekreftStatus }, cmd, NoSharedMsg )
+
+        SlettDeltakerRespons (Ok _) ->
+            let
+                tmp =
+                    Debug.log "slettet deltaker" model.deltakerId
+            in
+                ( { model | bekreftSletting = Av }, Cmd.none, NavigateToAktivitet model.aktivitetId )
+
+        SlettDeltakerRespons (Err error) ->
+            let
+                ( cmd, statusText, _ ) =
+                    case error of
+                        Http.BadUrl info ->
+                            ( Cmd.none, "Feil i url til API.", 0 )
+
+                        Http.BadPayload _ _ ->
+                            ( Cmd.none, "Feil i innhold ved sending av data til API.", 0 )
+
+                        Http.BadStatus status ->
+                            ( Cmd.none, "Feil i sending av data til API.", 0 )
+
+                        Http.NetworkError ->
+                            ( Cmd.none, "Feil i sending av data til API. Nettverksfeil.", 0 )
+
+                        Http.Timeout ->
+                            ( Cmd.none, "Nettverksfeil - timet ut ved kall til API.", 0 )
+            in
+                ( { model | statusText = statusText }, cmd, NoSharedMsg )
+
 
 valideringsInfo : DeltakerEdit -> ( Bool, String )
 valideringsInfo deltaker =
@@ -380,15 +456,17 @@ showText elementType displayStyle text_ =
 vis : Taco -> Model -> Html Msg
 vis taco model =
     grid []
-        (visHeading model :: visAktivitet model ++ visDeltaker model)
+        (visHeading taco model :: visAktivitet model ++ visDeltaker model)
 
 
-visHeading : Model -> Grid.Cell Msg
-visHeading model =
+visHeading : Taco -> Model -> Grid.Cell Msg
+visHeading taco model =
     cell
         [ size All 12
         ]
-        [ Options.span
+        [ (visSlettDeltaker model)
+            |> visVedKanRedigere taco
+        , Options.span
             [ Typo.headline
             , Options.css "padding" "16px 32px"
             ]
@@ -722,3 +800,18 @@ dropdownConfigFag =
         |> Dropdown.withSelectedClass "bold"
         |> Dropdown.withSelectedStyles [ ( "color", "black" ) ]
         |> Dropdown.withTriggerClass "col-12 border bg-white p1"
+
+
+visSlettDeltaker : Model -> Taco -> Html Msg
+visSlettDeltaker model taco =
+    let
+        konfigurasjon =
+            { bekreftMsg = SlettDeltaker
+            , mdlMsg = Mdl
+            , mdlModel = model.mdl
+            , bekreftSporsmaal = "Vil du virkelig slette denne deltakeren?"
+            , avbrytTekst = "Avbryt"
+            , bekreftTekst = "Slett deltaker"
+            }
+    in
+        visSlett model.bekreftSletting konfigurasjon taco
