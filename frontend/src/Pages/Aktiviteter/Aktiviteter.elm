@@ -473,11 +473,14 @@ visAktivitetTabellSuksess model aktiviteter =
                     [ css "width" "20%" ]
                     [ showText div Typo.body2 "Navn"
                     ]
-                , Table.th [ css "width" "15%" ]
+                , Table.th [ css "width" "10%" ]
                     [ showText div Typo.body2 "Aktivitetstype"
                     ]
                 , Table.th [ css "width" "10%" ]
                     [ showText div Typo.body2 "Skole"
+                    ]
+                , Table.th [ css "width" "5%", css "text-align" "left" ]
+                    [ showText span Typo.body2 "Skoleår"
                     ]
                 , Table.th [ css "width" "5%", css "text-align" "left" ]
                     [ showText span Typo.body2 "Timer"
@@ -512,6 +515,7 @@ visAktivitetTabellRad idx model outerMdl =
         [ Table.td [ css "text-align" "left", cs "wrapword" ] [ text model.navn ]
         , Table.td [ css "text-align" "left", cs "wrapword" ] [ text model.aktivitetsTypeNavn ]
         , Table.td [ css "text-align" "left", cs "wrapword" ] [ text model.skoleNavn ]
+        , Table.td [ css "text-align" "left", cs "wrapword" ] [ text model.skoleAarNavn ]
         , Table.td [ Table.numeric ] [ text <| toString model.omfangTimer ]
         , Table.td [ css "text-align" "left", cs "wrapword" ] [ text (String.left 600 model.beskrivelse) ]
         ]
