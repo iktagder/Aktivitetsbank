@@ -18,12 +18,12 @@ namespace VAF.Aktivitetsbank.API.Authorization
 
         protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, IsPhoneAdminRequirement requirement)
         {
-            //var roles = context.User.Claims.Where(q => q.Type == ClaimTypes.GroupSid).Select(q => q.Value);
-            //foreach (var role in roles)
-            //{
-            //    var name = new System.Security.Principal.SecurityIdentifier(role).Translate(typeof(System.Security.Principal.NTAccount)).ToString();
-            //    _logger.LogInformation("Got role {0}", name);
-            //}
+            var roles = context.User.Claims.Where(q => q.Type == ClaimTypes.GroupSid).Select(q => q.Value);
+            foreach (var role in roles)
+            {
+                var name = new System.Security.Principal.SecurityIdentifier(role).Translate(typeof(System.Security.Principal.NTAccount)).ToString();
+                _logger.LogInformation("Got role {0}", name);
+            }
 
             context.Succeed(requirement);
             return Task.CompletedTask;
