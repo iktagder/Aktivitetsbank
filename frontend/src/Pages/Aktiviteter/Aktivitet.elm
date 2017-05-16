@@ -370,11 +370,11 @@ showText elementType displayStyle text_ =
 view : Taco -> Model -> Html Msg
 view taco model =
     grid []
-        (visHeading model :: visAktivitet model ++ visAktivitetDeltakere model)
+        (visHeading taco model :: visAktivitet model ++ visAktivitetDeltakere model)
 
 
-visHeading : Model -> Grid.Cell Msg
-visHeading model =
+visHeading : Taco -> Model -> Grid.Cell Msg
+visHeading taco model =
     cell
         [ size All 12
         ]
@@ -412,7 +412,31 @@ visHeading model =
         --     [ Tooltip.large ]
         --     [ text "Kopier aktivitet" ]
         , (visKopierAktivitetMeny model)
-        , Icon.view "mode_edit"
+            |> visVedKanRedigere taco
+        , (visEditerAktivitetIkon model)
+            |> visVedKanRedigere taco
+        , (visSlettAktivitet model)
+            |> visVedKanRedigere taco
+        , Options.span
+            [ Typo.headline
+            , Options.css "padding" "16px 32px"
+            ]
+            [ text "Aktivitet detaljer" ]
+        ]
+
+
+visVedKanRedigere : Taco -> (Taco -> Html Msg) -> Html Msg
+visVedKanRedigere taco visInnhold =
+    if taco.userInfo.rolle == "Rediger" then
+        visInnhold taco
+    else
+        text ""
+
+
+visEditerAktivitetIkon : Model -> Taco -> Html Msg
+visEditerAktivitetIkon model taco =
+    Options.span [ Options.css "float" "right" ]
+        [ Icon.view "mode_edit"
             [ Tooltip.attach Mdl [ 125, 100 ]
             , Options.css "float" "right"
             , Options.onClick <| VisAktivitetEndre model.aktivitetId
@@ -420,12 +444,6 @@ visHeading model =
             , cs "standard-ikon"
             ]
         , Tooltip.render Mdl [ 125, 100 ] model.mdl [ Tooltip.large ] [ text "Endre aktivitet" ]
-        , (visSlettAktivitet model)
-        , Options.span
-            [ Typo.headline
-            , Options.css "padding" "16px 32px"
-            ]
-            [ text "Aktivitet detaljer" ]
         ]
 
 
@@ -816,8 +834,8 @@ visAktivitetDeltaker model deltaker =
             ]
 
 
-visKopierAktivitetMeny : Model -> Html Msg
-visKopierAktivitetMeny model =
+visKopierAktivitetMeny : Model -> Taco -> Html Msg
+visKopierAktivitetMeny model taco =
     Options.div []
         [ Menu.render Mdl
             [ 22, 33, 44 ]
@@ -882,8 +900,8 @@ visKopierAktivitetSkole skole =
         [ text skole.navn ]
 
 
-visSlettAktivitet : Model -> Html Msg
-visSlettAktivitet model =
+visSlettAktivitet : Model -> Taco -> Html Msg
+visSlettAktivitet model taco =
     case model.bekreftSletting of
         Av ->
             visSlettAktivitetIkon model

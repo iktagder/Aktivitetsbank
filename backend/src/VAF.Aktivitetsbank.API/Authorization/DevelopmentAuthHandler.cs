@@ -27,7 +27,7 @@ namespace VAF.Aktivitetsbank.API.Authorization
 
             //context.Succeed(requirement);
             //return Task.CompletedTask;
-            if (context.User.HasClaim(c => c.Type == ClaimTypes.Name) && context.User.IsInRole("BOUVET\\Dep.AlleKristiansand3"))
+            if (context.User.HasClaim(c => c.Type == ClaimTypes.Name) && context.User.IsInRole("BOUVET\\Dep.AlleKristiansand"))
             {
                 context.Succeed(requirement);
             }

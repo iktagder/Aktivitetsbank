@@ -5,12 +5,14 @@ using System.Security.Principal;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using VAF.Aktivitetsbank.Application;
 using VAF.Aktivitetsbank.Application.Commands;
 using VAF.Aktivitetsbank.Application.Handlers;
 using VAF.Aktivitetsbank.Application.Queries;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using VAF.Aktivitetsbank.API.Authorization;
 
 namespace VAF.Aktivitetsbank.API.Controllers
 {
@@ -40,8 +42,8 @@ namespace VAF.Aktivitetsbank.API.Controllers
             var userInfo = new UserInfo();
             //userInfo.brukernavn = "Username: " + WindowsIdentity.GetCurrent().Name;
             userInfo.brukernavn = HttpContext.User.Identity.Name;
-
-            if (HttpContext.User.HasClaim(c => c.Type == ClaimTypes.Name) && HttpContext.User.IsInRole("ADM\\RES_Aktivitetsbank"))
+            
+            if (HttpContext.User.HasClaim(c => c.Type == ClaimTypes.Name) && (HttpContext.User.IsInRole("ADM\\RES_Aktivitetsbank") ||HttpContext.User.IsInRole("BOUVET\\Dep.AlleKristiansand")))
             {
                 userInfo.rolle = "Rediger";
             }

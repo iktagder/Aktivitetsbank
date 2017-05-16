@@ -224,39 +224,9 @@ view taco model =
         [ cell
             [ size All 12
             ]
-            [ Icon.view "add"
-                [ Tooltip.attach Mdl [ 123, 100 ]
-                , Options.css "float" "right"
-                , Icon.size24
-                , cs "standard-ikon"
-                , Options.onClick OpprettAktivitet
-                ]
-            , Tooltip.render Mdl
-                [ 123
-                , 100
-                ]
-                model.mdl
-                [ Tooltip.large
-                ]
-                [ text "Opprett aktivitet"
-                ]
-            , Icon.view "search"
-                [ Tooltip.attach Mdl
-                    [ 124
-                    , 100
-                    ]
-                , Options.css "float" "right"
-                , Icon.size24
-                , cs "standard-ikon"
-                , Options.onClick VisFilter
-                ]
-            , Tooltip.render Mdl
-                [ 124
-                , 100
-                ]
-                model.mdl
-                [ Tooltip.large ]
-                [ text "Filtrer aktiviteter" ]
+            [ (visOpprettAktivitetIkon model)
+                |> visVedKanRedigere taco
+            , (visFilterIkon taco model)
             , Options.span
                 [ Typo.headline
                 , Options.css "padding" "16px 32px"
@@ -294,6 +264,59 @@ view taco model =
             ]
             [ viewMainContent model
             ]
+        ]
+
+
+visVedKanRedigere : Taco -> (Taco -> Html Msg) -> Html Msg
+visVedKanRedigere taco visInnhold =
+    if taco.userInfo.rolle == "Rediger" then
+        visInnhold taco
+    else
+        text ""
+
+
+visOpprettAktivitetIkon : Model -> Taco -> Html Msg
+visOpprettAktivitetIkon model taco =
+    Options.span [ Options.css "float" "right" ]
+        [ Icon.view "add"
+            [ Tooltip.attach Mdl [ 123, 100 ]
+            , Options.css "float" "right"
+            , Icon.size24
+            , cs "standard-ikon"
+            , Options.onClick OpprettAktivitet
+            ]
+        , Tooltip.render Mdl
+            [ 123
+            , 100
+            ]
+            model.mdl
+            [ Tooltip.large
+            ]
+            [ text "Opprett aktivitet"
+            ]
+        ]
+
+
+visFilterIkon : Taco -> Model -> Html Msg
+visFilterIkon taco model =
+    Options.span [ Options.css "float" "right" ]
+        [ Icon.view "search"
+            [ Tooltip.attach Mdl
+                [ 124
+                , 100
+                ]
+            , Options.css "float" "right"
+            , Icon.size24
+            , cs "standard-ikon"
+            , Options.onClick VisFilter
+            ]
+        , Tooltip.render Mdl
+            [ 124
+            , 100
+            ]
+            model.mdl
+            [ Tooltip.large ]
+            [ text "Filtrer aktiviteter" ]
         ]
 
 
