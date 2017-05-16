@@ -3,6 +3,9 @@ module Main exposing (..)
 import Navigation exposing (Location)
 import Html exposing (..)
 import Types exposing (..)
+import Html exposing (Html, text, div, span, p, a)
+import Material.Typography as Typo
+import Material.Options as Options exposing (when, css, cs, Style, onClick)
 import Time exposing (Time)
 import RemoteData exposing (RemoteData(..))
 import Routing.Router as Router
@@ -34,6 +37,8 @@ type alias Model =
 type AppState
     = NotReady Flags
     | Ready Taco Router.Model
+    | Unauthorized
+    | AppNetworkError
 
 
 type alias Flags =
@@ -120,6 +125,16 @@ updateTime model time =
             , Cmd.none
             )
 
+        Unauthorized ->
+            ( model
+            , Cmd.none
+            )
+
+        AppNetworkError ->
+            ( model
+            , Cmd.none
+            )
+
 
 updateRouter : Model -> Router.Msg -> ( Model, Cmd Msg )
 updateRouter model routerMsg =
@@ -143,36 +158,46 @@ updateRouter model routerMsg =
             in
                 ( model, Cmd.none )
 
+        Unauthorized ->
+            ( model
+            , Cmd.none
+            )
+
+        AppNetworkError ->
+            ( model
+            , Cmd.none
+            )
+
 
 updateUserInfo : Model -> RemoteData.WebData UserInformation -> ( Model, Cmd Msg )
 updateUserInfo model webData =
     case webData of
         Failure error ->
             let
-                ( cmd, statusText, retryCount ) =
+                ( newAppstate, cmd, statusText, retryCount ) =
                     case error of
                         Http.BadUrl info ->
-                            ( Cmd.none, "Feil i url til API", model.loadUserRetryCount )
+                            ( model.appState, Cmd.none, "Feil i url til API", model.loadUserRetryCount )
 
                         Http.BadPayload _ _ ->
-                            ( Cmd.none, "Feil i sending av data til API", model.loadUserRetryCount )
+                            ( model.appState, Cmd.none, "Feil i sending av data til API", model.loadUserRetryCount )
 
                         Http.BadStatus status ->
                             if model.loadUserRetryCount < 5 then
-                                ( fetchUserInformation model.apiEndpoint, "Prøver henting av data på nytt", model.loadUserRetryCount + 1 )
+                                ( model.appState, fetchUserInformation model.apiEndpoint, "Prøver henting av data på nytt", model.loadUserRetryCount + 1 )
                             else
-                                ( Cmd.none, "Stoppet henting av data på nytt.", model.loadUserRetryCount )
+                                ( Unauthorized, Cmd.none, "Stoppet henting av data på nytt.", model.loadUserRetryCount )
 
                         Http.NetworkError ->
                             if model.loadUserRetryCount < 5 then
-                                ( fetchUserInformation model.apiEndpoint, "Nettverksfeil - Prøver henting av data på nytt", model.loadUserRetryCount + 1 )
+                                ( model.appState, fetchUserInformation model.apiEndpoint, "Nettverksfeil - Prøver henting av data på nytt", model.loadUserRetryCount + 1 )
                             else
-                                ( Cmd.none, "Stoppet henting av data på nytt.", model.loadUserRetryCount )
+                                ( AppNetworkError, Cmd.none, "Stoppet henting av data på nytt.", model.loadUserRetryCount )
 
                         Http.Timeout ->
-                            ( Cmd.none, "Nettverksfeil - timet ut", model.loadUserRetryCount )
+                            ( model.appState, Cmd.none, "Nettverksfeil - timet ut", model.loadUserRetryCount )
             in
-                ( { model | loadUserRetryCount = retryCount }, cmd )
+                ( { model | loadUserRetryCount = retryCount, appState = newAppstate }, cmd )
 
         -- Debug.crash "OMG CANT EVEN DOWNLOAD."
         Success userInfo ->
@@ -193,6 +218,16 @@ updateUserInfo model webData =
 
                 Ready taco routerModel ->
                     ( { model | appState = Ready (updateTaco taco (UpdateUserInfo userInfo)) routerModel }
+                    , Cmd.none
+                    )
+
+                Unauthorized ->
+                    ( model
+                    , Cmd.none
+                    )
+
+                AppNetworkError ->
+                    ( model
                     , Cmd.none
                     )
 
@@ -229,3 +264,23 @@ view model =
                 , css "justify-content" "center"
                 ]
                 [ Loading.indeterminate ]
+
+        Unauthorized ->
+            Options.div
+                [ css "display" "flex"
+                , css "width" "100%"
+                , css "height" "100vh"
+                , css "align-items" "center"
+                , css "justify-content" "center"
+                ]
+                [ Options.styled div [ Typo.title ] [ text "Du har ikke tilgang til Aktivitetsbank." ] ]
+
+        AppNetworkError ->
+            Options.div
+                [ css "display" "flex"
+                , css "width" "100%"
+                , css "height" "100vh"
+                , css "align-items" "center"
+                , css "justify-content" "center"
+                ]
+                [ Options.styled div [ Typo.title ] [ text "Nettverksfeil - sjekk at du er på rett nett og at du har tilgang til Aktivitetsbank." ] ]
