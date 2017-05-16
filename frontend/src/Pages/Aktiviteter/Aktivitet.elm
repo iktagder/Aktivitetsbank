@@ -19,6 +19,7 @@ import Material.Typography as Typography
 import RemoteData exposing (WebData, RemoteData(..))
 import Types exposing (..)
 import Shared.Tilgang exposing (..)
+import Pages.Aktiviteter.FellesVis exposing (..)
 import Http exposing (Error)
 import Decoders exposing (..)
 import Dropdown
@@ -34,15 +35,8 @@ type alias Model =
     , appMetadata : WebData AppMetadata
     , dropdownStateSkole : Dropdown.State
     , dropdownStateAktivitetstype : Dropdown.State
-    , bekreftSletting : BekreftSletting
+    , bekreftSletting : BekreftSlettingMsg
     }
-
-
-type BekreftSletting
-    = Av
-    | VisBekreftSletting
-    | SlettingBekreftet
-    | SlettingAvbrutt
 
 
 type Msg
@@ -57,7 +51,7 @@ type Msg
     | OnSelectAktivitetstype (Maybe AktivitetsType)
     | AktivitetstypeDropdown (Dropdown.Msg AktivitetsType)
     | VisDeltakerOpprett
-    | SlettAktivitet BekreftSletting
+    | SlettAktivitet BekreftSlettingMsg
     | NavigerHjem
     | NavigerTilEndreDeltaker String String
     | KopierAktivitetTilSkole Skole
@@ -395,23 +389,6 @@ visHeading taco model =
             ]
             [ text "Gå til hovedside"
             ]
-
-        -- , Icon.view "content_copy"
-        --     [ Tooltip.attach Mdl
-        --         [ 124
-        --         , 100
-        --         ]
-        --     , Options.css "float" "right"
-        --     , Icon.size24
-        --     , cs "vis-navigering"
-        --     ]
-        -- , Tooltip.render Mdl
-        --     [ 124
-        --     , 100
-        --     ]
-        --     model.mdl
-        --     [ Tooltip.large ]
-        --     [ text "Kopier aktivitet" ]
         , (visKopierAktivitetMeny model)
             |> visVedKanRedigere taco
         , (visEditerAktivitetIkon model)
@@ -664,8 +641,6 @@ visAktivitetDeltakereSuksess taco model deltakere =
 
         -- , Options.css "padding" "16px 32px"
         ]
-        -- [ showText span Typo.headline "Deltakere"
-        -- , Tooltip.attach Mdl [ 120 ] ], Tooltip.render Mdl [ 120 ] outerMdl [ Tooltip.large ] [ text "Endre deltaker" ]
         [ Options.span
             [ Typo.headline
             , Options.css "float" "left"
@@ -684,31 +659,6 @@ visAktivitetDeltakereSuksess taco model deltakere =
         -- [ visAktivitetDeltakerListe model deltakere
         [ visAktivitetDeltakerTabell taco model deltakere
         ]
-
-    -- , cell
-    --     [ size All 12
-    --     , Elevation.e0
-    --     -- , Options.css "padding" "16px 32px"
-    --     -- , Options.css "display" "flex"
-    --     -- , Options.css "flex-direction" "column"
-    --     -- , Options.css "float" "left"
-    --     , css "flex-direction" "row"
-    --     , css "align-items" "stretch"
-    --     , css "justify-content" "flex-start"
-    --     , css "align-content" "stretch"
-    --     -- , Options.css "align-items" "left"
-    --     ]
-    --     [ Options.span [ Typo.menu, Options.css "float" "left" ] [ text "Legg til deltaker" ]
-    --     , Button.render Mdl
-    --         [ 0, 4, 2 ]
-    --         model.mdl
-    --         [ Button.fab
-    --         , Button.ripple
-    --         , Options.onClick VisDeltakerOpprett
-    --         , Options.css "float" "left"
-    --         ]
-    --         [ Icon.i "add" ]
-    --     ]
     ]
 
 
@@ -786,19 +736,6 @@ visAktivitetDeltakerTabellRad idx taco aktivitetId model outerMdl =
             ]
 
 
-
--- , Table.td []
---     [ Button.render Mdl
---         [ idx ]
---         outerMdl
---         [ Button.minifab
---         , Button.colored
---         , Options.onClick (selectedMsg model.navn)
---         ]
---         [ Icon.view "cancel" [ Tooltip.attach mdlMsg [ idx ] ], Tooltip.render mdlMsg [ idx ] outerMdl [ Tooltip.large ] [ text "Fjern tilgang" ] ]
---     ]
-
-
 visAktivitetDeltakerListe : Model -> List Deltaker -> Html Msg
 visAktivitetDeltakerListe model deltakere =
     Lists.ul [ css "width" "100%" ]
@@ -873,25 +810,6 @@ visKopierAktivitetMeny model taco =
         ]
 
 
-
--- , Icon.view "content_copy"
---     [ Tooltip.attach Mdl
---         [ 124
---         , 100
---         ]
---     , Options.css "float" "right"
---     , Icon.size24
---     , cs "vis-navigering"
---     ]
--- , Tooltip.render Mdl
---     [ 124
---     , 100
---     ]
---     model.mdl
---     [ Tooltip.large ]
---     [ text "Kopier aktivitet" ]
-
-
 visKopiAktivitetSkoler : Model -> List (Menu.Item Msg)
 visKopiAktivitetSkoler model =
     case model.appMetadata of
@@ -913,58 +831,14 @@ visKopierAktivitetSkole skole =
 
 visSlettAktivitet : Model -> Taco -> Html Msg
 visSlettAktivitet model taco =
-    case model.bekreftSletting of
-        Av ->
-            visSlettAktivitetIkon model
-
-        VisBekreftSletting ->
-            visSlettAktivitetBekreft model
-
-        SlettingBekreftet ->
-            text "Sletter aktivitet"
-
-        SlettingAvbrutt ->
-            text "Sletting avbrutt"
-
-
-visSlettAktivitetIkon : Model -> Html Msg
-visSlettAktivitetIkon model =
-    Options.span [ Options.css "float" "right" ]
-        [ Icon.view "delete_sweep"
-            [ Tooltip.attach Mdl [ 145, 100 ]
-            , Options.css "float" "right"
-            , Options.onClick <| SlettAktivitet VisBekreftSletting
-            , Icon.size24
-            , cs "standard-ikon"
-            ]
-        , Tooltip.render Mdl [ 145, 100 ] model.mdl [ Tooltip.large ] [ text "Slett aktivitet" ]
-        ]
-
-
-visSlettAktivitetBekreft : Model -> Html Msg
-visSlettAktivitetBekreft model =
-    Options.span [ Options.css "float" "right" ]
-        [ Options.styled div [ Typo.title ] [ text "Vil du virkelig slette denne aktiviteten?" ]
-        , Button.render Mdl
-            [ 347, 1 ]
-            model.mdl
-            [ Button.ripple
-            , Button.colored
-            , Button.raised
-            , Options.onClick (SlettAktivitet SlettingAvbrutt)
-            , css "float" "left"
-            , Options.css "margin" "6px 6px"
-            ]
-            [ text "Avbryt" ]
-        , Button.render Mdl
-            [ 41, 404 ]
-            model.mdl
-            [ Button.ripple
-            , Button.accent
-            , Button.raised
-            , Options.onClick (SlettAktivitet SlettingBekreftet)
-            , css "float" "left"
-            , Options.css "margin" "6px 6px"
-            ]
-            [ text "Bekreft sletting" ]
-        ]
+    let
+        konfigurasjon =
+            { bekreftMsg = SlettAktivitet
+            , mdlMsg = Mdl
+            , mdlModel = model.mdl
+            , bekreftSporsmaal = "Vil du virkelig slette denne aktiviteten?"
+            , avbrytTekst = "Avbryt"
+            , bekreftTekst = "Slett aktivitet"
+            }
+    in
+        visSlett model.bekreftSletting konfigurasjon taco
