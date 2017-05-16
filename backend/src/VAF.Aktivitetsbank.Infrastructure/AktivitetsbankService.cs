@@ -255,5 +255,57 @@ namespace VAF.Aktivitetsbank.Infrastructure
                 throw;
             }
         }
+
+        public void SlettAktivitet(SlettAktivitetDto commandSlettAktivitetDto)
+        {
+            try
+            {
+                var gammelAktivitet = _context.AktivitetSet.Find(commandSlettAktivitetDto.Id);
+                if (gammelAktivitet != null)
+                {
+                    gammelAktivitet.Aktiv = false;
+                    gammelAktivitet.Endret = DateTime.Now;
+                    gammelAktivitet.EndretAv = commandSlettAktivitetDto.BrukerId;
+                    _context.SaveChanges();
+                }
+                else
+                {
+                    _logger.LogError("Kunne ikke deaktivere aktivitet i databasen.", commandSlettAktivitetDto); 
+                    throw new NullReferenceException();
+                }
+
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("Kunne ikke deaktivere aktivitet i databasen.", e); 
+                throw;
+            }
+        }
+
+        public void SlettDeltaker(SlettDeltakerDto commandSlettDeltakerDto)
+        {
+            try
+            {
+                var gammelDeltaker = _context.DeltakerSet.Find(commandSlettDeltakerDto.Id);
+                if (gammelDeltaker != null)
+                {
+                    gammelDeltaker.Aktiv = false;
+                    gammelDeltaker.Endret = DateTime.Now;
+                    gammelDeltaker.EndretAv = commandSlettDeltakerDto.BrukerId;
+                    _context.SaveChanges();
+                }
+                else
+                {
+                    _logger.LogError("Kunne ikke deaktivere deltaker i databasen.", commandSlettDeltakerDto); 
+                    throw new NullReferenceException();
+                }
+
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("Kunne ikke deaktivere deltaker i databasen.", e); 
+                throw;
+            }
+        }
     }
 }

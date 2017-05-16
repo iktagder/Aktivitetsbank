@@ -16,5 +16,7 @@ namespace VAF.Aktivitetsbank.Application
         void EndreAktivitet(EndreAktivitetDto commandEndreAktivitetDto);
         void EndreDeltaker(EndreDeltakerDto commandEndreDeltakerDto);
         void KopierAktivitet(KopierAktivitetDto commandKopierAktivitetDto);
+        void SlettAktivitet(SlettAktivitetDto commandSlettAktivitetDto);
+        void SlettDeltaker(SlettDeltakerDto commandSlettDeltakerDto);
     }
 }

@@ -143,5 +143,32 @@ namespace VAF.Aktivitetsbank.API.Controllers
                 return new StatusCodeResult(500);
             }
         }
+        [HttpDelete("{id}")]
+        public IActionResult SlettAktivitet(Guid id)
+        {
+            //validere guid? nullable?
+            if (id == Guid.Empty)
+            {
+                _logger.LogError("Feil data ved sletting av aktivitet. Mangler input data.");
+                return BadRequest();
+            }
+            var slettAktivitetDto = new SlettAktivitetDto()
+            {
+                Id = id,
+                BrukerId = HttpContext.User.Identity.Name
+            };
+            try
+            {
+                _commandDispatcher.Execute(new SlettAktivitetCommand(slettAktivitetDto));
+                return new NoContentResult();
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                _logger.LogError("Feil i sletting av aktivitet. Serverfeil.", e);
+                return new StatusCodeResult(500);
+            }
+        }
     }
 }

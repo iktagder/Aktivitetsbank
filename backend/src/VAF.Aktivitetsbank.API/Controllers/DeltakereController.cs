@@ -111,5 +111,33 @@ namespace VAF.Aktivitetsbank.API.Controllers
             }
         }
 
+        [HttpDelete("{aktivitetId}/deltakere/{deltakerId}")]
+        public IActionResult SlettDeltaker(Guid aktivitetId, Guid deltakerId)
+        {
+            if (aktivitetId == Guid.Empty || deltakerId == Guid.Empty)
+            {
+                _logger.LogError("Feil data ved sletting av deltaker. Mangler input data.");
+                return BadRequest();
+            }
+            var slettDeltakerDto = new SlettDeltakerDto()
+            {
+                Id = deltakerId,
+                AktivitetId = aktivitetId,
+                BrukerId = HttpContext.User.Identity.Name
+            };
+            try
+            {
+                _commandDispatcher.Execute(new SlettDeltakerCommand(slettDeltakerDto));
+                return new NoContentResult();
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                _logger.LogError("Feil i sletting av deltaker. Serverfeil.", e);
+                return new StatusCodeResult(500);
+            }
+        }
+
     }
 }

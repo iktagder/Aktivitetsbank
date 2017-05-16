@@ -110,9 +110,11 @@ namespace VAF.Aktivitetsbank.API
             builder.RegisterType < DeltakerQueryHandler>().As<IQueryHandler<DeltakerQuery, DeltakerDto>>();
             builder.RegisterType<OpprettAktivitetCommandHandler>().As<ICommandHandler<OpprettAktivitetCommand>>();
             builder.RegisterType<EndreAktivitetCommandHandler>().As<ICommandHandler<EndreAktivitetCommand>>();
+            builder.RegisterType<SlettAktivitetCommandHandler>().As<ICommandHandler<SlettAktivitetCommand>>();
             builder.RegisterType<KopierAktivitetCommandHandler>().As<ICommandHandler<KopierAktivitetCommand>>();
             builder.RegisterType<OpprettDeltakerCommandHandler>().As<ICommandHandler<OpprettDeltakerCommand>>();
             builder.RegisterType<EndreDeltakerCommandHandler>().As<ICommandHandler<EndreDeltakerCommand>>();
+            builder.RegisterType<SlettDeltakerCommandHandler>().As<ICommandHandler<SlettDeltakerCommand>>();
             builder.RegisterType<AktivitetsbankService>().As<IAktivitetsbankService>();
             builder.RegisterType<RabbitMqNotificationService>().As<INotificationService<NumberChangedEvent>>();
 
