@@ -18,6 +18,7 @@ import Material.Spinner as Loading
 import Material.Typography as Typography
 import RemoteData exposing (WebData, RemoteData(..))
 import Types exposing (..)
+import Shared.Tilgang exposing (..)
 import Http exposing (Error)
 import Decoders exposing (..)
 import Dropdown
@@ -370,7 +371,7 @@ showText elementType displayStyle text_ =
 view : Taco -> Model -> Html Msg
 view taco model =
     grid []
-        (visHeading taco model :: visAktivitet model ++ visAktivitetDeltakere model)
+        (visHeading taco model :: visAktivitet model ++ visAktivitetDeltakere taco model)
 
 
 visHeading : Taco -> Model -> Grid.Cell Msg
@@ -423,14 +424,6 @@ visHeading taco model =
             ]
             [ text "Aktivitet detaljer" ]
         ]
-
-
-visVedKanRedigere : Taco -> (Taco -> Html Msg) -> Html Msg
-visVedKanRedigere taco visInnhold =
-    if taco.userInfo.rolle == "Rediger" then
-        visInnhold taco
-    else
-        text ""
 
 
 visEditerAktivitetIkon : Model -> Taco -> Html Msg
@@ -620,8 +613,8 @@ dropdownConfigAktivitetstype =
         |> Dropdown.withTriggerClass "col-4 border bg-white p1"
 
 
-visAktivitetDeltakere : Model -> List (Grid.Cell Msg)
-visAktivitetDeltakere model =
+visAktivitetDeltakere : Taco -> Model -> List (Grid.Cell Msg)
+visAktivitetDeltakere taco model =
     case model.deltakere of
         NotAsked ->
             [ cell
@@ -656,11 +649,11 @@ visAktivitetDeltakere model =
             ]
 
         Success data ->
-            visAktivitetDeltakereSuksess model data
+            visAktivitetDeltakereSuksess taco model data
 
 
-visAktivitetDeltakereSuksess : Model -> List Deltaker -> List (Grid.Cell Msg)
-visAktivitetDeltakereSuksess model deltakere =
+visAktivitetDeltakereSuksess : Taco -> Model -> List Deltaker -> List (Grid.Cell Msg)
+visAktivitetDeltakereSuksess taco model deltakere =
     [ cell
         [ size All 12
         , Elevation.e0
@@ -679,17 +672,8 @@ visAktivitetDeltakereSuksess model deltakere =
             , Options.css "margin" "16px 16px"
             ]
             [ text "Deltakere" ]
-        , Icon.view "add"
-            [ Tooltip.attach Mdl
-                [ 121
-                ]
-            , Options.css "float" "left"
-            , Options.onClick VisDeltakerOpprett
-            , Icon.size24
-            , Options.css "margin" "12px 16px"
-            , cs "vis-navigering"
-            ]
-        , Tooltip.render Mdl [ 121 ] model.mdl [ Tooltip.large ] [ text "Opprett deltaker på aktiviteten" ]
+        , (visLeggTilDeltakerIkon model)
+            |> visVedKanRedigere taco
         ]
     , cell
         [ size All 12
@@ -698,7 +682,7 @@ visAktivitetDeltakereSuksess model deltakere =
         -- , Options.css "padding" "16px 32px"
         ]
         -- [ visAktivitetDeltakerListe model deltakere
-        [ visAktivitetDeltakerTabell model deltakere
+        [ visAktivitetDeltakerTabell taco model deltakere
         ]
 
     -- , cell
@@ -728,8 +712,25 @@ visAktivitetDeltakereSuksess model deltakere =
     ]
 
 
-visAktivitetDeltakerTabell : Model -> List Deltaker -> Html Msg
-visAktivitetDeltakerTabell model deltakere =
+visLeggTilDeltakerIkon : Model -> Taco -> Html Msg
+visLeggTilDeltakerIkon model taco =
+    Options.span [ Options.css "float" "left" ]
+        [ Icon.view "add"
+            [ Tooltip.attach Mdl
+                [ 121
+                ]
+            , Options.css "float" "left"
+            , Options.onClick VisDeltakerOpprett
+            , Icon.size24
+            , Options.css "margin" "12px 16px"
+            , cs "vis-navigering"
+            ]
+        , Tooltip.render Mdl [ 121 ] model.mdl [ Tooltip.large ] [ text "Opprett deltaker på aktiviteten" ]
+        ]
+
+
+visAktivitetDeltakerTabell : Taco -> Model -> List Deltaker -> Html Msg
+visAktivitetDeltakerTabell taco model deltakere =
     Table.table [ css "table-layout" "fixed", css "width" "100%" ]
         [ Table.thead
             []
@@ -751,28 +752,38 @@ visAktivitetDeltakerTabell model deltakere =
                     [ showText span Typo.body2 "Kompetansemål"
                     ]
                 , Table.th [ css "width" "5%" ]
-                    [ showText div Typo.body2 "Handling"
+                    [ if kanRedigere taco then
+                        showText div Typo.body2 "Handling"
+                      else
+                        text ""
                     ]
                 ]
             ]
         , Table.tbody []
             (deltakere
-                |> List.indexedMap (\idx item -> visAktivitetDeltakerTabellRad idx model.aktivitetId item model.mdl)
+                |> List.indexedMap (\idx item -> visAktivitetDeltakerTabellRad idx taco model.aktivitetId item model.mdl)
             )
         ]
 
 
-visAktivitetDeltakerTabellRad : Int -> String -> Deltaker -> Material.Model -> Html Msg
-visAktivitetDeltakerTabellRad idx aktivitetId model outerMdl =
-    Table.tr
-        []
-        [ Table.td [ css "text-align" "left", cs "wrapword" ] [ text model.utdanningsprogramNavn ]
-        , Table.td [ css "text-align" "left", cs "wrapword" ] [ text model.trinnNavn ]
-        , Table.td [ css "text-align" "left", cs "wrapword" ] [ text model.fagNavn ]
-        , Table.td [ Table.numeric ] [ text <| toString model.timer ]
-        , Table.td [ css "text-align" "left", cs "wrapword" ] [ text (String.left 600 model.kompetansemaal) ]
-        , Table.td [] [ Icon.view "mode_edit" [ cs "vis-navigering", Options.onClick (NavigerTilEndreDeltaker aktivitetId model.id), Tooltip.attach Mdl [ 120 ] ], Tooltip.render Mdl [ 120 ] outerMdl [ Tooltip.large ] [ text "Endre deltaker" ] ]
-        ]
+visAktivitetDeltakerTabellRad : Int -> Taco -> String -> Deltaker -> Material.Model -> Html Msg
+visAktivitetDeltakerTabellRad idx taco aktivitetId model outerMdl =
+    let
+        aksjon =
+            if kanRedigere taco then
+                Table.td [] [ Icon.view "mode_edit" [ cs "vis-navigering", Options.onClick (NavigerTilEndreDeltaker aktivitetId model.id), Tooltip.attach Mdl [ 120 ] ], Tooltip.render Mdl [ 120 ] outerMdl [ Tooltip.large ] [ text "Endre deltaker" ] ]
+            else
+                Table.td [] []
+    in
+        Table.tr
+            []
+            [ Table.td [ css "text-align" "left", cs "wrapword" ] [ text model.utdanningsprogramNavn ]
+            , Table.td [ css "text-align" "left", cs "wrapword" ] [ text model.trinnNavn ]
+            , Table.td [ css "text-align" "left", cs "wrapword" ] [ text model.fagNavn ]
+            , Table.td [ Table.numeric ] [ text <| toString model.timer ]
+            , Table.td [ css "text-align" "left", cs "wrapword" ] [ text (String.left 600 model.kompetansemaal) ]
+            , aksjon
+            ]
 
 
 

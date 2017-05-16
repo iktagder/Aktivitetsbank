@@ -18,6 +18,7 @@ import Material.Spinner as Loading
 import Material.Typography as Typography
 import RemoteData exposing (WebData, RemoteData(..))
 import Types exposing (..)
+import Shared.Tilgang exposing (..)
 import Http exposing (Error)
 import Decoders exposing (..)
 import Dict
@@ -265,14 +266,6 @@ view taco model =
             [ viewMainContent model
             ]
         ]
-
-
-visVedKanRedigere : Taco -> (Taco -> Html Msg) -> Html Msg
-visVedKanRedigere taco visInnhold =
-    if taco.userInfo.rolle == "Rediger" then
-        visInnhold taco
-    else
-        text ""
 
 
 visOpprettAktivitetIkon : Model -> Taco -> Html Msg
