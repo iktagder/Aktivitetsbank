@@ -33,7 +33,15 @@ type alias Model =
     , appMetadata : WebData AppMetadata
     , dropdownStateSkole : Dropdown.State
     , dropdownStateAktivitetstype : Dropdown.State
+    , bekreftSletting : BekreftSletting
     }
+
+
+type BekreftSletting
+    = Av
+    | VisBekreftSletting
+    | SlettingBekreftet
+    | SlettingAvbrutt
 
 
 type Msg
@@ -48,10 +56,12 @@ type Msg
     | OnSelectAktivitetstype (Maybe AktivitetsType)
     | AktivitetstypeDropdown (Dropdown.Msg AktivitetsType)
     | VisDeltakerOpprett
+    | SlettAktivitet BekreftSletting
     | NavigerHjem
     | NavigerTilEndreDeltaker String String
     | KopierAktivitetTilSkole Skole
     | KopierAktivitetRespons (Result Error KopiertAktivitet)
+    | SlettAktivitetRespons (Result Error ())
 
 
 init : String -> String -> ( Model, Cmd Msg )
@@ -65,6 +75,7 @@ init apiEndpoint id =
       , appMetadata = RemoteData.NotAsked
       , dropdownStateSkole = Dropdown.newState "1"
       , dropdownStateAktivitetstype = Dropdown.newState "1"
+      , bekreftSletting = Av
       }
     , Cmd.batch
         [ (hentAktivitetDetalj id apiEndpoint)
@@ -156,6 +167,30 @@ postKopierAktivitet endPoint aktivitetId aktivitetKopi responseMsg =
                 , url = url
                 , body = body
                 , expect = Http.expectJson decodeNyAktivitet
+                , timeout = Nothing
+                , withCredentials = True
+                }
+    in
+        req
+            |> Http.send responseMsg
+
+
+deleteSlettAktivitet : String -> String -> (Result Error () -> msg) -> Cmd msg
+deleteSlettAktivitet endPoint aktivitetId responseMsg =
+    let
+        url =
+            endPoint ++ "aktiviteter/" ++ aktivitetId
+
+        body =
+            Http.emptyBody
+
+        req =
+            Http.request
+                { method = "DELETE"
+                , headers = []
+                , url = url
+                , body = body
+                , expect = Http.expectStringResponse (\_ -> Ok ())
                 , timeout = Nothing
                 , withCredentials = True
                 }
@@ -280,6 +315,52 @@ update msg model =
             in
                 ( { model | statusText = statusText }, cmd, NoSharedMsg )
 
+        SlettAktivitet bekreft ->
+            let
+                ( bekreftStatus, cmd ) =
+                    case bekreft of
+                        Av ->
+                            ( bekreft, Cmd.none )
+
+                        VisBekreftSletting ->
+                            ( bekreft, Cmd.none )
+
+                        SlettingBekreftet ->
+                            ( bekreft, deleteSlettAktivitet model.apiEndpoint model.aktivitetId SlettAktivitetRespons )
+
+                        SlettingAvbrutt ->
+                            ( Av, Cmd.none )
+            in
+                ( { model | bekreftSletting = bekreftStatus }, cmd, NoSharedMsg )
+
+        SlettAktivitetRespons (Ok _) ->
+            let
+                tmp =
+                    Debug.log "slettet aktivitet" model.aktivitetId
+            in
+                ( { model | bekreftSletting = Av }, Cmd.none, NavigerTilHjem )
+
+        SlettAktivitetRespons (Err error) ->
+            let
+                ( cmd, statusText, _ ) =
+                    case error of
+                        Http.BadUrl info ->
+                            ( Cmd.none, "Feil i url til API.", 0 )
+
+                        Http.BadPayload _ _ ->
+                            ( Cmd.none, "Feil i innhold ved sending av data til API.", 0 )
+
+                        Http.BadStatus status ->
+                            ( Cmd.none, "Feil i sending av data til API.", 0 )
+
+                        Http.NetworkError ->
+                            ( Cmd.none, "Feil i sending av data til API. Nettverksfeil.", 0 )
+
+                        Http.Timeout ->
+                            ( Cmd.none, "Nettverksfeil - timet ut ved kall til API.", 0 )
+            in
+                ( { model | statusText = statusText }, cmd, NoSharedMsg )
+
 
 showText : (List (Html.Attribute m) -> List (Html msg) -> a) -> Options.Property c m -> String -> a
 showText elementType displayStyle text_ =
@@ -339,6 +420,7 @@ visHeading model =
             , cs "standard-ikon"
             ]
         , Tooltip.render Mdl [ 125, 100 ] model.mdl [ Tooltip.large ] [ text "Endre aktivitet" ]
+        , (visSlettAktivitet model)
         , Options.span
             [ Typo.headline
             , Options.css "padding" "16px 32px"
@@ -798,3 +880,62 @@ visKopierAktivitetSkole skole =
     Menu.item
         [ Menu.onSelect (KopierAktivitetTilSkole skole) ]
         [ text skole.navn ]
+
+
+visSlettAktivitet : Model -> Html Msg
+visSlettAktivitet model =
+    case model.bekreftSletting of
+        Av ->
+            visSlettAktivitetIkon model
+
+        VisBekreftSletting ->
+            visSlettAktivitetBekreft model
+
+        SlettingBekreftet ->
+            text "Sletter aktivitet"
+
+        SlettingAvbrutt ->
+            text "Sletting avbrutt"
+
+
+visSlettAktivitetIkon : Model -> Html Msg
+visSlettAktivitetIkon model =
+    Options.span [ Options.css "float" "right" ]
+        [ Icon.view "delete_sweep"
+            [ Tooltip.attach Mdl [ 145, 100 ]
+            , Options.css "float" "right"
+            , Options.onClick <| SlettAktivitet VisBekreftSletting
+            , Icon.size24
+            , cs "standard-ikon"
+            ]
+        , Tooltip.render Mdl [ 145, 100 ] model.mdl [ Tooltip.large ] [ text "Slett aktivitet" ]
+        ]
+
+
+visSlettAktivitetBekreft : Model -> Html Msg
+visSlettAktivitetBekreft model =
+    Options.span [ Options.css "float" "right" ]
+        [ Options.styled div [ Typo.title ] [ text "Vil du virkelig slette denne aktiviteten?" ]
+        , Button.render Mdl
+            [ 347, 1 ]
+            model.mdl
+            [ Button.ripple
+            , Button.colored
+            , Button.raised
+            , Options.onClick (SlettAktivitet SlettingAvbrutt)
+            , css "float" "left"
+            , Options.css "margin" "6px 6px"
+            ]
+            [ text "Avbryt" ]
+        , Button.render Mdl
+            [ 41, 404 ]
+            model.mdl
+            [ Button.ripple
+            , Button.accent
+            , Button.raised
+            , Options.onClick (SlettAktivitet SlettingBekreftet)
+            , css "float" "left"
+            , Options.css "margin" "6px 6px"
+            ]
+            [ text "Bekreft sletting" ]
+        ]
