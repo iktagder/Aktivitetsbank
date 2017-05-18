@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace VAF.Aktivitetsbank.API.Authorization
 {
-    public class DevelopmentAuthHandler : AuthorizationHandler<IsPhoneAdminRequirement>
+    public class DevelopmentAuthHandler : AuthorizationHandler<ErAktivitetsbankRedigererRequirement>
     {
         private readonly ILogger _logger;
 
@@ -16,7 +16,7 @@ namespace VAF.Aktivitetsbank.API.Authorization
 
         }
 
-        protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, IsPhoneAdminRequirement requirement)
+        protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, ErAktivitetsbankRedigererRequirement requirement)
         {
             //var roles = context.User.Claims.Where(q => q.Type == ClaimTypes.GroupSid).Select(q => q.Value);
             //foreach (var role in roles)

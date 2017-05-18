@@ -6,17 +6,17 @@ using Microsoft.Extensions.Logging;
 
 namespace VAF.Aktivitetsbank.API.Authorization
 {
-    public class PhoneAdminAuthHandler : AuthorizationHandler<IsPhoneAdminRequirement>
+    public class AktivitetsbankRedigererAuthHandler : AuthorizationHandler<ErAktivitetsbankRedigererRequirement>
     {
         private readonly ILogger _logger;
 
-        public PhoneAdminAuthHandler(ILoggerFactory loggerFactory)
+        public AktivitetsbankRedigererAuthHandler(ILoggerFactory loggerFactory)
         {
             _logger = loggerFactory.CreateLogger(this.GetType().Name);
 
         }
 
-        protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, IsPhoneAdminRequirement requirement)
+        protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, ErAktivitetsbankRedigererRequirement requirement)
         {
             //var roles = context.User.Claims.Where(q => q.Type == ClaimTypes.GroupSid).Select(q => q.Value);
             //foreach (var role in roles)

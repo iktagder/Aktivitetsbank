@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Principal;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -28,22 +29,22 @@ namespace VAF.Aktivitetsbank.API.Controllers
     public class UserController : Controller
     {
         private readonly ILogger<UserController> _logger;
+        private readonly IAuthorizationService _authorizationService;
         private readonly AppOptions _options;
 
-        public UserController(ILogger<UserController> logger, IOptions<AppOptions> options)
+        public UserController(ILogger<UserController> logger, IOptions<AppOptions> options, IAuthorizationService authorizationService)
         {
             _logger = logger;
+            _authorizationService = authorizationService;
             _options = options.Value;
         }
 
         [HttpGet()]
-        public UserInfo Get()
+        public async Task<dynamic> Get()
         {
             var userInfo = new UserInfo();
-            //userInfo.brukernavn = "Username: " + WindowsIdentity.GetCurrent().Name;
             userInfo.brukernavn = HttpContext.User.Identity.Name;
-            
-            if (HttpContext.User.HasClaim(c => c.Type == ClaimTypes.Name) && (HttpContext.User.IsInRole("ADM\\RES_Aktivitetsbank") ||HttpContext.User.IsInRole("BOUVET\\Dep.AlleKristiansand")))
+            if (await _authorizationService.AuthorizeAsync(HttpContext.User, "", new ErAktivitetsbankRedigererRequirement()))
             {
                 userInfo.rolle = "Rediger";
             }

@@ -6,9 +6,9 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace VAF.Aktivitetsbank.API.Authorization
 {
-    public class IsPhoneAdminRequirement : IAuthorizationRequirement
+    public class ErAktivitetsbankRedigererRequirement : IAuthorizationRequirement
     {
-        public IsPhoneAdminRequirement()
+        public ErAktivitetsbankRedigererRequirement()
         {
             
         }

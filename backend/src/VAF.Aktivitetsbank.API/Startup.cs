@@ -64,7 +64,7 @@ namespace VAF.Aktivitetsbank.API
 
             services.AddAuthorization(options =>
             {
-                options.AddPolicy("CanChangePhoneNumbers", policyBuilder => policyBuilder.AddRequirements(new IsPhoneAdminRequirement()));
+                options.AddPolicy("CanChangePhoneNumbers", policyBuilder => policyBuilder.AddRequirements(new ErAktivitetsbankRedigererRequirement()));
             });
 
 
@@ -75,7 +75,7 @@ namespace VAF.Aktivitetsbank.API
             }
             else
             {
-                services.AddSingleton<IAuthorizationHandler, PhoneAdminAuthHandler>();
+                services.AddSingleton<IAuthorizationHandler, AktivitetsbankRedigererAuthHandler>();
             }
             services.AddDbContext<AktivitetsbankContext>(
                 options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
