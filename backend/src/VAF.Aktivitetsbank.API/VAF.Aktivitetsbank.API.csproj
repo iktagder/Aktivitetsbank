@@ -32,5 +32,10 @@
     <ProjectReference Include="..\VAF.Aktivitetsbank.Application\VAF.Aktivitetsbank.Application.csproj" />
     <ProjectReference Include="..\VAF.Aktivitetsbank.Infrastructure\VAF.Aktivitetsbank.Infrastructure.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 
 </Project>
