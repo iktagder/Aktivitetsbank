@@ -31,6 +31,7 @@ namespace VAF.Aktivitetsbank.API.Controllers
         }
 
         [HttpGet]
+        [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
         public IEnumerable<AktivitetDto> Get()
         {
             _logger.LogInformation("Lister ut aktiviteter");
@@ -38,6 +39,7 @@ namespace VAF.Aktivitetsbank.API.Controllers
         }
 
         [HttpGet("{id}")]
+        [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
         public AktivitetDto GetAktivitet(Guid id)
         {
             _logger.LogInformation("Aktivitet detalj");

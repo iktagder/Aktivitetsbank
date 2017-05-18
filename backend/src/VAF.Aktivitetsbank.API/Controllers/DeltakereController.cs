@@ -32,12 +32,14 @@ namespace VAF.Aktivitetsbank.API.Controllers
         }
 
         [HttpGet("{aktivitetId}/deltakere")]
+        [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
         public IEnumerable<DeltakerDto> Get(Guid aktivitetId)
         {
             _logger.LogInformation("Lister ut deltakere for aktivitet");
             return _queryDispatcher.Query<DeltakereSearchQuery, IList<DeltakerDto>>(new DeltakereSearchQuery(aktivitetId)).ToList();
         }
         [HttpGet("{aktivitetId}/deltakere/{deltakerId}")]
+        [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
         public DeltakerDto Get(Guid aktivitetId, Guid deltakerId)
         {
             _logger.LogInformation("Henter deltaker");
