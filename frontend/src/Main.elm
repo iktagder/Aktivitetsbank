@@ -31,6 +31,7 @@ type alias Model =
     , loadUserRetryCount : Int
     , apiEndpoint : String
     , statusText : String
+    , logo : String
     }
 
 
@@ -44,6 +45,7 @@ type AppState
 type alias Flags =
     { currentTime : Time
     , apiEndpoint : String
+    , vafLogo : String
     }
 
 
@@ -65,6 +67,7 @@ init flags location =
           , loadUserRetryCount = 0
           , apiEndpoint = flags.apiEndpoint
           , statusText = ""
+          , logo = flags.vafLogo
           }
         , Cmd.batch
             [ fetchUserInformation endPoint
@@ -210,7 +213,7 @@ updateUserInfo model webData =
                             }
 
                         ( initRouterModel, routerCmd ) =
-                            Router.init model.location notreadyModel.apiEndpoint
+                            Router.init model.location notreadyModel.apiEndpoint model.logo
                     in
                         ( { model | appState = Ready initTaco initRouterModel }
                         , Cmd.map RouterMsg routerCmd

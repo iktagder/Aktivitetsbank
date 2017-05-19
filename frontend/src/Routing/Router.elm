@@ -4,7 +4,7 @@ import Material.Snackbar as Snackbar
 import Material.Options as Options exposing (when, css, cs, Style, onClick)
 import Navigation exposing (Location)
 import Html exposing (..)
-import Html.Attributes exposing (href)
+import Html.Attributes exposing (href, src, class, style)
 import Types exposing (Route(..), TacoUpdate(..), Taco, SharedMsg(..))
 import Routing.Helpers exposing (parseLocation, reverseRoute)
 import Pages.Aktiviteter.Aktiviteter as Aktiviteter
@@ -58,6 +58,7 @@ type alias Model =
     , route : Route
     , currentPage : Page
     , apiEndpoint : String
+    , logo : String
     }
 
 
@@ -78,8 +79,8 @@ type Msg
     | PagesMsg PageMsg
 
 
-init : Location -> String -> ( Model, Cmd Msg )
-init location apiEndpoint =
+init : Location -> String -> String -> ( Model, Cmd Msg )
+init location apiEndpoint logo =
     let
         route =
             parseLocation location
@@ -93,6 +94,7 @@ init location apiEndpoint =
           , route = route
           , currentPage = pageModel
           , apiEndpoint = apiEndpoint
+          , logo = logo
           }
         , pageCmd
         )
@@ -395,7 +397,13 @@ viewHeader taco model =
         [ Color.background <| Color.color Color.Grey Color.S100
         , Color.text <| Color.color Color.Grey Color.S900
         ]
-        [ Layout.title [ Options.onClick (NavigateTo RouteAktivitetsListe), cs "vis-navigering" ] [ text "VAF - Aktivitetsbank" ]
+        [ img
+            [ src model.logo
+            , class "d-inline-block align-top"
+            , style [ ( "height", "40px" ), ( "margin-right", "10px" ) ]
+            ]
+            []
+        , Layout.title [ Options.onClick (NavigateTo RouteAktivitetsListe), cs "vis-navigering" ] [ text "Aktivitetsbank" ]
         , Layout.spacer
         , Layout.navigation []
             [ Layout.link
