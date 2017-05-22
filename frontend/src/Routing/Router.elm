@@ -397,12 +397,14 @@ viewHeader taco model =
         [ Color.background <| Color.color Color.Grey Color.S100
         , Color.text <| Color.color Color.Grey Color.S900
         ]
-        [ img
-            [ src model.logo
-            , class "d-inline-block align-top"
-            , style [ ( "height", "40px" ), ( "margin-right", "10px" ) ]
+        [ a [ href <| reverseRoute RouteAktivitetsListe ]
+            [ img
+                [ src model.logo
+                , class "d-inline-block align-top"
+                , style [ ( "height", "40px" ), ( "margin-right", "10px" ) ]
+                ]
+                []
             ]
-            []
         , Layout.title [ Options.onClick (NavigateTo RouteAktivitetsListe), cs "vis-navigering" ] [ text "Aktivitetsbank" ]
         , Layout.spacer
         , Layout.navigation []
