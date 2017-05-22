@@ -1,11 +1,11 @@
 module Pages.Aktiviteter.Aktivitet exposing (..)
 
 import Html exposing (Html, text, div, span, p, a)
+import Html.Attributes as Attr exposing (style)
 import Material
 import Material.Menu as Menu
 import Material.Grid as Grid exposing (grid, size, cell, Device(..))
 import Material.Elevation as Elevation
-import Material.Textfield as Textfield
 import Material.Icon as Icon
 import Material.Tooltip as Tooltip
 import Material.List as Lists
@@ -731,7 +731,18 @@ visAktivitetDeltakerTabellRad idx taco aktivitetId model outerMdl =
             , Table.td [ css "text-align" "left", cs "wrapword" ] [ text model.trinnNavn ]
             , Table.td [ css "text-align" "left", cs "wrapword" ] [ text model.fagNavn ]
             , Table.td [ Table.numeric ] [ text <| toString model.timer ]
-            , Table.td [ css "text-align" "left", cs "wrapword" ] [ text (String.left 600 model.kompetansemaal) ]
+            , Table.td [ css "text-align" "left", cs "wrapword" ]
+                [ Html.pre
+                    [ style
+                        [ ( "overflow", "hidden" )
+                        , ( "word-wrap", "normal" )
+                        , ( "white-space", "pre-wrap" )
+                        , ( "font-family", "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Helvetica, sans-serif" )
+                        , ( "font-size", "13px" )
+                        ]
+                    ]
+                    [ text (String.left 600 (model.kompetansemaal)) ]
+                ]
             , aksjon
             ]
 
