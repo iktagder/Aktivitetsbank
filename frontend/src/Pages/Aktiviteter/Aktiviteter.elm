@@ -44,8 +44,6 @@ type Msg
     | OpprettAktivitet
     | VisFilter
     | FiltrerPaNavn String
-      -- | FiltrerPaType String
-      -- | FiltrerPaSkole String
     | FilterMetadata FilterType
     | NullstillFilter
 
@@ -252,29 +250,6 @@ view taco model =
                 ]
                 [ text "Aktiviteter" ]
             ]
-
-        -- [ Button.render Mdl
-        --     [ 0 ]
-        --     model.mdl
-        --     [ Button.fab
-        --     , Button.ripple
-        --     , Options.onClick OpprettAktivitet
-        --     , Options.css "float" "right"
-        --     , Options.css "margin-left" "3px"
-        --     ]
-        --     [ Icon.i "add" ]
-        -- , Button.render Mdl
-        --     [ 1 ]
-        --     model.mdl
-        --     [ Button.fab
-        --     , Button.ripple
-        --     , Options.onClick VisFilter
-        --     , Options.css "float" "right"
-        --     ]
-        --     [ Icon.i "" ]
-        -- , Options.span [ Typo.title ]
-        --     [ text "Aktiviteter" ]
-        -- ]
         , getFilterCell model
         , cell
             [ size All (getAntallAktivietCeller model)
@@ -360,64 +335,16 @@ getFilterCell model =
 
 visFilter : Model -> Html Msg
 visFilter model =
-    Options.div
-        [ css "margin-top"
-            "5px"
-        , css
-            "margin-left"
-            "5px"
-        ]
-        [ Button.render Mdl
-            [ 1 ]
-            model.mdl
-            [ Button.fab
-            , Button.ripple
-            , Options.onClick NullstillFilter
-            , Options.css "margin" "2px"
-            , Options.css "float" "right"
-            ]
-            [ Icon.i "clear" ]
-        , Options.div [ Typo.title ]
-            [ text "Filtrer" ]
-        , Textfield.render Mdl
-            [ 1 ]
-            model.mdl
-            [ Textfield.label "Navn"
-            , Textfield.floatingLabel
-            , Textfield.text_
-            , Textfield.value <| model.filter.navnFilter
-            , Options.onInput (FiltrerPaNavn)
-            ]
-            []
-        , visAvansertFilter model
-        ]
-
-
-visAvansertFilter : Model -> Html Msg
-visAvansertFilter model =
-    case model.appMetadata of
-        NotAsked ->
-            text "Venter på henting av metadata.."
-
-        Loading ->
-            Options.div []
-                [ Loading.spinner [ Loading.active True ]
-                ]
-
-        Failure err ->
-            text "Feil ved henting av data"
-
-        Success data ->
-            let
-                konfigurasjon =
-                    { filterMsg = FilterMetadata
-                    , nullstillMsg = NullstillFilter
-                    , filterNavnMsg = FiltrerPaNavn
-                    , mdlMsg = Mdl
-                    , mdlModel = model.mdl
-                    }
-            in
-                visStandardFilter model.filter konfigurasjon data
+    let
+        konfigurasjon =
+            { filterMsg = FilterMetadata
+            , nullstillMsg = NullstillFilter
+            , filterNavnMsg = FiltrerPaNavn
+            , mdlMsg = Mdl
+            , mdlModel = model.mdl
+            }
+    in
+        visStandardFilter model.appMetadata model.filter konfigurasjon
 
 
 viewMainContent : Model -> Html Msg

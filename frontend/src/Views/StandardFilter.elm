@@ -9,7 +9,10 @@ import Material.Options as Options exposing (when, css, cs, Style, onClick)
 import Material.Typography as Typo
 import Material.Typography as Typography
 import Material.Toggles as Toggles
+import Material.Textfield as Textfield
+import Material.Spinner as Loading
 import Types exposing (..)
+import RemoteData exposing (WebData, RemoteData(..))
 
 
 type alias KonfigurasjonStandardFilter msg =
@@ -21,8 +24,61 @@ type alias KonfigurasjonStandardFilter msg =
     }
 
 
-visStandardFilter : Filter -> KonfigurasjonStandardFilter msg -> AppMetadata -> Html msg
-visStandardFilter model konfigurasjon metadata =
+visStandardFilter : WebData AppMetadata -> Filter -> KonfigurasjonStandardFilter msg -> Html msg
+visStandardFilter metadata filter konfigurasjon =
+    Options.div
+        [ css "margin-top"
+            "5px"
+        , css
+            "margin-left"
+            "5px"
+        ]
+        [ Button.render konfigurasjon.mdlMsg
+            [ 1944 ]
+            konfigurasjon.mdlModel
+            [ Button.fab
+            , Button.ripple
+            , Options.onClick konfigurasjon.nullstillMsg
+            , Options.css "margin" "2px"
+            , Options.css "float" "right"
+            ]
+            [ Icon.i "clear" ]
+        , Options.div [ Typo.title ]
+            [ text "Filtrer" ]
+        , Textfield.render konfigurasjon.mdlMsg
+            [ 3212 ]
+            konfigurasjon.mdlModel
+            [ Textfield.label "Navn"
+            , Textfield.floatingLabel
+            , Textfield.text_
+            , Textfield.value <| filter.navnFilter
+            , Options.onInput (konfigurasjon.filterNavnMsg)
+            ]
+            []
+        , visAvansertFilter metadata filter konfigurasjon
+        ]
+
+
+visAvansertFilter : WebData AppMetadata -> Filter -> KonfigurasjonStandardFilter msg -> Html msg
+visAvansertFilter metadata filter konfigurasjon =
+    case metadata of
+        NotAsked ->
+            text "Venter på henting av metadata.."
+
+        Loading ->
+            Options.div []
+                [ Loading.spinner [ Loading.active True ]
+                ]
+
+        Failure err ->
+            text "Feil ved henting av data"
+
+        Success data ->
+            visStandardFilterSuksess filter konfigurasjon data
+
+
+visStandardFilterSuksess : Filter -> KonfigurasjonStandardFilter msg -> AppMetadata -> Html msg
+visStandardFilterSuksess model konfigurasjon metadata =
     Options.div []
         [ text "Aktivitetstyper"
         , Options.div []
