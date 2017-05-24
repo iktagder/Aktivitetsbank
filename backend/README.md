@@ -20,3 +20,7 @@ dotnet ef migrations script -s ..\VAF.Aktivitetsbank.Data.UI\ -o c:\tmp\dbscript
 dotnet ef migrations script 20170514210915_required_user -s ..\VAF.Aktivitetsbank.Data.UI\ -o c:\tmp\dbscript_aktivt_felt.sql
 
 ´´´
+
+
+Hvordan endre mellom lese/skriverettighet i utviklingsmodus:
+Endre i appsettings.json - VafOptions.UtviklerKanRedigere true/false
