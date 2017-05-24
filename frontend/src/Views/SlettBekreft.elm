@@ -1,4 +1,4 @@
-module Pages.Aktiviteter.FellesVis exposing (..)
+module Views.SlettBekreft exposing (..)
 
 import Html exposing (Html, text, div, span, p, a)
 import Material
@@ -11,7 +11,7 @@ import Material.Typography as Typography
 import Types exposing (..)
 
 
-type BekreftSlettingMsg
+type BekreftSlettingStatus
     = Av
     | VisBekreftSletting
     | SlettingBekreftet
@@ -19,7 +19,7 @@ type BekreftSlettingMsg
 
 
 type alias KonfigurasjonSlett msg =
-    { bekreftMsg : BekreftSlettingMsg -> msg
+    { bekreftMsg : BekreftSlettingStatus -> msg
     , mdlMsg : Material.Msg msg -> msg
     , mdlModel : Material.Model
     , bekreftSporsmaal : String
@@ -28,7 +28,7 @@ type alias KonfigurasjonSlett msg =
     }
 
 
-visSlett : BekreftSlettingMsg -> KonfigurasjonSlett msg -> Taco -> Html msg
+visSlett : BekreftSlettingStatus -> KonfigurasjonSlett msg -> Taco -> Html msg
 visSlett bekreftSletting konfigurasjon taco =
     case bekreftSletting of
         Av ->

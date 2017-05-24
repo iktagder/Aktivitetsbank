@@ -18,7 +18,7 @@ import Decoders exposing (..)
 import Dropdown
 import Shared.Validation exposing (..)
 import Shared.Tilgang exposing (..)
-import Pages.Aktiviteter.FellesVis exposing (..)
+import Views.SlettBekreft exposing (..)
 
 
 type alias Model =
@@ -34,7 +34,7 @@ type alias Model =
     , dropdownStateUtdanningsprogram : Dropdown.State
     , dropdownStateTrinn : Dropdown.State
     , dropdownStateFag : Dropdown.State
-    , bekreftSletting : BekreftSlettingMsg
+    , bekreftSletting : BekreftSlettingStatus
     }
 
 
@@ -54,7 +54,7 @@ type Msg
     | EndreDeltaker
     | EndreDeltakerRespons (Result Error ())
     | NavigerTilbake
-    | SlettDeltaker BekreftSlettingMsg
+    | SlettDeltaker BekreftSlettingStatus
     | SlettDeltakerRespons (Result Error ())
 
 

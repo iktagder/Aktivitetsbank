@@ -19,7 +19,7 @@ import Material.Typography as Typography
 import RemoteData exposing (WebData, RemoteData(..))
 import Types exposing (..)
 import Shared.Tilgang exposing (..)
-import Pages.Aktiviteter.FellesVis exposing (..)
+import Views.SlettBekreft exposing (..)
 import Http exposing (Error)
 import Decoders exposing (..)
 import Dropdown
@@ -35,7 +35,7 @@ type alias Model =
     , appMetadata : WebData AppMetadata
     , dropdownStateSkole : Dropdown.State
     , dropdownStateAktivitetstype : Dropdown.State
-    , bekreftSletting : BekreftSlettingMsg
+    , bekreftSletting : BekreftSlettingStatus
     }
 
 
@@ -51,7 +51,7 @@ type Msg
     | OnSelectAktivitetstype (Maybe AktivitetsType)
     | AktivitetstypeDropdown (Dropdown.Msg AktivitetsType)
     | VisDeltakerOpprett
-    | SlettAktivitet BekreftSlettingMsg
+    | SlettAktivitet BekreftSlettingStatus
     | NavigerHjem
     | NavigerTilEndreDeltaker String String
     | KopierAktivitetTilSkole Skole
