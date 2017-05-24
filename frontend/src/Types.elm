@@ -16,6 +16,11 @@ type alias Filter =
     }
 
 
+type FilterType
+    = SkoleFilter String
+    | AktivitetsTypeFilter String
+
+
 type alias Skole =
     { id : String
     , navn : String

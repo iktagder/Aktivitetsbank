@@ -18,9 +18,10 @@ import Material.Spinner as Loading
 import Material.Typography as Typography
 import RemoteData exposing (WebData, RemoteData(..))
 import Types exposing (..)
-import Shared.Tilgang exposing (..)
 import Http exposing (Error)
 import Decoders exposing (..)
+import Shared.Tilgang exposing (..)
+import Views.StandardFilter exposing (..)
 
 
 type alias Model =
@@ -43,8 +44,9 @@ type Msg
     | OpprettAktivitet
     | VisFilter
     | FiltrerPaNavn String
-    | FiltrerPaType String
-    | FiltrerPaSkole String
+      -- | FiltrerPaType String
+      -- | FiltrerPaSkole String
+    | FilterMetadata FilterType
     | NullstillFilter
 
 
@@ -149,49 +151,51 @@ update msg model =
                 , NoSharedMsg
                 )
 
-        FiltrerPaType typeId ->
-            let
-                nyttAktivitetsTypeFilter =
-                    if List.member typeId model.filter.aktivitetsTypeFilter then
-                        List.filter (\x -> x /= typeId) model.filter.aktivitetsTypeFilter
-                    else
-                        typeId :: model.filter.aktivitetsTypeFilter
+        FilterMetadata filterType ->
+            case filterType of
+                AktivitetsTypeFilter typeId ->
+                    let
+                        nyttAktivitetsTypeFilter =
+                            if List.member typeId model.filter.aktivitetsTypeFilter then
+                                List.filter (\x -> x /= typeId) model.filter.aktivitetsTypeFilter
+                            else
+                                typeId :: model.filter.aktivitetsTypeFilter
 
-                gammeltFilter =
-                    model.filter
+                        gammeltFilter =
+                            model.filter
 
-                nyttFilter =
-                    { gammeltFilter | aktivitetsTypeFilter = nyttAktivitetsTypeFilter }
-            in
-                ( { model
-                    | filtertAktivitetListe = filterAktivitetList model model.filter.navnFilter nyttAktivitetsTypeFilter model.filter.skoleFilter
-                    , filter = nyttFilter
-                  }
-                , Cmd.none
-                , NoSharedMsg
-                )
+                        nyttFilter =
+                            { gammeltFilter | aktivitetsTypeFilter = nyttAktivitetsTypeFilter }
+                    in
+                        ( { model
+                            | filtertAktivitetListe = filterAktivitetList model model.filter.navnFilter nyttAktivitetsTypeFilter model.filter.skoleFilter
+                            , filter = nyttFilter
+                          }
+                        , Cmd.none
+                        , NoSharedMsg
+                        )
 
-        FiltrerPaSkole skoleId ->
-            let
-                nyttSkoleFilter =
-                    if List.member skoleId model.filter.skoleFilter then
-                        List.filter (\x -> x /= skoleId) model.filter.skoleFilter
-                    else
-                        skoleId :: model.filter.skoleFilter
+                SkoleFilter skoleId ->
+                    let
+                        nyttSkoleFilter =
+                            if List.member skoleId model.filter.skoleFilter then
+                                List.filter (\x -> x /= skoleId) model.filter.skoleFilter
+                            else
+                                skoleId :: model.filter.skoleFilter
 
-                gammeltFilter =
-                    model.filter
+                        gammeltFilter =
+                            model.filter
 
-                nyttFilter =
-                    { gammeltFilter | skoleFilter = nyttSkoleFilter }
-            in
-                ( { model
-                    | filtertAktivitetListe = filterAktivitetList model model.filter.navnFilter model.filter.aktivitetsTypeFilter nyttSkoleFilter
-                    , filter = nyttFilter
-                  }
-                , Cmd.none
-                , NoSharedMsg
-                )
+                        nyttFilter =
+                            { gammeltFilter | skoleFilter = nyttSkoleFilter }
+                    in
+                        ( { model
+                            | filtertAktivitetListe = filterAktivitetList model model.filter.navnFilter model.filter.aktivitetsTypeFilter nyttSkoleFilter
+                            , filter = nyttFilter
+                          }
+                        , Cmd.none
+                        , NoSharedMsg
+                        )
 
         NullstillFilter ->
             ( { model | filter = { skoleFilter = [], aktivitetsTypeFilter = [], navnFilter = "" }, filtertAktivitetListe = (getAktivitetListe model) }, Cmd.none, NoSharedMsg )
@@ -404,47 +408,7 @@ visAvansertFilter model =
             text "Feil ved henting av data"
 
         Success data ->
-            visAvansertFilterSuksess model data
-
-
-visAvansertFilterSuksess : Model -> AppMetadata -> Html Msg
-visAvansertFilterSuksess model data =
-    Options.div []
-        [ text "Aktivitetstyper"
-        , Options.div []
-            (data.aktivitetstyper
-                |> List.indexedMap (\index item -> visAktivitetTypeFilter model item index)
-            )
-        , text "Skoler"
-        , Options.div []
-            (data.skoler
-                |> List.indexedMap (\index item -> visSkoleTypeFilter model item index)
-            )
-        ]
-
-
-visAktivitetTypeFilter : Model -> AktivitetsType -> Int -> Html Msg
-visAktivitetTypeFilter model type_ index =
-    Toggles.checkbox Mdl
-        [ 5, index ]
-        model.mdl
-        [ Options.onToggle (FiltrerPaType type_.id)
-        , Toggles.ripple
-        , Toggles.value (List.member type_.id model.filter.aktivitetsTypeFilter)
-        ]
-        [ text type_.navn ]
-
-
-visSkoleTypeFilter : Model -> Skole -> Int -> Html Msg
-visSkoleTypeFilter model skole index =
-    Toggles.checkbox Mdl
-        [ 9, index ]
-        model.mdl
-        [ Options.onToggle (FiltrerPaSkole skole.id)
-        , Toggles.ripple
-        , Toggles.value (List.member skole.id model.filter.skoleFilter)
-        ]
-        [ text skole.navn ]
+            visStandardFilter model.filter Mdl model.mdl FilterMetadata data
 
 
 viewMainContent : Model -> Html Msg
