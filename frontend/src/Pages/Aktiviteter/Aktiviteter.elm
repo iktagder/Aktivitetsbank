@@ -408,7 +408,16 @@ visAvansertFilter model =
             text "Feil ved henting av data"
 
         Success data ->
-            visStandardFilter model.filter Mdl model.mdl FilterMetadata data
+            let
+                konfigurasjon =
+                    { filterMsg = FilterMetadata
+                    , nullstillMsg = NullstillFilter
+                    , filterNavnMsg = FiltrerPaNavn
+                    , mdlMsg = Mdl
+                    , mdlModel = model.mdl
+                    }
+            in
+                visStandardFilter model.filter konfigurasjon data
 
 
 viewMainContent : Model -> Html Msg
