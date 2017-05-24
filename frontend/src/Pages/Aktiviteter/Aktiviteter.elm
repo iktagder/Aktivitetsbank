@@ -21,7 +21,6 @@ import Types exposing (..)
 import Shared.Tilgang exposing (..)
 import Http exposing (Error)
 import Decoders exposing (..)
-import Dict
 
 
 type alias Model =
@@ -32,9 +31,7 @@ type alias Model =
     , filtertAktivitetListe : List Aktivitet
     , appMetadata : WebData AppMetadata
     , visFilter : Bool
-    , aktivitetsTypefilter : Dict.Dict Int String
-    , skoleFilter : Dict.Dict Int String
-    , navnFilter : String
+    , filter : Filter
     }
 
 
@@ -46,8 +43,8 @@ type Msg
     | OpprettAktivitet
     | VisFilter
     | FiltrerPaNavn String
-    | FiltrerPaType String Int
-    | FiltrerPaSkole String Int
+    | FiltrerPaType String
+    | FiltrerPaSkole String
     | NullstillFilter
 
 
@@ -60,9 +57,7 @@ init apiEndpoint =
       , appMetadata = RemoteData.NotAsked
       , visFilter = False
       , filtertAktivitetListe = []
-      , aktivitetsTypefilter = Dict.empty
-      , navnFilter = ""
-      , skoleFilter = Dict.empty
+      , filter = { navnFilter = "", skoleFilter = [], aktivitetsTypeFilter = [] }
       }
     , Cmd.batch [ fetchAppMetadata apiEndpoint, fetchAktivitetListe apiEndpoint ]
     )
@@ -139,59 +134,78 @@ update msg model =
             ( { model | visFilter = not model.visFilter, filtertAktivitetListe = (getAktivitetListe model) }, Cmd.none, NoSharedMsg )
 
         FiltrerPaNavn navn ->
-            ( { model
-                | navnFilter = navn
-                , filtertAktivitetListe = filterAktivitetList model navn model.aktivitetsTypefilter model.skoleFilter
-              }
-            , Cmd.none
-            , NoSharedMsg
-            )
-
-        FiltrerPaType typeId index ->
             let
-                newAktivitetsTypefilter =
-                    if Dict.member index model.aktivitetsTypefilter then
-                        Dict.remove index model.aktivitetsTypefilter
-                    else
-                        Dict.insert index typeId model.aktivitetsTypefilter
+                filter_ =
+                    model.filter
+
+                nyttFilter =
+                    { filter_ | navnFilter = navn }
             in
                 ( { model
-                    | filtertAktivitetListe = filterAktivitetList model model.navnFilter newAktivitetsTypefilter model.skoleFilter
-                    , aktivitetsTypefilter = newAktivitetsTypefilter
+                    | filter = nyttFilter
+                    , filtertAktivitetListe = filterAktivitetList model navn model.filter.aktivitetsTypeFilter model.filter.skoleFilter
                   }
                 , Cmd.none
                 , NoSharedMsg
                 )
 
-        FiltrerPaSkole skoleId index ->
+        FiltrerPaType typeId ->
             let
-                newSkoleFilter =
-                    if Dict.member index model.skoleFilter then
-                        Dict.remove index model.skoleFilter
+                nyttAktivitetsTypeFilter =
+                    if List.member typeId model.filter.aktivitetsTypeFilter then
+                        List.filter (\x -> x /= typeId) model.filter.aktivitetsTypeFilter
                     else
-                        Dict.insert index skoleId model.skoleFilter
+                        typeId :: model.filter.aktivitetsTypeFilter
+
+                gammeltFilter =
+                    model.filter
+
+                nyttFilter =
+                    { gammeltFilter | aktivitetsTypeFilter = nyttAktivitetsTypeFilter }
             in
                 ( { model
-                    | filtertAktivitetListe = filterAktivitetList model model.navnFilter model.aktivitetsTypefilter newSkoleFilter
-                    , skoleFilter = newSkoleFilter
+                    | filtertAktivitetListe = filterAktivitetList model model.filter.navnFilter nyttAktivitetsTypeFilter model.filter.skoleFilter
+                    , filter = nyttFilter
+                  }
+                , Cmd.none
+                , NoSharedMsg
+                )
+
+        FiltrerPaSkole skoleId ->
+            let
+                nyttSkoleFilter =
+                    if List.member skoleId model.filter.skoleFilter then
+                        List.filter (\x -> x /= skoleId) model.filter.skoleFilter
+                    else
+                        skoleId :: model.filter.skoleFilter
+
+                gammeltFilter =
+                    model.filter
+
+                nyttFilter =
+                    { gammeltFilter | skoleFilter = nyttSkoleFilter }
+            in
+                ( { model
+                    | filtertAktivitetListe = filterAktivitetList model model.filter.navnFilter model.filter.aktivitetsTypeFilter nyttSkoleFilter
+                    , filter = nyttFilter
                   }
                 , Cmd.none
                 , NoSharedMsg
                 )
 
         NullstillFilter ->
-            ( { model | skoleFilter = Dict.empty, aktivitetsTypefilter = Dict.empty, navnFilter = "", filtertAktivitetListe = (getAktivitetListe model) }, Cmd.none, NoSharedMsg )
+            ( { model | filter = { skoleFilter = [], aktivitetsTypeFilter = [], navnFilter = "" }, filtertAktivitetListe = (getAktivitetListe model) }, Cmd.none, NoSharedMsg )
 
 
-filterAktivitetList : Model -> String -> Dict.Dict Int String -> Dict.Dict Int String -> List Aktivitet
+filterAktivitetList : Model -> String -> List String -> List String -> List Aktivitet
 filterAktivitetList model navn aktivitetsType skole =
     (getAktivitetListe model)
         |> List.filter
             (\aktivitet ->
-                if Dict.isEmpty aktivitetsType then
+                if List.isEmpty aktivitetsType then
                     True
                 else
-                    List.member aktivitet.aktivitetsTypeId (Dict.values aktivitetsType)
+                    List.member aktivitet.aktivitetsTypeId aktivitetsType
             )
         |> List.filter
             (\aktivitet ->
@@ -202,10 +216,10 @@ filterAktivitetList model navn aktivitetsType skole =
             )
         |> List.filter
             (\aktivitet ->
-                if Dict.isEmpty skole then
+                if List.isEmpty skole then
                     True
                 else
-                    List.member aktivitet.skoleId (Dict.values skole)
+                    List.member aktivitet.skoleId skole
             )
 
 
@@ -367,7 +381,7 @@ visFilter model =
             [ Textfield.label "Navn"
             , Textfield.floatingLabel
             , Textfield.text_
-            , Textfield.value <| model.navnFilter
+            , Textfield.value <| model.filter.navnFilter
             , Options.onInput (FiltrerPaNavn)
             ]
             []
@@ -414,9 +428,9 @@ visAktivitetTypeFilter model type_ index =
     Toggles.checkbox Mdl
         [ 5, index ]
         model.mdl
-        [ Options.onToggle (FiltrerPaType type_.id index)
+        [ Options.onToggle (FiltrerPaType type_.id)
         , Toggles.ripple
-        , Toggles.value (Dict.member index model.aktivitetsTypefilter)
+        , Toggles.value (List.member type_.id model.filter.aktivitetsTypeFilter)
         ]
         [ text type_.navn ]
 
@@ -426,9 +440,9 @@ visSkoleTypeFilter model skole index =
     Toggles.checkbox Mdl
         [ 9, index ]
         model.mdl
-        [ Options.onToggle (FiltrerPaSkole skole.id index)
+        [ Options.onToggle (FiltrerPaSkole skole.id)
         , Toggles.ripple
-        , Toggles.value (Dict.member index model.skoleFilter)
+        , Toggles.value (List.member skole.id model.filter.skoleFilter)
         ]
         [ text skole.navn ]
 

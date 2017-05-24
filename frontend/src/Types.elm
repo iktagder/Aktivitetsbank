@@ -9,6 +9,13 @@ type alias Taco =
     }
 
 
+type alias Filter =
+    { aktivitetsTypeFilter : List String
+    , skoleFilter : List String
+    , navnFilter : String
+    }
+
+
 type alias Skole =
     { id : String
     , navn : String
