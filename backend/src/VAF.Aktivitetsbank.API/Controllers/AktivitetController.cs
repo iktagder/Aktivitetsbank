@@ -35,7 +35,7 @@ namespace VAF.Aktivitetsbank.API.Controllers
         public IEnumerable<AktivitetDto> Get()
         {
             _logger.LogInformation("Lister ut aktiviteter");
-            return _queryDispatcher.Query<AktivitetSearchQuery, IList<AktivitetDto>>(new AktivitetSearchQuery("")).ToList();
+            return _queryDispatcher.Query<AktivitetSearchQuery, IList<AktivitetDto>>(new AktivitetSearchQuery(null)).ToList();
         }
 
         [HttpGet("{id}")]

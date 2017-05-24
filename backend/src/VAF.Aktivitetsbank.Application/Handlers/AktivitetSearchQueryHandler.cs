@@ -19,7 +19,7 @@ namespace VAF.Aktivitetsbank.Application.Handlers
         public IList<AktivitetDto> Handle(AktivitetSearchQuery query)
         {
 
-            return _aktivitetsbankService.HentAktiviteter(query.QueryTerm);
+            return _aktivitetsbankService.HentAktiviteter(query.QueryFilter);
         }
     }
 }

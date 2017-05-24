@@ -47,7 +47,7 @@ namespace VAF.Aktivitetsbank.Infrastructure
             return metadata;
         }
 
-        public IList<AktivitetDto> HentAktiviteter(string queryQueryTerm)
+        public IList<AktivitetDto> HentAktiviteter(FilterDto filterQuery)
         {
             var aktiviteter = _context.AktivitetSet.Include(x => x.Skole).Where(x => x.Aktiv).OrderBy(x => x.Navn).Include(x => x.Aktivitetstype).Include(x => x.SkoleAar).ToList();
             var aktiviteterMapped = Mapper.Map<IList<AktivitetDto>>(aktiviteter);

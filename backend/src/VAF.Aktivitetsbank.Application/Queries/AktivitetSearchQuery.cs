@@ -1,16 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using VAF.Aktivitetsbank.Application.Handlers.Dtos;
 
 namespace VAF.Aktivitetsbank.Application.Queries
 {
     public class AktivitetSearchQuery : IQuery
     {
-        public readonly string QueryTerm;
+        public readonly FilterDto QueryFilter;
 
-        public AktivitetSearchQuery(string queryTerm)
+        public AktivitetSearchQuery(FilterDto queryFilter)
         {
-            QueryTerm = queryTerm;
+            QueryFilter = queryFilter;
         }
     }
 }
