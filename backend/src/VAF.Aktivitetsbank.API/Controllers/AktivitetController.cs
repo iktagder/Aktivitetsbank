@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Primitives;
 using VAF.Aktivitetsbank.Application;
 using VAF.Aktivitetsbank.Application.Commands;
 using VAF.Aktivitetsbank.Application.Handlers;
@@ -35,7 +36,53 @@ namespace VAF.Aktivitetsbank.API.Controllers
         public IEnumerable<AktivitetDto> Get()
         {
             _logger.LogInformation("Lister ut aktiviteter");
-            return _queryDispatcher.Query<AktivitetSearchQuery, IList<AktivitetDto>>(new AktivitetSearchQuery(null)).ToList();
+            var query = HttpContext.Request.QueryString.Value;
+            var filter = OpprettFilter(query);
+
+            return _queryDispatcher.Query<AktivitetSearchQuery, IList<AktivitetDto>>(new AktivitetSearchQuery(filter)).ToList();
+        }
+
+
+        private static FilterDto OpprettFilter(string query)
+        {
+            var queryDictionary = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(query);
+            var filter = new FilterDto();
+            filter.Skoler = HentFilterVerdier("filter[skoler]", queryDictionary);
+            filter.Aktivitetstyper = HentFilterVerdier("filter[aktivitetstyper]", queryDictionary);
+            filter.SkoleAar = HentFilterVerdier("filter[skoleaar]", queryDictionary);
+            filter.Utdanningsprogrammer = HentFilterVerdier("filter[utdanningsprogram]", queryDictionary);
+            filter.TrinnListe = HentFilterVerdier("filter[trinn]", queryDictionary);
+            filter.FagListe = HentFilterVerdier("filter[fag]", queryDictionary);
+            filter.FriTekst = HentFritekstFilter("filter[fritekst]", queryDictionary);
+            return filter;
+        }
+
+        private static List<Guid> HentFilterVerdier(string key, Dictionary<string, StringValues> queryDictionary)
+        {
+            if (queryDictionary.ContainsKey(key))
+            {
+                var verdier = new List<Guid>();
+                foreach (var stringValue in queryDictionary[key].ToString().Split(','))
+                {
+                    Guid newGuid;
+                    var success = Guid.TryParse(stringValue, out newGuid);
+                    if (success)
+                    {
+                        verdier.Add(newGuid);
+                    }
+                }
+                return verdier.Count > 0 ? verdier : null;
+            }
+            return null;
+        }
+
+        private static string HentFritekstFilter(string key, Dictionary<string, StringValues> queryDictionary)
+        {
+            if (queryDictionary.ContainsKey(key))
+            {
+                return queryDictionary[key].FirstOrDefault();
+            }
+            return null;
         }
 
         [HttpGet("{id}")]

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.Extensions.Logging;
 using VAF.Aktivitetsbank.Application;
 using VAF.Aktivitetsbank.Application.Handlers.Dtos;
@@ -49,9 +50,75 @@ namespace VAF.Aktivitetsbank.Infrastructure
 
         public IList<AktivitetDto> HentAktiviteter(FilterDto filterQuery)
         {
-            var aktiviteter = _context.AktivitetSet.Include(x => x.Skole).Where(x => x.Aktiv).OrderBy(x => x.Navn).Include(x => x.Aktivitetstype).Include(x => x.SkoleAar).ToList();
-            var aktiviteterMapped = Mapper.Map<IList<AktivitetDto>>(aktiviteter);
+            var aktiviteter = _context.AktivitetSet.AsQueryable();
+            if (filterQuery != null)
+            {
+                aktiviteter = FiltrerAktiviteter(aktiviteter, filterQuery);
+            }
+            aktiviteter = aktiviteter.OrderBy(x => x.Navn);
+            var aktiviteterMapped = Mapper.Map<IList<AktivitetDto>>(aktiviteter.ToList());
             return aktiviteterMapped;
+        }
+
+        private IQueryable<Aktivitet> FiltrerAktiviteter(IQueryable<Aktivitet> aktiviteter, FilterDto filterQuery)
+        {
+            aktiviteter = aktiviteter.Include(x => x.Skole).Include(x => x.Aktivitetstype).Include(x => x.SkoleAar);
+            aktiviteter = aktiviteter.Where(x => x.Aktiv);
+            if (filterQuery.Skoler != null)
+            {
+                aktiviteter = aktiviteter.Where(x => filterQuery.Skoler.Contains(x.SkoleId));
+            }
+            if (filterQuery.Aktivitetstyper != null)
+            {
+                aktiviteter = aktiviteter.Where(x => filterQuery.Aktivitetstyper.Contains(x.AktivitetstypeId));
+            }
+            if (filterQuery.Utdanningsprogrammer != null)
+            {
+                aktiviteter = from a in aktiviteter
+                              join d in _context.DeltakerSet on a.Id equals d.AktivitetId
+                              where filterQuery.Utdanningsprogrammer.Contains(d.UtdanningsprogramId)
+                    select a;
+            }
+            if (filterQuery.TrinnListe != null)
+            {
+                aktiviteter = from a in aktiviteter
+                              join d in _context.DeltakerSet on a.Id equals d.AktivitetId
+                              where filterQuery.TrinnListe.Contains(d.TrinnId)
+                    select a;
+            }
+            if (filterQuery.FagListe != null)
+            {
+                aktiviteter = from a in aktiviteter
+                              join d in _context.DeltakerSet on a.Id equals d.AktivitetId
+                              where filterQuery.FagListe.Contains(d.FagId)
+                    select a;
+            }
+            if (filterQuery.SkoleAar != null)
+            {
+                aktiviteter = aktiviteter.Where(x => filterQuery.SkoleAar.Contains(x.SkoleAarId));
+            }
+            if (!String.IsNullOrEmpty(filterQuery.FriTekst))
+            {
+                var friTekst = filterQuery.FriTekst.Trim().ToLowerInvariant();
+                aktiviteter = from a in aktiviteter
+                              join d in _context.DeltakerSet on a.Id equals d.AktivitetId
+                              //join skoler in _context.SkoleSet on a.SkoleId equals skoler.Id
+                              //join aktivitetstyper in _context.AktivitetstypeSet on a.AktivitetstypeId equals aktivitetstyper.Id
+                              //join utdanningsprogrammer in _context.UtdanningsprogramSet on d.UtdanningsprogramId equals utdanningsprogrammer.Id
+                              //join trinn in _context.TrinnSet on d.TrinnId equals trinn.Id
+                              //join fag in _context.FagSet on d.FagId equals fag.Id
+                              where (a.Beskrivelse.ToLowerInvariant().Contains(friTekst) 
+                              || d.Kompetansemaal.ToLowerInvariant().Contains(friTekst)
+                              //|| skoler.Navn.ToLowerInvariant().Contains(friTekst)
+                              //|| aktivitetstyper.Navn.ToLowerInvariant().Contains(friTekst)
+                              //|| utdanningsprogrammer.Navn.ToLowerInvariant().Contains(friTekst)
+                              //|| trinn.Navn.ToLowerInvariant().Contains(friTekst)
+                              //|| fag.Navn.ToLowerInvariant().Contains(friTekst)
+                              )
+                
+                    select a;
+            }
+            return aktiviteter;
         }
 
         public IList<DeltakerDto> HentDeltakere(Guid queryAktivitetId)
