@@ -14,6 +14,9 @@ type alias Filter =
     { ekspandertFilter : EkspandertFilter
     , aktivitetsTypeFilter : Dict.Dict String String
     , skoleFilter : Dict.Dict String String
+    , utdanningsprogramFilter : Dict.Dict String String
+    , trinnFilter : Dict.Dict String String
+    , fagFilter : Dict.Dict String String
     , navnFilter : String
     }
 
@@ -21,12 +24,18 @@ type alias Filter =
 type FilterType
     = SkoleFilter String String
     | AktivitetsTypeFilter String String
+    | UtdanningsprogramFilter String String
+    | TrinnFilter String String
+    | FagFilter String String
 
 
 type EkspandertFilter
     = IngenFilterEkspandert
     | SkoleFilterEkspandert
     | AktivitetsTypeFilterEkspandert
+    | UtdanningsprogramFilterEkspandert
+    | TrinnFilterEkspandert
+    | FagFilterEkspandert
 
 
 type alias Skole =

@@ -60,6 +60,9 @@ initFilter =
     , navnFilter = ""
     , skoleFilter = Dict.empty
     , aktivitetsTypeFilter = Dict.empty
+    , utdanningsprogramFilter = Dict.empty
+    , trinnFilter = Dict.empty
+    , fagFilter = Dict.empty
     }
 
 
@@ -204,6 +207,69 @@ update msg model =
                         , NoSharedMsg
                         )
 
+                UtdanningsprogramFilter utdanningsprogramId navn ->
+                    let
+                        nyttUtdanningsprogramFilter =
+                            if Dict.member utdanningsprogramId model.filter.utdanningsprogramFilter then
+                                Dict.remove utdanningsprogramId model.filter.utdanningsprogramFilter
+                            else
+                                Dict.insert utdanningsprogramId navn model.filter.utdanningsprogramFilter
+
+                        gammeltFilter =
+                            model.filter
+
+                        nyttFilter =
+                            { gammeltFilter | utdanningsprogramFilter = nyttUtdanningsprogramFilter }
+                    in
+                        ( { model
+                            | filter = nyttFilter
+                          }
+                        , Cmd.none
+                        , NoSharedMsg
+                        )
+
+                TrinnFilter trinnId navn ->
+                    let
+                        nyttTrinnFilter =
+                            if Dict.member trinnId model.filter.trinnFilter then
+                                Dict.remove trinnId model.filter.trinnFilter
+                            else
+                                Dict.insert trinnId navn model.filter.trinnFilter
+
+                        gammeltFilter =
+                            model.filter
+
+                        nyttFilter =
+                            { gammeltFilter | trinnFilter = nyttTrinnFilter }
+                    in
+                        ( { model
+                            | filter = nyttFilter
+                          }
+                        , Cmd.none
+                        , NoSharedMsg
+                        )
+
+                FagFilter fagId navn ->
+                    let
+                        nyttFagFilter =
+                            if Dict.member fagId model.filter.fagFilter then
+                                Dict.remove fagId model.filter.fagFilter
+                            else
+                                Dict.insert fagId navn model.filter.fagFilter
+
+                        gammeltFilter =
+                            model.filter
+
+                        nyttFilter =
+                            { gammeltFilter | fagFilter = nyttFagFilter }
+                    in
+                        ( { model
+                            | filter = nyttFilter
+                          }
+                        , Cmd.none
+                        , NoSharedMsg
+                        )
+
         NullstillFilter ->
             ( { model | filter = initFilter, filtertAktivitetListe = (getAktivitetListe model) }, Cmd.none, NoSharedMsg )
 
@@ -243,6 +309,27 @@ update msg model =
                                     Dict.remove skoleId model.filter.skoleFilter
                             in
                                 { gammeltFilter | skoleFilter = nyttSkoleFilter }
+
+                        UtdanningsprogramFilter utdanningsprogramId navn ->
+                            let
+                                nyttUtdanningsprogramFilter =
+                                    Dict.remove utdanningsprogramId model.filter.utdanningsprogramFilter
+                            in
+                                { gammeltFilter | utdanningsprogramFilter = nyttUtdanningsprogramFilter }
+
+                        TrinnFilter trinnId navn ->
+                            let
+                                nyttTrinnFilter =
+                                    Dict.remove trinnId model.filter.trinnFilter
+                            in
+                                { gammeltFilter | trinnFilter = nyttTrinnFilter }
+
+                        FagFilter fagId navn ->
+                            let
+                                nyttFagFilter =
+                                    Dict.remove fagId model.filter.fagFilter
+                            in
+                                { gammeltFilter | fagFilter = nyttFagFilter }
             in
                 ( { model | filter = nyttFilter }, Cmd.none, NoSharedMsg )
 
