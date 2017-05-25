@@ -36,17 +36,17 @@ visStandardFilter metadata filter konfigurasjon =
             "margin-left"
             "5px"
         ]
-        [ Button.render konfigurasjon.mdlMsg
-            [ 1944 ]
-            konfigurasjon.mdlModel
-            [ Button.fab
-            , Button.ripple
-            , Options.onClick konfigurasjon.nullstillMsg
-            , Options.css "margin" "2px"
-            , Options.css "float" "right"
-            ]
-            [ Icon.i "clear" ]
-        , Options.div [ Typo.title ]
+        -- [ Button.render konfigurasjon.mdlMsg
+        --     [ 1944 ]
+        --     konfigurasjon.mdlModel
+        --     [ Button.fab
+        --     , Button.ripple
+        --     , Options.onClick konfigurasjon.nullstillMsg
+        --     , Options.css "margin" "2px"
+        --     , Options.css "float" "right"
+        --     ]
+        --     [ Icon.i "clear" ]
+        [ Options.div [ Typo.title ]
             [ text "Filtrer" ]
         , Textfield.render konfigurasjon.mdlMsg
             [ 3212 ]
@@ -110,7 +110,7 @@ visAktivitetTypeFilterRad model type_ index konfigurasjon =
         , Toggles.ripple
         , Toggles.value (Dict.member type_.id model.aktivitetsTypeFilter)
         ]
-        [ text type_.navn ]
+        [ text <| String.left 30 type_.navn ]
 
 
 visSkoleTypeFilter : Filter -> AppMetadata -> KonfigurasjonStandardFilter msg -> Html msg
@@ -133,7 +133,7 @@ visSkoleTypeFilterRad model skole index konfigurasjon =
         , Toggles.ripple
         , Toggles.value (Dict.member skole.id model.skoleFilter)
         ]
-        [ text skole.navn ]
+        [ text <| String.left 30 skole.navn ]
 
 
 visAktivtFilter : Filter -> EkspandertFilter -> String -> KonfigurasjonStandardFilter msg -> (KonfigurasjonStandardFilter msg -> Html msg) -> Html msg

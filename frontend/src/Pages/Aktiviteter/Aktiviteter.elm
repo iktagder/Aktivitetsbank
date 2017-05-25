@@ -44,7 +44,7 @@ init apiEndpoint =
       , statusText = ""
       , aktivitetListe = RemoteData.NotAsked
       , appMetadata = RemoteData.NotAsked
-      , visFilter = False
+      , visFilter = True
       , filtertAktivitetListe = []
       , filter = initFilter
       }
@@ -332,7 +332,7 @@ visFilterIkon taco model =
 getAntallAktivietCeller : Model -> Int
 getAntallAktivietCeller model =
     if model.visFilter then
-        9
+        10
     else
         12
 
@@ -344,8 +344,8 @@ getFilterCell model =
     of
         True ->
             cell
-                [ size All 3
-                , Elevation.e2
+                [ size All 2
+                , Elevation.e0
                 ]
                 [ visFilter model
                 ]
