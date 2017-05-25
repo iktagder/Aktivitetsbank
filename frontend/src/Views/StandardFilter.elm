@@ -14,6 +14,7 @@ import Material.Textfield as Textfield
 import Material.Spinner as Loading
 import Types exposing (..)
 import RemoteData exposing (WebData, RemoteData(..))
+import Dict
 
 
 type alias KonfigurasjonStandardFilter msg =
@@ -105,9 +106,9 @@ visAktivitetTypeFilterRad model type_ index konfigurasjon =
     Toggles.checkbox konfigurasjon.mdlMsg
         [ 5, index ]
         konfigurasjon.mdlModel
-        [ Options.onToggle (konfigurasjon.filterMsg (AktivitetsTypeFilter type_.id))
+        [ Options.onToggle (konfigurasjon.filterMsg (AktivitetsTypeFilter type_.id type_.navn))
         , Toggles.ripple
-        , Toggles.value (List.member type_.id model.aktivitetsTypeFilter)
+        , Toggles.value (Dict.member type_.id model.aktivitetsTypeFilter)
         ]
         [ text type_.navn ]
 
@@ -128,9 +129,9 @@ visSkoleTypeFilterRad model skole index konfigurasjon =
     Toggles.checkbox konfigurasjon.mdlMsg
         [ 9, index ]
         konfigurasjon.mdlModel
-        [ Options.onToggle (konfigurasjon.filterMsg (SkoleFilter skole.id))
+        [ Options.onToggle (konfigurasjon.filterMsg (SkoleFilter skole.id skole.navn))
         , Toggles.ripple
-        , Toggles.value (List.member skole.id model.skoleFilter)
+        , Toggles.value (Dict.member skole.id model.skoleFilter)
         ]
         [ text skole.navn ]
 
@@ -160,7 +161,13 @@ visGjeldendeFilter filter slettMsg =
     Options.div []
         [ Options.span []
             (filter.skoleFilter
-                |> List.indexedMap (\index filterEnhet -> visGjeldendeFilterEnhet filterEnhet slettMsg (SkoleFilter filterEnhet))
+                |> Dict.toList
+                |> List.indexedMap (\index ( id, navn ) -> visGjeldendeFilterEnhet navn slettMsg (SkoleFilter id navn))
+            )
+        , Options.span []
+            (filter.aktivitetsTypeFilter
+                |> Dict.toList
+                |> List.indexedMap (\index ( id, navn ) -> visGjeldendeFilterEnhet navn slettMsg (AktivitetsTypeFilter id navn))
             )
         ]
 
@@ -168,7 +175,10 @@ visGjeldendeFilter filter slettMsg =
 visGjeldendeFilterEnhet : String -> (FilterType -> msg) -> FilterType -> Html msg
 visGjeldendeFilterEnhet filterNavn slettMsg filterType =
     Chip.span
-        [ Chip.deleteIcon "cancel" ]
+        [ Chip.deleteIcon "cancel"
+        , Chip.deleteClick
+            (slettMsg filterType)
+        ]
         [ Chip.content []
             [ text filterNavn ]
         ]

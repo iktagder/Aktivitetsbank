@@ -19,6 +19,7 @@ import Material.Typography as Typography
 import RemoteData exposing (WebData, RemoteData(..))
 import Types exposing (..)
 import Http exposing (Error)
+import Dict
 import Decoders exposing (..)
 import Shared.Tilgang exposing (..)
 import Views.StandardFilter exposing (..)
@@ -57,8 +58,8 @@ initFilter =
 
     -- { ekspandertFilter = SkoleFilterEkspandert
     , navnFilter = ""
-    , skoleFilter = []
-    , aktivitetsTypeFilter = []
+    , skoleFilter = Dict.empty
+    , aktivitetsTypeFilter = Dict.empty
     }
 
 
@@ -156,7 +157,6 @@ update msg model =
             in
                 ( { model
                     | filter = nyttFilter
-                    , filtertAktivitetListe = filterAktivitetList model navn model.filter.aktivitetsTypeFilter model.filter.skoleFilter
                   }
                 , Cmd.none
                 , NoSharedMsg
@@ -164,13 +164,13 @@ update msg model =
 
         FilterMetadata filterType ->
             case filterType of
-                AktivitetsTypeFilter typeId ->
+                AktivitetsTypeFilter typeId navn ->
                     let
                         nyttAktivitetsTypeFilter =
-                            if List.member typeId model.filter.aktivitetsTypeFilter then
-                                List.filter (\x -> x /= typeId) model.filter.aktivitetsTypeFilter
+                            if Dict.member typeId model.filter.aktivitetsTypeFilter then
+                                Dict.remove typeId model.filter.aktivitetsTypeFilter
                             else
-                                typeId :: model.filter.aktivitetsTypeFilter
+                                Dict.insert typeId navn model.filter.aktivitetsTypeFilter
 
                         gammeltFilter =
                             model.filter
@@ -178,21 +178,18 @@ update msg model =
                         nyttFilter =
                             { gammeltFilter | aktivitetsTypeFilter = nyttAktivitetsTypeFilter }
                     in
-                        ( { model
-                            | filtertAktivitetListe = filterAktivitetList model model.filter.navnFilter nyttAktivitetsTypeFilter model.filter.skoleFilter
-                            , filter = nyttFilter
-                          }
+                        ( { model | filter = nyttFilter }
                         , Cmd.none
                         , NoSharedMsg
                         )
 
-                SkoleFilter skoleId ->
+                SkoleFilter skoleId navn ->
                     let
                         nyttSkoleFilter =
-                            if List.member skoleId model.filter.skoleFilter then
-                                List.filter (\x -> x /= skoleId) model.filter.skoleFilter
+                            if Dict.member skoleId model.filter.skoleFilter then
+                                Dict.remove skoleId model.filter.skoleFilter
                             else
-                                skoleId :: model.filter.skoleFilter
+                                Dict.insert skoleId navn model.filter.skoleFilter
 
                         gammeltFilter =
                             model.filter
@@ -201,8 +198,7 @@ update msg model =
                             { gammeltFilter | skoleFilter = nyttSkoleFilter }
                     in
                         ( { model
-                            | filtertAktivitetListe = filterAktivitetList model model.filter.navnFilter model.filter.aktivitetsTypeFilter nyttSkoleFilter
-                            , filter = nyttFilter
+                            | filter = nyttFilter
                           }
                         , Cmd.none
                         , NoSharedMsg
@@ -228,33 +224,27 @@ update msg model =
                 ( { model | filter = nyttFilter }, Cmd.none, NoSharedMsg )
 
         FjernGjeldendeFilter filterType ->
-            ( model, Cmd.none, NoSharedMsg )
+            let
+                gammeltFilter =
+                    model.filter
 
+                nyttFilter =
+                    case filterType of
+                        AktivitetsTypeFilter typeId navn ->
+                            let
+                                nyttAktivitetsTypeFilter =
+                                    Dict.remove typeId model.filter.aktivitetsTypeFilter
+                            in
+                                { gammeltFilter | aktivitetsTypeFilter = nyttAktivitetsTypeFilter }
 
-filterAktivitetList : Model -> String -> List String -> List String -> List Aktivitet
-filterAktivitetList model navn aktivitetsType skole =
-    (getAktivitetListe model)
-        |> List.filter
-            (\aktivitet ->
-                if List.isEmpty aktivitetsType then
-                    True
-                else
-                    List.member aktivitet.aktivitetsTypeId aktivitetsType
-            )
-        |> List.filter
-            (\aktivitet ->
-                if String.isEmpty navn then
-                    True
-                else
-                    String.contains (String.toLower navn) (String.toLower aktivitet.navn)
-            )
-        |> List.filter
-            (\aktivitet ->
-                if List.isEmpty skole then
-                    True
-                else
-                    List.member aktivitet.skoleId skole
-            )
+                        SkoleFilter skoleId navn ->
+                            let
+                                nyttSkoleFilter =
+                                    Dict.remove skoleId model.filter.skoleFilter
+                            in
+                                { gammeltFilter | skoleFilter = nyttSkoleFilter }
+            in
+                ( { model | filter = nyttFilter }, Cmd.none, NoSharedMsg )
 
 
 getAktivitetListe : Model -> List Aktivitet
@@ -422,7 +412,7 @@ visAktivitetListe model =
 visAktivitetListeSuksess : Model -> List Aktivitet -> Html Msg
 visAktivitetListeSuksess model aktiviteter =
     Lists.ul [ css "width" "100%" ]
-        (getAktiviteter model aktiviteter
+        (aktiviteter
             |> List.map (visAktivitet model)
         )
 
@@ -455,21 +445,11 @@ visAktivitetTabellSuksess model aktiviteter =
                 ]
             ]
         , Table.tbody []
-            (getAktiviteter model aktiviteter
+            (aktiviteter
                 |> List.sortBy .navn
                 |> List.indexedMap (\idx item -> visAktivitetTabellRad idx item model.mdl)
             )
         ]
-
-
-getAktiviteter : Model -> List Aktivitet -> List Aktivitet
-getAktiviteter model aktiviteter =
-    case model.visFilter of
-        True ->
-            model.filtertAktivitetListe
-
-        False ->
-            aktiviteter
 
 
 visAktivitetTabellRad : Int -> Aktivitet -> Material.Model -> Html Msg

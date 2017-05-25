@@ -1,5 +1,6 @@
 module Types exposing (..)
 
+import Dict
 import Time exposing (Time)
 
 
@@ -11,15 +12,15 @@ type alias Taco =
 
 type alias Filter =
     { ekspandertFilter : EkspandertFilter
-    , aktivitetsTypeFilter : List String
-    , skoleFilter : List String
+    , aktivitetsTypeFilter : Dict.Dict String String
+    , skoleFilter : Dict.Dict String String
     , navnFilter : String
     }
 
 
 type FilterType
-    = SkoleFilter String
-    | AktivitetsTypeFilter String
+    = SkoleFilter String String
+    | AktivitetsTypeFilter String String
 
 
 type EkspandertFilter
