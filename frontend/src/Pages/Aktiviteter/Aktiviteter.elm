@@ -117,6 +117,7 @@ type Msg
     | FilterMetadata FilterType
     | NullstillFilter
     | EkspanderFilterType EkspandertFilter
+    | FjernGjeldendeFilter FilterType
 
 
 update : Msg -> Model -> ( Model, Cmd Msg, SharedMsg )
@@ -226,6 +227,9 @@ update msg model =
             in
                 ( { model | filter = nyttFilter }, Cmd.none, NoSharedMsg )
 
+        FjernGjeldendeFilter filterType ->
+            ( model, Cmd.none, NoSharedMsg )
+
 
 filterAktivitetList : Model -> String -> List String -> List String -> List Aktivitet
 filterAktivitetList model navn aktivitetsType skole =
@@ -284,7 +288,8 @@ view taco model =
             , Elevation.e0
             , Options.css "padding" "16px 32px"
             ]
-            [ viewMainContent model
+            [ visGjeldendeFilter model.filter FjernGjeldendeFilter
+            , viewMainContent model
             ]
         ]
 

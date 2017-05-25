@@ -1,4 +1,4 @@
-module Views.StandardFilter exposing (visStandardFilter, KonfigurasjonStandardFilter)
+module Views.StandardFilter exposing (visStandardFilter, visGjeldendeFilter, KonfigurasjonStandardFilter)
 
 import Html exposing (Html, text, div, span, p, a)
 import Material
@@ -7,6 +7,7 @@ import Material.Tooltip as Tooltip
 import Material.Button as Button
 import Material.Options as Options exposing (when, css, cs, Style, onClick)
 import Material.Typography as Typo
+import Material.Chip as Chip
 import Material.Typography as Typography
 import Material.Toggles as Toggles
 import Material.Textfield as Textfield
@@ -152,3 +153,22 @@ visAktivtFilter filter gjeldendeFilter filterNavn konfigurasjon visInnhold =
             , cs "vis-navigering"
             ]
             [ text <| "> " ++ filterNavn ]
+
+
+visGjeldendeFilter : Filter -> (FilterType -> msg) -> Html msg
+visGjeldendeFilter filter slettMsg =
+    Options.div []
+        [ Options.span []
+            (filter.skoleFilter
+                |> List.indexedMap (\index filterEnhet -> visGjeldendeFilterEnhet filterEnhet slettMsg (SkoleFilter filterEnhet))
+            )
+        ]
+
+
+visGjeldendeFilterEnhet : String -> (FilterType -> msg) -> FilterType -> Html msg
+visGjeldendeFilterEnhet filterNavn slettMsg filterType =
+    Chip.span
+        [ Chip.deleteIcon "cancel" ]
+        [ Chip.content []
+            [ text filterNavn ]
+        ]
