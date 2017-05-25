@@ -10,7 +10,8 @@ type alias Taco =
 
 
 type alias Filter =
-    { aktivitetsTypeFilter : List String
+    { ekspandertFilter : EkspandertFilter
+    , aktivitetsTypeFilter : List String
     , skoleFilter : List String
     , navnFilter : String
     }
@@ -19,6 +20,12 @@ type alias Filter =
 type FilterType
     = SkoleFilter String
     | AktivitetsTypeFilter String
+
+
+type EkspandertFilter
+    = IngenFilterEkspandert
+    | SkoleFilterEkspandert
+    | AktivitetsTypeFilterEkspandert
 
 
 type alias Skole =

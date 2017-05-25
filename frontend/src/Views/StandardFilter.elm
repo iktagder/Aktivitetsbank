@@ -19,6 +19,7 @@ type alias KonfigurasjonStandardFilter msg =
     { filterMsg : FilterType -> msg
     , nullstillMsg : msg
     , filterNavnMsg : String -> msg
+    , ekspanderFilterTypeMsg : EkspandertFilter -> msg
     , mdlMsg : Material.Msg msg -> msg
     , mdlModel : Material.Model
     }
@@ -80,21 +81,26 @@ visAvansertFilter metadata filter konfigurasjon =
 visStandardFilterSuksess : Filter -> KonfigurasjonStandardFilter msg -> AppMetadata -> Html msg
 visStandardFilterSuksess model konfigurasjon metadata =
     Options.div []
-        [ text "Aktivitetstyper"
-        , Options.div []
-            (metadata.aktivitetstyper
-                |> List.indexedMap (\index item -> visAktivitetTypeFilter model item index konfigurasjon)
-            )
-        , text "Skoler"
-        , Options.div []
-            (metadata.skoler
-                |> List.indexedMap (\index item -> visSkoleTypeFilter model item index konfigurasjon)
-            )
+        [ visAktivitetTypeFilter model metadata
+            |> visAktivtFilter model AktivitetsTypeFilterEkspandert "Aktivitetstyper" konfigurasjon
+        , visSkoleTypeFilter model metadata
+            |> visAktivtFilter model SkoleFilterEkspandert "Skoler" konfigurasjon
         ]
 
 
-visAktivitetTypeFilter : Filter -> AktivitetsType -> Int -> KonfigurasjonStandardFilter msg -> Html msg
-visAktivitetTypeFilter model type_ index konfigurasjon =
+visAktivitetTypeFilter : Filter -> AppMetadata -> KonfigurasjonStandardFilter msg -> Html msg
+visAktivitetTypeFilter model metadata konfigurasjon =
+    Options.div
+        [ css "margin-left" "2rem"
+        , css "margin-top" "1rem"
+        ]
+        (metadata.aktivitetstyper
+            |> List.indexedMap (\index item -> visAktivitetTypeFilterRad model item index konfigurasjon)
+        )
+
+
+visAktivitetTypeFilterRad : Filter -> AktivitetsType -> Int -> KonfigurasjonStandardFilter msg -> Html msg
+visAktivitetTypeFilterRad model type_ index konfigurasjon =
     Toggles.checkbox konfigurasjon.mdlMsg
         [ 5, index ]
         konfigurasjon.mdlModel
@@ -105,8 +111,19 @@ visAktivitetTypeFilter model type_ index konfigurasjon =
         [ text type_.navn ]
 
 
-visSkoleTypeFilter : Filter -> Skole -> Int -> KonfigurasjonStandardFilter msg -> Html msg
-visSkoleTypeFilter model skole index konfigurasjon =
+visSkoleTypeFilter : Filter -> AppMetadata -> KonfigurasjonStandardFilter msg -> Html msg
+visSkoleTypeFilter model metadata konfigurasjon =
+    Options.div
+        [ css "margin-left" "2rem"
+        , css "margin-top" "1rem"
+        ]
+        (metadata.skoler
+            |> List.indexedMap (\index item -> visSkoleTypeFilterRad model item index konfigurasjon)
+        )
+
+
+visSkoleTypeFilterRad : Filter -> Skole -> Int -> KonfigurasjonStandardFilter msg -> Html msg
+visSkoleTypeFilterRad model skole index konfigurasjon =
     Toggles.checkbox konfigurasjon.mdlMsg
         [ 9, index ]
         konfigurasjon.mdlModel
@@ -115,3 +132,23 @@ visSkoleTypeFilter model skole index konfigurasjon =
         , Toggles.value (List.member skole.id model.skoleFilter)
         ]
         [ text skole.navn ]
+
+
+visAktivtFilter : Filter -> EkspandertFilter -> String -> KonfigurasjonStandardFilter msg -> (KonfigurasjonStandardFilter msg -> Html msg) -> Html msg
+visAktivtFilter filter gjeldendeFilter filterNavn konfigurasjon visInnhold =
+    if filter.ekspandertFilter == gjeldendeFilter then
+        Options.div
+            []
+            [ Options.div
+                [ Options.onClick (konfigurasjon.ekspanderFilterTypeMsg gjeldendeFilter)
+                , cs "vis-navigering"
+                ]
+                [ text <| "< " ++ filterNavn ]
+            , visInnhold konfigurasjon
+            ]
+    else
+        Options.div
+            [ Options.onClick (konfigurasjon.ekspanderFilterTypeMsg gjeldendeFilter)
+            , cs "vis-navigering"
+            ]
+            [ text <| "> " ++ filterNavn ]

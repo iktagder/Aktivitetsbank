@@ -36,18 +36,6 @@ type alias Model =
     }
 
 
-type Msg
-    = Mdl (Material.Msg Msg)
-    | AppMetadataResponse (WebData AppMetadata)
-    | AktivitetListeResponse (WebData (List Aktivitet))
-    | VisAktivitetDetalj String
-    | OpprettAktivitet
-    | VisFilter
-    | FiltrerPaNavn String
-    | FilterMetadata FilterType
-    | NullstillFilter
-
-
 init : String -> ( Model, Cmd Msg )
 init apiEndpoint =
     ( { mdl = Material.model
@@ -57,10 +45,21 @@ init apiEndpoint =
       , appMetadata = RemoteData.NotAsked
       , visFilter = False
       , filtertAktivitetListe = []
-      , filter = { navnFilter = "", skoleFilter = [], aktivitetsTypeFilter = [] }
+      , filter = initFilter
       }
     , Cmd.batch [ fetchAppMetadata apiEndpoint, fetchAktivitetListe apiEndpoint ]
     )
+
+
+initFilter : Filter
+initFilter =
+    { ekspandertFilter = IngenFilterEkspandert
+
+    -- { ekspandertFilter = SkoleFilterEkspandert
+    , navnFilter = ""
+    , skoleFilter = []
+    , aktivitetsTypeFilter = []
+    }
 
 
 fetchAppMetadata : String -> Cmd Msg
@@ -105,6 +104,19 @@ fetchAktivitetListe endPoint =
         req
             |> RemoteData.sendRequest
             |> Cmd.map AktivitetListeResponse
+
+
+type Msg
+    = Mdl (Material.Msg Msg)
+    | AppMetadataResponse (WebData AppMetadata)
+    | AktivitetListeResponse (WebData (List Aktivitet))
+    | VisAktivitetDetalj String
+    | OpprettAktivitet
+    | VisFilter
+    | FiltrerPaNavn String
+    | FilterMetadata FilterType
+    | NullstillFilter
+    | EkspanderFilterType EkspandertFilter
 
 
 update : Msg -> Model -> ( Model, Cmd Msg, SharedMsg )
@@ -196,7 +208,23 @@ update msg model =
                         )
 
         NullstillFilter ->
-            ( { model | filter = { skoleFilter = [], aktivitetsTypeFilter = [], navnFilter = "" }, filtertAktivitetListe = (getAktivitetListe model) }, Cmd.none, NoSharedMsg )
+            ( { model | filter = initFilter, filtertAktivitetListe = (getAktivitetListe model) }, Cmd.none, NoSharedMsg )
+
+        EkspanderFilterType ekspandertFilter ->
+            let
+                gammeltFilter =
+                    model.filter
+
+                nyttEkspandertFilter =
+                    if ekspandertFilter == gammeltFilter.ekspandertFilter then
+                        IngenFilterEkspandert
+                    else
+                        ekspandertFilter
+
+                nyttFilter =
+                    { gammeltFilter | ekspandertFilter = nyttEkspandertFilter }
+            in
+                ( { model | filter = nyttFilter }, Cmd.none, NoSharedMsg )
 
 
 filterAktivitetList : Model -> String -> List String -> List String -> List Aktivitet
@@ -340,6 +368,7 @@ visFilter model =
             { filterMsg = FilterMetadata
             , nullstillMsg = NullstillFilter
             , filterNavnMsg = FiltrerPaNavn
+            , ekspanderFilterTypeMsg = EkspanderFilterType
             , mdlMsg = Mdl
             , mdlModel = model.mdl
             }
