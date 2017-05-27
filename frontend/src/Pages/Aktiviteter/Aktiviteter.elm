@@ -62,6 +62,7 @@ initFilter =
     , aktivitetsTypeFilter = Dict.empty
     , utdanningsprogramFilter = Dict.empty
     , trinnFilter = Dict.empty
+    , skoleAarFilter = Dict.empty
     , fagFilter = Dict.empty
     }
 
@@ -240,6 +241,19 @@ update msg model =
                             in
                                 { gammeltFilter | fagFilter = nyttFagFilter }
 
+                        SkoleAarFilter skoleAarId navn ->
+                            let
+                                nyttFagFilter =
+                                    if Dict.member skoleAarId model.filter.skoleAarFilter then
+                                        Dict.remove skoleAarId model.filter.skoleAarFilter
+                                    else
+                                        Dict.insert skoleAarId navn model.filter.skoleAarFilter
+
+                                gammeltFilter =
+                                    model.filter
+                            in
+                                { gammeltFilter | skoleAarFilter = nyttFagFilter }
+
                         AlleFilter ->
                             model.filter
             in
@@ -313,6 +327,13 @@ update msg model =
                                     Dict.remove fagId model.filter.fagFilter
                             in
                                 { gammeltFilter | fagFilter = nyttFagFilter }
+
+                        SkoleAarFilter skoleAarId navn ->
+                            let
+                                nyttSkoleAarFilter =
+                                    Dict.remove skoleAarId model.filter.skoleAarFilter
+                            in
+                                { gammeltFilter | skoleAarFilter = nyttSkoleAarFilter }
 
                         AlleFilter ->
                             initFilter

@@ -2,9 +2,6 @@ module Views.StandardFilter exposing (visStandardFilter, visGjeldendeFilter, Kon
 
 import Html exposing (Html, text, div, span, p, a)
 import Material
-import Material.Icon as Icon
-import Material.Tooltip as Tooltip
-import Material.Button as Button
 import Material.Options as Options exposing (when, css, cs, Style, onClick)
 import Material.Typography as Typo
 import Material.Color as Color
@@ -37,6 +34,7 @@ tomtFilter filter =
             && Dict.isEmpty filter.utdanningsprogramFilter
             && Dict.isEmpty filter.trinnFilter
             && Dict.isEmpty filter.fagFilter
+            && Dict.isEmpty filter.skoleAarFilter
             && String.isEmpty filter.navnFilter
     then
         True
@@ -53,16 +51,6 @@ visStandardFilter metadata filter konfigurasjon =
             "margin-left"
             "5px"
         ]
-        -- [ Button.render konfigurasjon.mdlMsg
-        --     [ 1944 ]
-        --     konfigurasjon.mdlModel
-        --     [ Button.fab
-        --     , Button.ripple
-        --     , Options.onClick konfigurasjon.nullstillMsg
-        --     , Options.css "margin" "2px"
-        --     , Options.css "float" "right"
-        --     ]
-        --     [ Icon.i "clear" ]
         [ Options.div [ Typo.title ]
             [ text "Filtrer" ]
         , Textfield.render konfigurasjon.mdlMsg
@@ -76,35 +64,6 @@ visStandardFilter metadata filter konfigurasjon =
             ]
             []
         , visAvansertFilter metadata filter konfigurasjon
-
-        -- , Button.render konfigurasjon.mdlMsg
-        --     [ 410, 104 ]
-        --     konfigurasjon.mdlModel
-        --     [ Button.ripple
-        --     , Button.raised
-        --     -- , Options.when (tomtFilter filter) Button.disabled
-        --     , Options.onClick (konfigurasjon.nullstillMsg)
-        --     , css "float" "left"
-        --     , Options.css "margin" "6px 6px"
-        --     ]
-        --     [ text "Nullstill filter" ]
-        --     |> (\x ->
-        --             if tomtFilter filter then
-        --                 text ""
-        --             else
-        --                 x
-        --        )
-        -- , Button.render konfigurasjon.mdlMsg
-        --     [ 410, 104 ]
-        --     konfigurasjon.mdlModel
-        --     [ Button.ripple
-        --     , Button.raised
-        --     -- , Options.when (not model.visLagreKnapp) Button.disabled
-        --     , Options.onClick (konfigurasjon.utfoerSoekMsg)
-        --     , css "float" "left"
-        --     , Options.css "margin" "6px 6px"
-        --     ]
-        --     [ text "Utfør filtersøk" ]
         ]
 
 
@@ -139,6 +98,8 @@ visStandardFilterSuksess model konfigurasjon metadata =
             |> visAktivtFilter model TrinnFilterEkspandert "Trinn" konfigurasjon
         , visFagFilter model metadata
             |> visAktivtFilter model FagFilterEkspandert "Fag" konfigurasjon
+        , visSkoleAarFilter model metadata
+            |> visAktivtFilter model SkoleAarFilterEkspandert "Skoleår" konfigurasjon
         ]
 
 
@@ -257,6 +218,29 @@ visFagFilterRad model fag index konfigurasjon =
         [ text <| String.left 30 fag.navn ]
 
 
+visSkoleAarFilter : Filter -> AppMetadata -> KonfigurasjonStandardFilter msg -> Html msg
+visSkoleAarFilter model metadata konfigurasjon =
+    Options.div
+        [ css "margin-left" "2rem"
+        , css "margin-top" "1rem"
+        ]
+        (metadata.skoleAar
+            |> List.indexedMap (\index item -> visSkoleAarFilterRad model item index konfigurasjon)
+        )
+
+
+visSkoleAarFilterRad : Filter -> SkoleAar -> Int -> KonfigurasjonStandardFilter msg -> Html msg
+visSkoleAarFilterRad model skoleAar index konfigurasjon =
+    Toggles.checkbox konfigurasjon.mdlMsg
+        [ 59, index ]
+        konfigurasjon.mdlModel
+        [ Options.onToggle (konfigurasjon.filterMsg (SkoleAarFilter skoleAar.id skoleAar.navn))
+        , Toggles.ripple
+        , Toggles.value (Dict.member skoleAar.id model.skoleAarFilter)
+        ]
+        [ text <| String.left 30 skoleAar.navn ]
+
+
 visAktivtFilter : Filter -> EkspandertFilter -> String -> KonfigurasjonStandardFilter msg -> (KonfigurasjonStandardFilter msg -> Html msg) -> Html msg
 visAktivtFilter filter gjeldendeFilter filterNavn konfigurasjon visInnhold =
     if filter.ekspandertFilter == gjeldendeFilter then
@@ -306,6 +290,11 @@ visGjeldendeFilter filter slettMsg =
                 |> List.indexedMap (\index ( id, navn ) -> visGjeldendeFilterEnhet navn slettMsg (FagFilter id navn))
             )
         , Options.span []
+            (filter.skoleAarFilter
+                |> Dict.toList
+                |> List.indexedMap (\index ( id, navn ) -> visGjeldendeFilterEnhet navn slettMsg (SkoleAarFilter id navn))
+            )
+        , Options.span []
             [ if tomtFilter filter then
                 text ""
               else
@@ -337,6 +326,7 @@ genererFilterSpoerring filter =
                 |> (::) (genererKommaseparertStreng filter.utdanningsprogramFilter "filter[utdanningsprogram]=")
                 |> (::) (genererKommaseparertStreng filter.trinnFilter "filter[trinn]=")
                 |> (::) (genererKommaseparertStreng filter.fagFilter "filter[fag]=")
+                |> (::) (genererKommaseparertStreng filter.skoleAarFilter "filter[skoleaar]=")
                 |> (::) (genererFritekstStreng filter.navnFilter)
 
         kombinertFilter =

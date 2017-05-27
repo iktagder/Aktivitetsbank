@@ -17,6 +17,7 @@ type alias Filter =
     , utdanningsprogramFilter : Dict.Dict String String
     , trinnFilter : Dict.Dict String String
     , fagFilter : Dict.Dict String String
+    , skoleAarFilter : Dict.Dict String String
     , navnFilter : String
     }
 
@@ -27,6 +28,7 @@ type FilterType
     | UtdanningsprogramFilter String String
     | TrinnFilter String String
     | FagFilter String String
+    | SkoleAarFilter String String
     | AlleFilter
 
 
@@ -37,6 +39,7 @@ type EkspandertFilter
     | UtdanningsprogramFilterEkspandert
     | TrinnFilterEkspandert
     | FagFilterEkspandert
+    | SkoleAarFilterEkspandert
 
 
 type alias Skole =
