@@ -29,6 +29,7 @@ type FilterType
     | TrinnFilter String String
     | FagFilter String String
     | SkoleAarFilter String String
+    | NavnFilter String
     | AlleFilter
 
 

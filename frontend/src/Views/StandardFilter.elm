@@ -18,7 +18,6 @@ import Dict
 type alias KonfigurasjonStandardFilter msg =
     { filterMsg : FilterType -> msg
     , nullstillMsg : msg
-    , filterNavnMsg : String -> msg
     , utfoerSoekMsg : msg
     , ekspanderFilterTypeMsg : EkspandertFilter -> msg
     , mdlMsg : Material.Msg msg -> msg
@@ -60,7 +59,7 @@ visStandardFilter metadata filter konfigurasjon =
             , Textfield.floatingLabel
             , Textfield.text_
             , Textfield.value <| filter.navnFilter
-            , Options.onInput (konfigurasjon.filterNavnMsg)
+            , Options.onInput (\input -> konfigurasjon.filterMsg (NavnFilter input))
             ]
             []
         , visAvansertFilter metadata filter konfigurasjon
@@ -294,6 +293,12 @@ visGjeldendeFilter filter slettMsg =
                 |> Dict.toList
                 |> List.indexedMap (\index ( id, navn ) -> visGjeldendeFilterEnhet navn slettMsg (SkoleAarFilter id navn))
             )
+        , Options.span []
+            [ if String.isEmpty filter.navnFilter then
+                text ""
+              else
+                visGjeldendeFilterEnhet ("Fritekst: " ++ filter.navnFilter) slettMsg (NavnFilter filter.navnFilter)
+            ]
         , Options.span []
             [ if tomtFilter filter then
                 text ""

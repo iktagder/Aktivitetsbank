@@ -123,7 +123,6 @@ type Msg
     | VisAktivitetDetalj String
     | OpprettAktivitet
     | VisFilter
-    | FiltrerPaNavn String
     | FilterMetadata FilterType
     | NullstillFilter
     | EkspanderFilterType EkspandertFilter
@@ -156,21 +155,6 @@ update msg model =
 
         VisFilter ->
             ( { model | visFilter = not model.visFilter, filtertAktivitetListe = (getAktivitetListe model) }, Cmd.none, NoSharedMsg )
-
-        FiltrerPaNavn navn ->
-            let
-                filter_ =
-                    model.filter
-
-                nyttFilter =
-                    { filter_ | navnFilter = navn }
-            in
-                ( { model
-                    | filter = nyttFilter
-                  }
-                , fetchAktivitetListe model.apiEndpoint <| genererFilterSpoerring nyttFilter
-                , NoSharedMsg
-                )
 
         FilterMetadata filterType ->
             let
@@ -254,6 +238,16 @@ update msg model =
                             in
                                 { gammeltFilter | skoleAarFilter = nyttFagFilter }
 
+                        NavnFilter navn ->
+                            let
+                                nyttNavnFilter =
+                                    navn
+
+                                gammeltFilter =
+                                    model.filter
+                            in
+                                { gammeltFilter | navnFilter = nyttNavnFilter }
+
                         AlleFilter ->
                             model.filter
             in
@@ -334,6 +328,9 @@ update msg model =
                                     Dict.remove skoleAarId model.filter.skoleAarFilter
                             in
                                 { gammeltFilter | skoleAarFilter = nyttSkoleAarFilter }
+
+                        NavnFilter navn ->
+                            { gammeltFilter | navnFilter = "" }
 
                         AlleFilter ->
                             initFilter
@@ -463,7 +460,6 @@ visFilter model =
         konfigurasjon =
             { filterMsg = FilterMetadata
             , nullstillMsg = NullstillFilter
-            , filterNavnMsg = FiltrerPaNavn
             , utfoerSoekMsg = UtfoerSoek
             , ekspanderFilterTypeMsg = EkspanderFilterType
             , mdlMsg = Mdl
