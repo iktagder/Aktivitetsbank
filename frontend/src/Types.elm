@@ -7,6 +7,7 @@ import Time exposing (Time)
 type alias Taco =
     { currentTime : Time
     , userInfo : UserInformation
+    , appMetadata : AppMetadata
     }
 
 

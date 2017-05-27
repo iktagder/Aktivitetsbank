@@ -32,6 +32,8 @@ type alias Model =
     , apiEndpoint : String
     , statusText : String
     , logo : String
+    , userInformation : RemoteData.WebData UserInformation
+    , appMetadata : RemoteData.WebData AppMetadata
     }
 
 
@@ -54,6 +56,7 @@ type Msg
     | TimeChange Time
     | RouterMsg Router.Msg
     | HandleUserInformationResponse (RemoteData.WebData UserInformation)
+    | HandleAppMetadataResponse (RemoteData.WebData AppMetadata)
 
 
 init : Flags -> Location -> ( Model, Cmd Msg )
@@ -68,9 +71,12 @@ init flags location =
           , apiEndpoint = flags.apiEndpoint
           , statusText = ""
           , logo = flags.vafLogo
+          , userInformation = RemoteData.NotAsked
+          , appMetadata = RemoteData.NotAsked
           }
         , Cmd.batch
             [ fetchUserInformation endPoint
+            , fetchAppMetadata flags.apiEndpoint
 
             -- , Cmd.map RouterMsg (Router.getInitialCommand (RouterHelpers.parseLocation location) endPoint)
             ]
@@ -99,6 +105,28 @@ fetchUserInformation endPoint =
             |> Cmd.map HandleUserInformationResponse
 
 
+fetchAppMetadata : String -> Cmd Msg
+fetchAppMetadata endPoint =
+    let
+        queryUrl =
+            endPoint ++ "AktivitetsbankMetadata"
+
+        req =
+            Http.request
+                { method = "GET"
+                , headers = []
+                , url = queryUrl
+                , body = Http.emptyBody
+                , expect = Http.expectJson Decoders.decodeAppMetadata
+                , timeout = Nothing
+                , withCredentials = True
+                }
+    in
+        req
+            |> RemoteData.sendRequest
+            |> Cmd.map HandleAppMetadataResponse
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
@@ -107,6 +135,9 @@ update msg model =
 
         HandleUserInformationResponse webData ->
             updateUserInfo model webData
+
+        HandleAppMetadataResponse webData ->
+            updateAppMetadata model webData
 
         UrlChange location ->
             updateRouter { model | location = location } (Router.UrlChange location)
@@ -174,68 +205,129 @@ updateRouter model routerMsg =
 
 updateUserInfo : Model -> RemoteData.WebData UserInformation -> ( Model, Cmd Msg )
 updateUserInfo model webData =
-    case webData of
-        Failure error ->
-            let
-                ( newAppstate, cmd, statusText, retryCount ) =
-                    case error of
-                        Http.BadUrl info ->
-                            ( model.appState, Cmd.none, "Feil i url til API", model.loadUserRetryCount )
+    let
+        ( modelErr, cmdErr ) =
+            case webData of
+                Failure error ->
+                    let
+                        ( newAppstate, cmd, statusText, retryCount ) =
+                            case error of
+                                Http.BadUrl info ->
+                                    ( model.appState, Cmd.none, "Feil i url til API", model.loadUserRetryCount )
 
-                        Http.BadPayload _ _ ->
-                            ( model.appState, Cmd.none, "Feil i sending av data til API", model.loadUserRetryCount )
+                                Http.BadPayload _ _ ->
+                                    ( model.appState, Cmd.none, "Feil i sending av data til API", model.loadUserRetryCount )
 
-                        Http.BadStatus status ->
-                            if model.loadUserRetryCount < 5 then
-                                ( model.appState, fetchUserInformation model.apiEndpoint, "Prøver henting av data på nytt", model.loadUserRetryCount + 1 )
-                            else
-                                ( Unauthorized, Cmd.none, "Stoppet henting av data på nytt.", model.loadUserRetryCount )
+                                Http.BadStatus status ->
+                                    if model.loadUserRetryCount < 5 then
+                                        ( model.appState, fetchUserInformation model.apiEndpoint, "Prøver henting av data på nytt", model.loadUserRetryCount + 1 )
+                                    else
+                                        ( Unauthorized, Cmd.none, "Stoppet henting av data på nytt.", model.loadUserRetryCount )
 
-                        Http.NetworkError ->
-                            if model.loadUserRetryCount < 5 then
-                                ( model.appState, fetchUserInformation model.apiEndpoint, "Nettverksfeil - Prøver henting av data på nytt", model.loadUserRetryCount + 1 )
-                            else
-                                ( AppNetworkError, Cmd.none, "Stoppet henting av data på nytt.", model.loadUserRetryCount )
+                                Http.NetworkError ->
+                                    if model.loadUserRetryCount < 5 then
+                                        ( model.appState, fetchUserInformation model.apiEndpoint, "Nettverksfeil - Prøver henting av data på nytt", model.loadUserRetryCount + 1 )
+                                    else
+                                        ( AppNetworkError, Cmd.none, "Stoppet henting av data på nytt.", model.loadUserRetryCount )
 
-                        Http.Timeout ->
-                            ( model.appState, Cmd.none, "Nettverksfeil - timet ut", model.loadUserRetryCount )
-            in
-                ( { model | loadUserRetryCount = retryCount, appState = newAppstate }, cmd )
+                                Http.Timeout ->
+                                    ( model.appState, Cmd.none, "Nettverksfeil - timet ut", model.loadUserRetryCount )
+                    in
+                        ( { model | loadUserRetryCount = retryCount, appState = newAppstate }, cmd )
 
-        -- Debug.crash "OMG CANT EVEN DOWNLOAD."
-        Success userInfo ->
+                _ ->
+                    ( model, Cmd.none )
+
+        combinedData =
+            RemoteData.map2 (,) webData model.appMetadata
+
+        ( model_, cmd_ ) =
+            updateSuccessLoad combinedData ( modelErr, cmdErr )
+    in
+        ( { model_ | userInformation = webData }, cmd_ )
+
+
+updateAppMetadata : Model -> RemoteData.WebData AppMetadata -> ( Model, Cmd Msg )
+updateAppMetadata model webData =
+    let
+        ( modelErr, cmdErr ) =
+            case webData of
+                Failure error ->
+                    let
+                        ( newAppstate, cmd, statusText, retryCount ) =
+                            case error of
+                                Http.BadUrl info ->
+                                    ( model.appState, Cmd.none, "Feil i url til API", model.loadUserRetryCount )
+
+                                Http.BadPayload _ _ ->
+                                    ( model.appState, Cmd.none, "Feil i sending av data til API", model.loadUserRetryCount )
+
+                                Http.BadStatus status ->
+                                    if model.loadUserRetryCount < 5 then
+                                        ( model.appState, fetchAppMetadata model.apiEndpoint, "Prøver henting av data på nytt", model.loadUserRetryCount + 1 )
+                                    else
+                                        ( Unauthorized, Cmd.none, "Stoppet henting av data på nytt.", model.loadUserRetryCount )
+
+                                Http.NetworkError ->
+                                    if model.loadUserRetryCount < 5 then
+                                        ( model.appState, fetchAppMetadata model.apiEndpoint, "Nettverksfeil - Prøver henting av data på nytt", model.loadUserRetryCount + 1 )
+                                    else
+                                        ( AppNetworkError, Cmd.none, "Stoppet henting av data på nytt.", model.loadUserRetryCount )
+
+                                Http.Timeout ->
+                                    ( model.appState, Cmd.none, "Nettverksfeil - timet ut", model.loadUserRetryCount )
+                    in
+                        ( { model | loadUserRetryCount = retryCount, appState = newAppstate }, cmd )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        combinedData =
+            RemoteData.map2 (,) model.userInformation webData
+
+        ( model_, cmd_ ) =
+            updateSuccessLoad combinedData ( modelErr, cmdErr )
+    in
+        ( { model_ | appMetadata = webData }, cmd_ )
+
+
+updateSuccessLoad : RemoteData.WebData ( UserInformation, AppMetadata ) -> ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
+updateSuccessLoad combinedData ( model, cmd ) =
+    case combinedData of
+        Success ( userInfo, appMetadata ) ->
             case model.appState of
                 NotReady notreadyModel ->
                     let
                         initTaco =
                             { currentTime = notreadyModel.currentTime
                             , userInfo = userInfo
+                            , appMetadata = appMetadata
                             }
 
                         ( initRouterModel, routerCmd ) =
                             Router.init model.location notreadyModel.apiEndpoint model.logo
                     in
                         ( { model | appState = Ready initTaco initRouterModel }
-                        , Cmd.map RouterMsg routerCmd
+                        , Cmd.batch [ cmd, Cmd.map RouterMsg routerCmd ]
                         )
 
                 Ready taco routerModel ->
                     ( { model | appState = Ready (updateTaco taco (UpdateUserInfo userInfo)) routerModel }
-                    , Cmd.none
+                    , cmd
                     )
 
                 Unauthorized ->
                     ( model
-                    , Cmd.none
+                    , cmd
                     )
 
                 AppNetworkError ->
                     ( model
-                    , Cmd.none
+                    , cmd
                     )
 
         _ ->
-            ( model, Cmd.none )
+            ( model, cmd )
 
 
 updateTaco : Taco -> TacoUpdate -> Taco
