@@ -28,6 +28,21 @@ type alias KonfigurasjonStandardFilter msg =
     }
 
 
+tomtFilter : Filter -> Bool
+tomtFilter filter =
+    if
+        Dict.isEmpty filter.aktivitetsTypeFilter
+            && Dict.isEmpty filter.skoleFilter
+            && Dict.isEmpty filter.utdanningsprogramFilter
+            && Dict.isEmpty filter.trinnFilter
+            && Dict.isEmpty filter.fagFilter
+            && String.isEmpty filter.navnFilter
+    then
+        True
+    else
+        False
+
+
 visStandardFilter : WebData AppMetadata -> Filter -> KonfigurasjonStandardFilter msg -> Html msg
 visStandardFilter metadata filter konfigurasjon =
     Options.div
@@ -52,7 +67,7 @@ visStandardFilter metadata filter konfigurasjon =
         , Textfield.render konfigurasjon.mdlMsg
             [ 3212 ]
             konfigurasjon.mdlModel
-            [ Textfield.label "Navn"
+            [ Textfield.label "Tekst"
             , Textfield.floatingLabel
             , Textfield.text_
             , Textfield.value <| filter.navnFilter
@@ -60,6 +75,24 @@ visStandardFilter metadata filter konfigurasjon =
             ]
             []
         , visAvansertFilter metadata filter konfigurasjon
+        , Button.render konfigurasjon.mdlMsg
+            [ 410, 104 ]
+            konfigurasjon.mdlModel
+            [ Button.ripple
+            , Button.raised
+
+            -- , Options.when (tomtFilter filter) Button.disabled
+            , Options.onClick (konfigurasjon.nullstillMsg)
+            , css "float" "left"
+            , Options.css "margin" "6px 6px"
+            ]
+            [ text "Nullstill filter" ]
+            |> (\x ->
+                    if tomtFilter filter then
+                        text ""
+                    else
+                        x
+               )
 
         -- , Button.render konfigurasjon.mdlMsg
         --     [ 410, 104 ]
@@ -297,6 +330,7 @@ genererFilterSpoerring filter =
                 |> (::) (genererKommaseparertStreng filter.utdanningsprogramFilter "filter[utdanningsprogram]=")
                 |> (::) (genererKommaseparertStreng filter.trinnFilter "filter[trinn]=")
                 |> (::) (genererKommaseparertStreng filter.fagFilter "filter[fag]=")
+                |> (::) (genererFritekstStreng filter.navnFilter)
 
         kombinertFilter =
             alleFilter
@@ -325,3 +359,11 @@ genererKommaseparertStreng filterType filterPrefiks =
 
         True ->
             Nothing
+
+
+genererFritekstStreng : String -> Maybe String
+genererFritekstStreng fritekst =
+    if String.isEmpty fritekst || (String.length fritekst < 3) then
+        Nothing
+    else
+        Just <| "filter[fritekst]=" ++ fritekst
