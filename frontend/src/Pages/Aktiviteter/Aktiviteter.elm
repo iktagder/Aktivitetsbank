@@ -48,7 +48,7 @@ init apiEndpoint =
       , filtertAktivitetListe = []
       , filter = initFilter
       }
-    , Cmd.batch [ fetchAppMetadata apiEndpoint, fetchAktivitetListe apiEndpoint ]
+    , Cmd.batch [ fetchAppMetadata apiEndpoint, fetchAktivitetListe apiEndpoint Nothing ]
     )
 
 
@@ -88,11 +88,16 @@ fetchAppMetadata endPoint =
             |> Cmd.map AppMetadataResponse
 
 
-fetchAktivitetListe : String -> Cmd Msg
-fetchAktivitetListe endPoint =
+fetchAktivitetListe : String -> Maybe String -> Cmd Msg
+fetchAktivitetListe endPoint filter =
     let
         queryUrl =
-            endPoint ++ "aktiviteter"
+            case filter of
+                Nothing ->
+                    endPoint ++ "aktiviteter"
+
+                Just filterVerdi ->
+                    endPoint ++ "aktiviteter" ++ filterVerdi
 
         req =
             Http.request
@@ -122,6 +127,7 @@ type Msg
     | NullstillFilter
     | EkspanderFilterType EkspandertFilter
     | FjernGjeldendeFilter FilterType
+    | UtfoerSoek
 
 
 update : Msg -> Model -> ( Model, Cmd Msg, SharedMsg )
@@ -161,117 +167,91 @@ update msg model =
                 ( { model
                     | filter = nyttFilter
                   }
-                , Cmd.none
+                , fetchAktivitetListe model.apiEndpoint <| genererFilterSpoerring nyttFilter
                 , NoSharedMsg
                 )
 
         FilterMetadata filterType ->
-            case filterType of
-                AktivitetsTypeFilter typeId navn ->
-                    let
-                        nyttAktivitetsTypeFilter =
-                            if Dict.member typeId model.filter.aktivitetsTypeFilter then
-                                Dict.remove typeId model.filter.aktivitetsTypeFilter
-                            else
-                                Dict.insert typeId navn model.filter.aktivitetsTypeFilter
+            let
+                nyttFilter =
+                    case filterType of
+                        AktivitetsTypeFilter typeId navn ->
+                            let
+                                nyttAktivitetsTypeFilter =
+                                    if Dict.member typeId model.filter.aktivitetsTypeFilter then
+                                        Dict.remove typeId model.filter.aktivitetsTypeFilter
+                                    else
+                                        Dict.insert typeId navn model.filter.aktivitetsTypeFilter
 
-                        gammeltFilter =
-                            model.filter
+                                gammeltFilter =
+                                    model.filter
+                            in
+                                { gammeltFilter | aktivitetsTypeFilter = nyttAktivitetsTypeFilter }
 
-                        nyttFilter =
-                            { gammeltFilter | aktivitetsTypeFilter = nyttAktivitetsTypeFilter }
-                    in
-                        ( { model | filter = nyttFilter }
-                        , Cmd.none
-                        , NoSharedMsg
-                        )
+                        SkoleFilter skoleId navn ->
+                            let
+                                nyttSkoleFilter =
+                                    if Dict.member skoleId model.filter.skoleFilter then
+                                        Dict.remove skoleId model.filter.skoleFilter
+                                    else
+                                        Dict.insert skoleId navn model.filter.skoleFilter
 
-                SkoleFilter skoleId navn ->
-                    let
-                        nyttSkoleFilter =
-                            if Dict.member skoleId model.filter.skoleFilter then
-                                Dict.remove skoleId model.filter.skoleFilter
-                            else
-                                Dict.insert skoleId navn model.filter.skoleFilter
+                                gammeltFilter =
+                                    model.filter
+                            in
+                                { gammeltFilter | skoleFilter = nyttSkoleFilter }
 
-                        gammeltFilter =
-                            model.filter
+                        UtdanningsprogramFilter utdanningsprogramId navn ->
+                            let
+                                nyttUtdanningsprogramFilter =
+                                    if Dict.member utdanningsprogramId model.filter.utdanningsprogramFilter then
+                                        Dict.remove utdanningsprogramId model.filter.utdanningsprogramFilter
+                                    else
+                                        Dict.insert utdanningsprogramId navn model.filter.utdanningsprogramFilter
 
-                        nyttFilter =
-                            { gammeltFilter | skoleFilter = nyttSkoleFilter }
-                    in
-                        ( { model
-                            | filter = nyttFilter
-                          }
-                        , Cmd.none
-                        , NoSharedMsg
-                        )
+                                gammeltFilter =
+                                    model.filter
+                            in
+                                { gammeltFilter | utdanningsprogramFilter = nyttUtdanningsprogramFilter }
 
-                UtdanningsprogramFilter utdanningsprogramId navn ->
-                    let
-                        nyttUtdanningsprogramFilter =
-                            if Dict.member utdanningsprogramId model.filter.utdanningsprogramFilter then
-                                Dict.remove utdanningsprogramId model.filter.utdanningsprogramFilter
-                            else
-                                Dict.insert utdanningsprogramId navn model.filter.utdanningsprogramFilter
+                        TrinnFilter trinnId navn ->
+                            let
+                                nyttTrinnFilter =
+                                    if Dict.member trinnId model.filter.trinnFilter then
+                                        Dict.remove trinnId model.filter.trinnFilter
+                                    else
+                                        Dict.insert trinnId navn model.filter.trinnFilter
 
-                        gammeltFilter =
-                            model.filter
+                                gammeltFilter =
+                                    model.filter
+                            in
+                                { gammeltFilter | trinnFilter = nyttTrinnFilter }
 
-                        nyttFilter =
-                            { gammeltFilter | utdanningsprogramFilter = nyttUtdanningsprogramFilter }
-                    in
-                        ( { model
-                            | filter = nyttFilter
-                          }
-                        , Cmd.none
-                        , NoSharedMsg
-                        )
+                        FagFilter fagId navn ->
+                            let
+                                nyttFagFilter =
+                                    if Dict.member fagId model.filter.fagFilter then
+                                        Dict.remove fagId model.filter.fagFilter
+                                    else
+                                        Dict.insert fagId navn model.filter.fagFilter
 
-                TrinnFilter trinnId navn ->
-                    let
-                        nyttTrinnFilter =
-                            if Dict.member trinnId model.filter.trinnFilter then
-                                Dict.remove trinnId model.filter.trinnFilter
-                            else
-                                Dict.insert trinnId navn model.filter.trinnFilter
-
-                        gammeltFilter =
-                            model.filter
-
-                        nyttFilter =
-                            { gammeltFilter | trinnFilter = nyttTrinnFilter }
-                    in
-                        ( { model
-                            | filter = nyttFilter
-                          }
-                        , Cmd.none
-                        , NoSharedMsg
-                        )
-
-                FagFilter fagId navn ->
-                    let
-                        nyttFagFilter =
-                            if Dict.member fagId model.filter.fagFilter then
-                                Dict.remove fagId model.filter.fagFilter
-                            else
-                                Dict.insert fagId navn model.filter.fagFilter
-
-                        gammeltFilter =
-                            model.filter
-
-                        nyttFilter =
-                            { gammeltFilter | fagFilter = nyttFagFilter }
-                    in
-                        ( { model
-                            | filter = nyttFilter
-                          }
-                        , Cmd.none
-                        , NoSharedMsg
-                        )
+                                gammeltFilter =
+                                    model.filter
+                            in
+                                { gammeltFilter | fagFilter = nyttFagFilter }
+            in
+                ( { model
+                    | filter = nyttFilter
+                  }
+                , fetchAktivitetListe model.apiEndpoint <| genererFilterSpoerring nyttFilter
+                , NoSharedMsg
+                )
 
         NullstillFilter ->
-            ( { model | filter = initFilter, filtertAktivitetListe = (getAktivitetListe model) }, Cmd.none, NoSharedMsg )
+            ( { model | filter = initFilter, filtertAktivitetListe = (getAktivitetListe model) }
+            , fetchAktivitetListe model.apiEndpoint <| genererFilterSpoerring initFilter
+            , NoSharedMsg
+            )
 
         EkspanderFilterType ekspandertFilter ->
             let
@@ -331,7 +311,13 @@ update msg model =
                             in
                                 { gammeltFilter | fagFilter = nyttFagFilter }
             in
-                ( { model | filter = nyttFilter }, Cmd.none, NoSharedMsg )
+                ( { model | filter = nyttFilter }
+                , fetchAktivitetListe model.apiEndpoint <| genererFilterSpoerring nyttFilter
+                , NoSharedMsg
+                )
+
+        UtfoerSoek ->
+            ( model, fetchAktivitetListe model.apiEndpoint <| genererFilterSpoerring model.filter, NoSharedMsg )
 
 
 getAktivitetListe : Model -> List Aktivitet
@@ -450,6 +436,7 @@ visFilter model =
             { filterMsg = FilterMetadata
             , nullstillMsg = NullstillFilter
             , filterNavnMsg = FiltrerPaNavn
+            , utfoerSoekMsg = UtfoerSoek
             , ekspanderFilterTypeMsg = EkspanderFilterType
             , mdlMsg = Mdl
             , mdlModel = model.mdl

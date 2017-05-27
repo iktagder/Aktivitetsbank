@@ -21,6 +21,7 @@ type alias KonfigurasjonStandardFilter msg =
     { filterMsg : FilterType -> msg
     , nullstillMsg : msg
     , filterNavnMsg : String -> msg
+    , utfoerSoekMsg : msg
     , ekspanderFilterTypeMsg : EkspandertFilter -> msg
     , mdlMsg : Material.Msg msg -> msg
     , mdlModel : Material.Model
@@ -59,6 +60,18 @@ visStandardFilter metadata filter konfigurasjon =
             ]
             []
         , visAvansertFilter metadata filter konfigurasjon
+
+        -- , Button.render konfigurasjon.mdlMsg
+        --     [ 410, 104 ]
+        --     konfigurasjon.mdlModel
+        --     [ Button.ripple
+        --     , Button.raised
+        --     -- , Options.when (not model.visLagreKnapp) Button.disabled
+        --     , Options.onClick (konfigurasjon.utfoerSoekMsg)
+        --     , css "float" "left"
+        --     , Options.css "margin" "6px 6px"
+        --     ]
+        --     [ text "Utfør filtersøk" ]
         ]
 
 
