@@ -344,7 +344,8 @@ view taco model =
             ]
             [ (visOpprettAktivitetIkon model)
                 |> visVedKanRedigere taco
-            , (visFilterIkon taco model)
+
+            -- , (visFilterIkon taco model)
             , Options.span
                 [ Typo.headline
                 , Options.css "padding" "16px 32px"
