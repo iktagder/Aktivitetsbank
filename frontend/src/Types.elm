@@ -27,6 +27,7 @@ type FilterType
     | UtdanningsprogramFilter String String
     | TrinnFilter String String
     | FagFilter String String
+    | AlleFilter
 
 
 type EkspandertFilter

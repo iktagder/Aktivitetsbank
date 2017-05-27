@@ -7,6 +7,7 @@ import Material.Tooltip as Tooltip
 import Material.Button as Button
 import Material.Options as Options exposing (when, css, cs, Style, onClick)
 import Material.Typography as Typo
+import Material.Color as Color
 import Material.Chip as Chip
 import Material.Typography as Typography
 import Material.Toggles as Toggles
@@ -75,25 +76,24 @@ visStandardFilter metadata filter konfigurasjon =
             ]
             []
         , visAvansertFilter metadata filter konfigurasjon
-        , Button.render konfigurasjon.mdlMsg
-            [ 410, 104 ]
-            konfigurasjon.mdlModel
-            [ Button.ripple
-            , Button.raised
 
-            -- , Options.when (tomtFilter filter) Button.disabled
-            , Options.onClick (konfigurasjon.nullstillMsg)
-            , css "float" "left"
-            , Options.css "margin" "6px 6px"
-            ]
-            [ text "Nullstill filter" ]
-            |> (\x ->
-                    if tomtFilter filter then
-                        text ""
-                    else
-                        x
-               )
-
+        -- , Button.render konfigurasjon.mdlMsg
+        --     [ 410, 104 ]
+        --     konfigurasjon.mdlModel
+        --     [ Button.ripple
+        --     , Button.raised
+        --     -- , Options.when (tomtFilter filter) Button.disabled
+        --     , Options.onClick (konfigurasjon.nullstillMsg)
+        --     , css "float" "left"
+        --     , Options.css "margin" "6px 6px"
+        --     ]
+        --     [ text "Nullstill filter" ]
+        --     |> (\x ->
+        --             if tomtFilter filter then
+        --                 text ""
+        --             else
+        --                 x
+        --        )
         -- , Button.render konfigurasjon.mdlMsg
         --     [ 410, 104 ]
         --     konfigurasjon.mdlModel
@@ -305,6 +305,12 @@ visGjeldendeFilter filter slettMsg =
                 |> Dict.toList
                 |> List.indexedMap (\index ( id, navn ) -> visGjeldendeFilterEnhet navn slettMsg (FagFilter id navn))
             )
+        , Options.span []
+            [ if tomtFilter filter then
+                text ""
+              else
+                visGjeldendeFilterEnhet "Fjern alle filter" slettMsg AlleFilter
+            ]
         ]
 
 
@@ -312,6 +318,7 @@ visGjeldendeFilterEnhet : String -> (FilterType -> msg) -> FilterType -> Html ms
 visGjeldendeFilterEnhet filterNavn slettMsg filterType =
     Chip.span
         [ Chip.deleteIcon "cancel"
+        , Options.when (filterType == AlleFilter) (Color.background Color.primary)
         , Chip.deleteClick
             (slettMsg filterType)
         ]

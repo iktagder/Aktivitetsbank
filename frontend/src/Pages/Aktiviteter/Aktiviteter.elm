@@ -239,6 +239,9 @@ update msg model =
                                     model.filter
                             in
                                 { gammeltFilter | fagFilter = nyttFagFilter }
+
+                        AlleFilter ->
+                            model.filter
             in
                 ( { model
                     | filter = nyttFilter
@@ -310,6 +313,9 @@ update msg model =
                                     Dict.remove fagId model.filter.fagFilter
                             in
                                 { gammeltFilter | fagFilter = nyttFagFilter }
+
+                        AlleFilter ->
+                            initFilter
             in
                 ( { model | filter = nyttFilter }
                 , fetchAktivitetListe model.apiEndpoint <| genererFilterSpoerring nyttFilter
