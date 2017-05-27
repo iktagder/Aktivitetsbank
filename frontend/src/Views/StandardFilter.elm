@@ -1,4 +1,4 @@
-module Views.StandardFilter exposing (visStandardFilter, visGjeldendeFilter, KonfigurasjonStandardFilter)
+module Views.StandardFilter exposing (visStandardFilter, visGjeldendeFilter, KonfigurasjonStandardFilter, genererFilterSpoerring)
 
 import Html exposing (Html, text, div, span, p, a)
 import Material
@@ -272,3 +272,43 @@ visGjeldendeFilterEnhet filterNavn slettMsg filterType =
         [ Chip.content []
             [ text filterNavn ]
         ]
+
+
+genererFilterSpoerring : Filter -> Maybe String
+genererFilterSpoerring filter =
+    let
+        alleFilter =
+            []
+                |> (::) (genererKommaseparertStreng filter.aktivitetsTypeFilter "filter[aktivitetstyper]=")
+                |> (::) (genererKommaseparertStreng filter.skoleFilter "filter[skoler]=")
+                |> (::) (genererKommaseparertStreng filter.utdanningsprogramFilter "filter[utdanningsprogram]=")
+                |> (::) (genererKommaseparertStreng filter.trinnFilter "filter[trinn]=")
+                |> (::) (genererKommaseparertStreng filter.fagFilter "filter[fag]=")
+
+        kombinertFilter =
+            alleFilter
+                |> List.filterMap identity
+                |> List.intersperse "&"
+                |> List.foldr (++) ""
+                |> String.append "?"
+    in
+        if List.isEmpty <| List.filterMap identity alleFilter then
+            Nothing
+        else
+            Just kombinertFilter
+
+
+genererKommaseparertStreng : Dict.Dict String String -> String -> Maybe String
+genererKommaseparertStreng filterType filterPrefiks =
+    case Dict.isEmpty filterType of
+        False ->
+            filterType
+                |> Dict.toList
+                |> List.map (\( id, navn ) -> id)
+                |> List.intersperse ","
+                |> List.foldr (++) ""
+                |> String.append filterPrefiks
+                |> Just
+
+        True ->
+            Nothing
