@@ -33,7 +33,6 @@ INSERT [dbo].[Skole] ([Id], [Kode], [Navn]) VALUES (N'ae10a09e-ff02-4d31-99cb-24
 INSERT [dbo].[Skole] ([Id], [Kode], [Navn]) VALUES (N'0ee3658c-d8c8-4f00-93af-335d2f3fca88', N'MAN', N'Mandal')
 INSERT [dbo].[Skole] ([Id], [Kode], [Navn]) VALUES (N'e3dac0d5-0a4e-4cd1-a9d8-503aa98f005a', N'VEN', N'Vennesla')
 INSERT [dbo].[Skole] ([Id], [Kode], [Navn]) VALUES (N'269576c5-1c7b-4e6b-be9e-6c40026a898f', N'FVG', N'Flekkefjord')
-INSERT [dbo].[Skole] ([Id], [Kode], [Navn]) VALUES (N'5898868c-e584-43a0-b095-6f52d31bb685', N'BYR', N'Byremo')
 INSERT [dbo].[Skole] ([Id], [Kode], [Navn]) VALUES (N'6d584e76-ea83-4935-afc2-8d23d22d8b28', N'ALLE', N'Alle')
 INSERT [dbo].[Skole] ([Id], [Kode], [Navn]) VALUES (N'83911fda-028b-4e4f-bf00-9a86e503d935', N'SOG', N'Søgne')
 INSERT [dbo].[Skole] ([Id], [Kode], [Navn]) VALUES (N'd018042f-9490-4fb8-911e-a7b40a955f3e', N'KKG', N'KKG')
