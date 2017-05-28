@@ -1,7 +1,6 @@
 module Pages.Aktiviteter.DeltakerEndre exposing (..)
 
 import Html exposing (Html, text, div, span, p, a)
-import Html.Attributes exposing (class)
 import Material
 import Material.Grid as Grid exposing (grid, size, cell, Device(..))
 import Material.Elevation as Elevation

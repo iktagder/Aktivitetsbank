@@ -9,7 +9,6 @@ import Material.Textfield as Textfield
 import Material.Options as Options exposing (when, css, cs, Style, onClick)
 import Material.Typography as Typo
 import Material.Typography as Typography
-import RemoteData exposing (WebData, RemoteData(..))
 import Types exposing (..)
 import Http exposing (Error)
 import Decoders exposing (..)

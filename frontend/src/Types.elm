@@ -248,21 +248,3 @@ type alias UserInformation =
     , brukerNavn : String
     , rolle : String
     }
-
-
-type alias AnsattSearchItem =
-    { ansattId : String
-    , fornavn : String
-    , etternavn : String
-    , agressoResourceId : Maybe String
-    }
-
-
-type alias AnsattItem =
-    { --ansattId : String
-      fornavn : String
-    , etternavn : String
-    , phoneNumber : Maybe String
-    , tittel : Maybe String
-    , agressoResourceId : String
-    }

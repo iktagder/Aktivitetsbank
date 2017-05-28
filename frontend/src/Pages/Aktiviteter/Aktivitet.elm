@@ -22,7 +22,6 @@ import Shared.Tilgang exposing (..)
 import Views.SlettBekreft exposing (..)
 import Http exposing (Error)
 import Decoders exposing (..)
-import Dropdown
 
 
 type alias Model =
