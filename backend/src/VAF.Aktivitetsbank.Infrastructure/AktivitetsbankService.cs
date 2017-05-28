@@ -24,17 +24,17 @@ namespace VAF.Aktivitetsbank.Infrastructure
         }
         public AktivitetsbankMetadata HenteAlleMetadata()
         {
-            var skoler = _context.SkoleSet.OrderBy(x => x.Navn).AsEnumerable();
+            var skoler = _context.SkoleSet.OrderBy(x => x.Navn).AsNoTracking().AsEnumerable();
             var skolerMapped = Mapper.Map<IEnumerable<SkoleDto>>(skoler);
-            var trinn = _context.TrinnSet.OrderBy(x => x.Navn).AsEnumerable();
+            var trinn = _context.TrinnSet.OrderBy(x => x.Navn).AsNoTracking().AsEnumerable();
             var trinnMapped = Mapper.Map<IEnumerable<TrinnDto>>(trinn);
-            var fag = _context.FagSet.OrderBy(x => x.Navn).AsEnumerable();
+            var fag = _context.FagSet.OrderBy(x => x.Navn).AsNoTracking().AsEnumerable();
             var fagMapped = Mapper.Map<IEnumerable<FagDto>>(fag);
-            var aktivitetsTyper = _context.AktivitetstypeSet.OrderBy(x => x.Navn).AsEnumerable();
+            var aktivitetsTyper = _context.AktivitetstypeSet.OrderBy(x => x.Navn).AsNoTracking().AsEnumerable();
             var aktivitetsTyperMapped = Mapper.Map<IEnumerable<AktivitetstypeDto>>(aktivitetsTyper);
-            var utdanningsProgrammer = _context.UtdanningsprogramSet.OrderBy(x => x.Navn).AsEnumerable();
+            var utdanningsProgrammer = _context.UtdanningsprogramSet.OrderBy(x => x.Navn).AsNoTracking().AsEnumerable();
             var utdanningsProgrammerMapped = Mapper.Map<IEnumerable<UtdanningsprogramDto>>(utdanningsProgrammer);
-            var skoleAar = _context.SkoleAarSet.OrderBy(x => x.Navn).AsEnumerable();
+            var skoleAar = _context.SkoleAarSet.OrderBy(x => x.Navn).AsNoTracking().AsEnumerable();
             var skoleAarMapped = Mapper.Map<IEnumerable<SkoleAarDto>>(skoleAar);
 
 
@@ -55,7 +55,7 @@ namespace VAF.Aktivitetsbank.Infrastructure
             {
                 aktiviteter = FiltrerAktiviteter(aktiviteter, filterQuery);
             }
-            aktiviteter = aktiviteter.OrderBy(x => x.Navn);
+            aktiviteter = aktiviteter.OrderBy(x => x.Navn).AsNoTracking();
             var aktiviteterMapped = Mapper.Map<IList<AktivitetDto>>(aktiviteter.ToList());
             return aktiviteterMapped;
         }
@@ -123,21 +123,21 @@ namespace VAF.Aktivitetsbank.Infrastructure
 
         public IList<DeltakerDto> HentDeltakere(Guid queryAktivitetId)
         {
-            var deltakere = _context.DeltakerSet.Where(x => x.AktivitetId.Equals(queryAktivitetId) && x.Aktiv).OrderBy(x => x.Utdanningsprogram.Navn).ThenBy(x => x.Trinn.Navn).Include(x => x.Utdanningsprogram).Include(x => x.Fag).Include(x => x.Trinn).Include(x => x.Aktivitet).ToList();
+            var deltakere = _context.DeltakerSet.Where(x => x.AktivitetId.Equals(queryAktivitetId) && x.Aktiv).OrderBy(x => x.Utdanningsprogram.Navn).ThenBy(x => x.Trinn.Navn).Include(x => x.Utdanningsprogram).Include(x => x.Fag).Include(x => x.Trinn).Include(x => x.Aktivitet).AsNoTracking().ToList();
             var deltakereMapped = Mapper.Map<IList<DeltakerDto>>(deltakere);
             return deltakereMapped;
         }
 
         public AktivitetDto HentAktivitet(Guid queryId)
         {
-            var aktivitet = _context.AktivitetSet.Where(x => x.Id.Equals(queryId)).Include(x => x.Skole).Include(x => x.Aktivitetstype).Include(x => x.SkoleAar).FirstOrDefault();
+            var aktivitet = _context.AktivitetSet.Where(x => x.Id.Equals(queryId)).Include(x => x.Skole).Include(x => x.Aktivitetstype).Include(x => x.SkoleAar).AsNoTracking().FirstOrDefault();
             var aktivitetMapped = Mapper.Map<AktivitetDto>(aktivitet);
             return aktivitetMapped;
         }
 
         public DeltakerDto HentDeltaker(Guid queryAktivitetId, Guid queryDeltakerId)
         {
-            var deltaker = _context.DeltakerSet.Where(x => x.AktivitetId.Equals(queryAktivitetId) && x.Id.Equals(queryDeltakerId)).Include(x => x.Utdanningsprogram).Include(x => x.Fag).Include(x => x.Trinn).Include(x => x.Aktivitet).FirstOrDefault();
+            var deltaker = _context.DeltakerSet.Where(x => x.AktivitetId.Equals(queryAktivitetId) && x.Id.Equals(queryDeltakerId)).Include(x => x.Utdanningsprogram).Include(x => x.Fag).Include(x => x.Trinn).Include(x => x.Aktivitet).AsNoTracking().FirstOrDefault();
             var deltakerMapped = Mapper.Map<DeltakerDto>(deltaker);
             return deltakerMapped;
         }
