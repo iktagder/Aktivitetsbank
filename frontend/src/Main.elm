@@ -64,7 +64,7 @@ init : Flags -> Location -> ( Model, Cmd Msg )
 init flags location =
     let
         endPoint =
-            Debug.log "endpoint: " flags.apiEndpoint
+            flags.apiEndpoint
     in
         ( { appState = NotReady flags
           , location = location
@@ -339,13 +339,13 @@ updateTaco taco tacoUpdate =
             { taco | currentTime = time }
 
         UpdateUserInfo userInfo ->
-            { taco | userInfo = Debug.log "user" userInfo }
+            { taco | userInfo = userInfo }
 
         UpdateFilter newFilter ->
-            { taco | filter = Debug.log "newfilter" newFilter }
+            { taco | filter = newFilter }
 
         InitFilter ->
-            { taco | filter = Debug.log "newfilter" initFilter }
+            { taco | filter = initFilter }
 
         NoUpdate ->
             taco

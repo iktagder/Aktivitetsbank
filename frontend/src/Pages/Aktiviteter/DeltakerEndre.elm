@@ -320,11 +320,7 @@ update msg model =
                 ( { model | statusText = statusTekst }, cmd, NoSharedMsg )
 
         EndreDeltakerRespons (Ok _) ->
-            let
-                tmp =
-                    Debug.log "endret deltaker" model.deltakerId
-            in
-                ( model, Cmd.none, NavigateToAktivitet model.aktivitetId )
+            ( model, Cmd.none, NavigateToAktivitet model.aktivitetId )
 
         EndreDeltakerRespons (Err error) ->
             let
@@ -369,11 +365,7 @@ update msg model =
                 ( { model | bekreftSletting = bekreftStatus }, cmd, NoSharedMsg )
 
         SlettDeltakerRespons (Ok _) ->
-            let
-                tmp =
-                    Debug.log "slettet deltaker" model.deltakerId
-            in
-                ( { model | bekreftSletting = Av }, Cmd.none, NavigateToAktivitet model.aktivitetId )
+            ( { model | bekreftSletting = Av }, Cmd.none, NavigateToAktivitet model.aktivitetId )
 
         SlettDeltakerRespons (Err error) ->
             let

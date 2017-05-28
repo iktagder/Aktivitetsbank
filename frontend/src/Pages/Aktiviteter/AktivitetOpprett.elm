@@ -221,11 +221,7 @@ update msg model =
                 ( { model | statusText = statusTekst }, cmd, NoSharedMsg )
 
         NyAktivitetRespons (Ok nyId) ->
-            let
-                tmp =
-                    Debug.log "ny aktivitet" nyId
-            in
-                ( model, Cmd.none, NavigateToAktivitet nyId.id )
+            ( model, Cmd.none, NavigateToAktivitet nyId.id )
 
         NyAktivitetRespons (Err error) ->
             let

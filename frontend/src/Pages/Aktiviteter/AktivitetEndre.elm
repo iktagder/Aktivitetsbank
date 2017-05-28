@@ -278,11 +278,7 @@ update msg model =
                 ( { model | statusText = statusTekst }, cmd, NoSharedMsg )
 
         EndreAktivitetRespons (Ok _) ->
-            let
-                tmp =
-                    Debug.log "endret aktivitet" model.aktivitetId
-            in
-                ( model, Cmd.none, NavigateToAktivitet model.aktivitetId )
+            ( model, Cmd.none, NavigateToAktivitet model.aktivitetId )
 
         EndreAktivitetRespons (Err error) ->
             let

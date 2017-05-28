@@ -109,9 +109,8 @@ update msg model taco =
             in
                 ( model_, cmd_, NoSharedMsg )
 
-        -- (Debug.log "metadata-response" { model | appMetadata = response}, Cmd.none, NoSharedMsg)
         AktivitetListeResponse response ->
-            ( Debug.log "aktivitet-liste-response" { model | aktivitetListe = response }, Cmd.none, NoSharedMsg )
+            ( { model | aktivitetListe = response }, Cmd.none, NoSharedMsg )
 
         VisAktivitetDetalj id ->
             ( model, Cmd.none, NavigateToAktivitet id )

@@ -253,9 +253,6 @@ update msg model =
 
         NyDeltakerRespons (Ok nyId) ->
             let
-                tmp =
-                    Debug.log "ny deltaker" nyId
-
                 cmdShared =
                     case model.aktivitet of
                         Success data ->

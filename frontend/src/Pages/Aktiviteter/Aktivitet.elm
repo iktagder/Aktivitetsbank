@@ -189,10 +189,10 @@ update msg model =
                 ( model, Cmd.none, sharedMsg )
 
         AktivitetDeltakereResponse response ->
-            ( { model | deltakere = Debug.log "Deltakere:" response }, Cmd.none, NoSharedMsg )
+            ( { model | deltakere = response }, Cmd.none, NoSharedMsg )
 
         AktivitetResponse response ->
-            ( Debug.log "aktivitet-item-response" { model | aktivitet = response }, Cmd.none, NoSharedMsg )
+            ( { model | aktivitet = response }, Cmd.none, NoSharedMsg )
 
         NavigerHjem ->
             ( model, Cmd.none, NavigerTilHjem )
@@ -208,11 +208,7 @@ update msg model =
                 ( model, postKopierAktivitet model.apiEndpoint model.aktivitetId aktivitetKopi KopierAktivitetRespons, NoSharedMsg )
 
         KopierAktivitetRespons (Ok nyId) ->
-            let
-                tmp =
-                    Debug.log "ny aktivitet" nyId
-            in
-                ( model, Cmd.none, NavigateToAktivitet nyId.id )
+            ( model, Cmd.none, NavigateToAktivitet nyId.id )
 
         KopierAktivitetRespons (Err error) ->
             let
@@ -254,11 +250,7 @@ update msg model =
                 ( { model | bekreftSletting = bekreftStatus }, cmd, NoSharedMsg )
 
         SlettAktivitetRespons (Ok _) ->
-            let
-                tmp =
-                    Debug.log "slettet aktivitet" model.aktivitetId
-            in
-                ( { model | bekreftSletting = Av }, Cmd.none, NavigerTilHjem )
+            ( { model | bekreftSletting = Av }, Cmd.none, NavigerTilHjem )
 
         SlettAktivitetRespons (Err error) ->
             let
