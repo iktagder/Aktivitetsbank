@@ -12,8 +12,6 @@ import Material.Options as Options exposing (when, css, cs, Style, onClick)
 import Material.Typography as Typo
 import Material.Table as Table
 import Material.List as Lists
-import Material.Textfield as Textfield
-import Material.Toggles as Toggles
 import Material.Spinner as Loading
 import Material.Typography as Typography
 import RemoteData exposing (WebData, RemoteData(..))
@@ -32,29 +30,25 @@ type alias Model =
     , aktivitetListe : WebData (List Aktivitet)
     , filtertAktivitetListe : List Aktivitet
     , visFilter : Bool
-    , filter : Filter
     }
 
 
-init : String -> ( Model, Cmd Msg )
-init apiEndpoint =
+init : String -> Filter -> ( Model, Cmd Msg )
+init apiEndpoint filter =
     ( { mdl = Material.model
       , apiEndpoint = apiEndpoint
       , statusText = ""
       , aktivitetListe = RemoteData.NotAsked
       , visFilter = True
       , filtertAktivitetListe = []
-      , filter = initFilter
       }
-    , Cmd.batch [ fetchAktivitetListe apiEndpoint Nothing ]
+    , Cmd.batch [ fetchAktivitetListe apiEndpoint (genererFilterSpoerring filter) ]
     )
 
 
 initFilter : Filter
 initFilter =
     { ekspandertFilter = IngenFilterEkspandert
-
-    -- { ekspandertFilter = SkoleFilterEkspandert
     , navnFilter = ""
     , skoleFilter = Dict.empty
     , aktivitetsTypeFilter = Dict.empty
@@ -105,8 +99,8 @@ type Msg
     | UtfoerSoek
 
 
-update : Msg -> Model -> ( Model, Cmd Msg, SharedMsg )
-update msg model =
+update : Msg -> Model -> Taco -> ( Model, Cmd Msg, SharedMsg )
+update msg model taco =
     case msg of
         Mdl msg_ ->
             let
@@ -135,78 +129,78 @@ update msg model =
                         AktivitetsTypeFilter typeId navn ->
                             let
                                 nyttAktivitetsTypeFilter =
-                                    if Dict.member typeId model.filter.aktivitetsTypeFilter then
-                                        Dict.remove typeId model.filter.aktivitetsTypeFilter
+                                    if Dict.member typeId taco.filter.aktivitetsTypeFilter then
+                                        Dict.remove typeId taco.filter.aktivitetsTypeFilter
                                     else
-                                        Dict.insert typeId navn model.filter.aktivitetsTypeFilter
+                                        Dict.insert typeId navn taco.filter.aktivitetsTypeFilter
 
                                 gammeltFilter =
-                                    model.filter
+                                    taco.filter
                             in
                                 { gammeltFilter | aktivitetsTypeFilter = nyttAktivitetsTypeFilter }
 
                         SkoleFilter skoleId navn ->
                             let
                                 nyttSkoleFilter =
-                                    if Dict.member skoleId model.filter.skoleFilter then
-                                        Dict.remove skoleId model.filter.skoleFilter
+                                    if Dict.member skoleId taco.filter.skoleFilter then
+                                        Dict.remove skoleId taco.filter.skoleFilter
                                     else
-                                        Dict.insert skoleId navn model.filter.skoleFilter
+                                        Dict.insert skoleId navn taco.filter.skoleFilter
 
                                 gammeltFilter =
-                                    model.filter
+                                    taco.filter
                             in
                                 { gammeltFilter | skoleFilter = nyttSkoleFilter }
 
                         UtdanningsprogramFilter utdanningsprogramId navn ->
                             let
                                 nyttUtdanningsprogramFilter =
-                                    if Dict.member utdanningsprogramId model.filter.utdanningsprogramFilter then
-                                        Dict.remove utdanningsprogramId model.filter.utdanningsprogramFilter
+                                    if Dict.member utdanningsprogramId taco.filter.utdanningsprogramFilter then
+                                        Dict.remove utdanningsprogramId taco.filter.utdanningsprogramFilter
                                     else
-                                        Dict.insert utdanningsprogramId navn model.filter.utdanningsprogramFilter
+                                        Dict.insert utdanningsprogramId navn taco.filter.utdanningsprogramFilter
 
                                 gammeltFilter =
-                                    model.filter
+                                    taco.filter
                             in
                                 { gammeltFilter | utdanningsprogramFilter = nyttUtdanningsprogramFilter }
 
                         TrinnFilter trinnId navn ->
                             let
                                 nyttTrinnFilter =
-                                    if Dict.member trinnId model.filter.trinnFilter then
-                                        Dict.remove trinnId model.filter.trinnFilter
+                                    if Dict.member trinnId taco.filter.trinnFilter then
+                                        Dict.remove trinnId taco.filter.trinnFilter
                                     else
-                                        Dict.insert trinnId navn model.filter.trinnFilter
+                                        Dict.insert trinnId navn taco.filter.trinnFilter
 
                                 gammeltFilter =
-                                    model.filter
+                                    taco.filter
                             in
                                 { gammeltFilter | trinnFilter = nyttTrinnFilter }
 
                         FagFilter fagId navn ->
                             let
                                 nyttFagFilter =
-                                    if Dict.member fagId model.filter.fagFilter then
-                                        Dict.remove fagId model.filter.fagFilter
+                                    if Dict.member fagId taco.filter.fagFilter then
+                                        Dict.remove fagId taco.filter.fagFilter
                                     else
-                                        Dict.insert fagId navn model.filter.fagFilter
+                                        Dict.insert fagId navn taco.filter.fagFilter
 
                                 gammeltFilter =
-                                    model.filter
+                                    taco.filter
                             in
                                 { gammeltFilter | fagFilter = nyttFagFilter }
 
                         SkoleAarFilter skoleAarId navn ->
                             let
                                 nyttFagFilter =
-                                    if Dict.member skoleAarId model.filter.skoleAarFilter then
-                                        Dict.remove skoleAarId model.filter.skoleAarFilter
+                                    if Dict.member skoleAarId taco.filter.skoleAarFilter then
+                                        Dict.remove skoleAarId taco.filter.skoleAarFilter
                                     else
-                                        Dict.insert skoleAarId navn model.filter.skoleAarFilter
+                                        Dict.insert skoleAarId navn taco.filter.skoleAarFilter
 
                                 gammeltFilter =
-                                    model.filter
+                                    taco.filter
                             in
                                 { gammeltFilter | skoleAarFilter = nyttFagFilter }
 
@@ -216,30 +210,28 @@ update msg model =
                                     navn
 
                                 gammeltFilter =
-                                    model.filter
+                                    taco.filter
                             in
                                 { gammeltFilter | navnFilter = nyttNavnFilter }
 
                         AlleFilter ->
-                            model.filter
+                            taco.filter
             in
-                ( { model
-                    | filter = nyttFilter
-                  }
+                ( model
                 , fetchAktivitetListe model.apiEndpoint <| genererFilterSpoerring nyttFilter
-                , NoSharedMsg
+                , SharedTacoUpdate (UpdateFilter nyttFilter)
                 )
 
         NullstillFilter ->
-            ( { model | filter = initFilter, filtertAktivitetListe = (getAktivitetListe model) }
+            ( model
             , fetchAktivitetListe model.apiEndpoint <| genererFilterSpoerring initFilter
-            , NoSharedMsg
+            , SharedTacoUpdate InitFilter
             )
 
         EkspanderFilterType ekspandertFilter ->
             let
                 gammeltFilter =
-                    model.filter
+                    taco.filter
 
                 nyttEkspandertFilter =
                     if ekspandertFilter == gammeltFilter.ekspandertFilter then
@@ -250,54 +242,54 @@ update msg model =
                 nyttFilter =
                     { gammeltFilter | ekspandertFilter = nyttEkspandertFilter }
             in
-                ( { model | filter = nyttFilter }, Cmd.none, NoSharedMsg )
+                ( model, Cmd.none, SharedTacoUpdate (UpdateFilter nyttFilter) )
 
         FjernGjeldendeFilter filterType ->
             let
                 gammeltFilter =
-                    model.filter
+                    taco.filter
 
                 nyttFilter =
                     case filterType of
                         AktivitetsTypeFilter typeId navn ->
                             let
                                 nyttAktivitetsTypeFilter =
-                                    Dict.remove typeId model.filter.aktivitetsTypeFilter
+                                    Dict.remove typeId taco.filter.aktivitetsTypeFilter
                             in
                                 { gammeltFilter | aktivitetsTypeFilter = nyttAktivitetsTypeFilter }
 
                         SkoleFilter skoleId navn ->
                             let
                                 nyttSkoleFilter =
-                                    Dict.remove skoleId model.filter.skoleFilter
+                                    Dict.remove skoleId taco.filter.skoleFilter
                             in
                                 { gammeltFilter | skoleFilter = nyttSkoleFilter }
 
                         UtdanningsprogramFilter utdanningsprogramId navn ->
                             let
                                 nyttUtdanningsprogramFilter =
-                                    Dict.remove utdanningsprogramId model.filter.utdanningsprogramFilter
+                                    Dict.remove utdanningsprogramId taco.filter.utdanningsprogramFilter
                             in
                                 { gammeltFilter | utdanningsprogramFilter = nyttUtdanningsprogramFilter }
 
                         TrinnFilter trinnId navn ->
                             let
                                 nyttTrinnFilter =
-                                    Dict.remove trinnId model.filter.trinnFilter
+                                    Dict.remove trinnId taco.filter.trinnFilter
                             in
                                 { gammeltFilter | trinnFilter = nyttTrinnFilter }
 
                         FagFilter fagId navn ->
                             let
                                 nyttFagFilter =
-                                    Dict.remove fagId model.filter.fagFilter
+                                    Dict.remove fagId taco.filter.fagFilter
                             in
                                 { gammeltFilter | fagFilter = nyttFagFilter }
 
                         SkoleAarFilter skoleAarId navn ->
                             let
                                 nyttSkoleAarFilter =
-                                    Dict.remove skoleAarId model.filter.skoleAarFilter
+                                    Dict.remove skoleAarId taco.filter.skoleAarFilter
                             in
                                 { gammeltFilter | skoleAarFilter = nyttSkoleAarFilter }
 
@@ -307,13 +299,13 @@ update msg model =
                         AlleFilter ->
                             initFilter
             in
-                ( { model | filter = nyttFilter }
+                ( model
                 , fetchAktivitetListe model.apiEndpoint <| genererFilterSpoerring nyttFilter
-                , NoSharedMsg
+                , SharedTacoUpdate (UpdateFilter nyttFilter)
                 )
 
         UtfoerSoek ->
-            ( model, fetchAktivitetListe model.apiEndpoint <| genererFilterSpoerring model.filter, NoSharedMsg )
+            ( model, fetchAktivitetListe model.apiEndpoint <| genererFilterSpoerring taco.filter, NoSharedMsg )
 
 
 getAktivitetListe : Model -> List Aktivitet
@@ -348,7 +340,7 @@ view taco model =
             , Elevation.e0
             , Options.css "padding" "16px 32px"
             ]
-            [ visGjeldendeFilter model.filter FjernGjeldendeFilter
+            [ visGjeldendeFilter taco.filter FjernGjeldendeFilter
             , viewMainContent model
             ]
         ]
@@ -438,7 +430,7 @@ visFilter model taco =
             , mdlModel = model.mdl
             }
     in
-        visStandardFilter taco.appMetadata model.filter konfigurasjon
+        visStandardFilter taco.appMetadata taco.filter konfigurasjon
 
 
 viewMainContent : Model -> Html Msg

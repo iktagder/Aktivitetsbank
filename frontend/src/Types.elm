@@ -8,6 +8,7 @@ type alias Taco =
     { currentTime : Time
     , userInfo : UserInformation
     , appMetadata : AppMetadata
+    , filter : Filter
     }
 
 
@@ -226,6 +227,8 @@ type TacoUpdate
     = NoUpdate
     | UpdateTime Time
     | UpdateUserInfo UserInformation
+    | UpdateFilter Filter
+    | InitFilter
 
 
 type SharedMsg
@@ -237,6 +240,7 @@ type SharedMsg
     | NavigerTilDeltakerOpprett String
     | NavigerTilDeltakerEndre String String
     | NavigerTilHjem
+    | SharedTacoUpdate TacoUpdate
 
 
 type alias UserInformation =

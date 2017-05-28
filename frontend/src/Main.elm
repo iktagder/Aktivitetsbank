@@ -13,6 +13,7 @@ import Http
 import Decoders
 import Material.Progress as Loading
 import Material.Options as Options exposing (when, css, cs, Style, onClick)
+import Dict
 
 
 main : Program Flags Model Msg
@@ -179,7 +180,7 @@ updateRouter model routerMsg =
                     updateTaco taco tacoUpdate
 
                 ( nextRouterModel, routerCmd, tacoUpdate ) =
-                    Router.update routerMsg routerModel
+                    Router.update routerMsg routerModel taco
             in
                 ( { model | appState = Ready nextTaco nextRouterModel }
                 , Cmd.map RouterMsg routerCmd
@@ -302,10 +303,11 @@ updateSuccessLoad combinedData ( model, cmd ) =
                             { currentTime = notreadyModel.currentTime
                             , userInfo = userInfo
                             , appMetadata = appMetadata
+                            , filter = initFilter
                             }
 
                         ( initRouterModel, routerCmd ) =
-                            Router.init model.location notreadyModel.apiEndpoint model.logo
+                            Router.init model.location notreadyModel.apiEndpoint model.logo initTaco
                     in
                         ( { model | appState = Ready initTaco initRouterModel }
                         , Cmd.batch [ cmd, Cmd.map RouterMsg routerCmd ]
@@ -339,8 +341,29 @@ updateTaco taco tacoUpdate =
         UpdateUserInfo userInfo ->
             { taco | userInfo = Debug.log "user" userInfo }
 
+        UpdateFilter newFilter ->
+            { taco | filter = Debug.log "newfilter" newFilter }
+
+        InitFilter ->
+            { taco | filter = Debug.log "newfilter" initFilter }
+
         NoUpdate ->
             taco
+
+
+initFilter : Filter
+initFilter =
+    { ekspandertFilter = IngenFilterEkspandert
+
+    -- { ekspandertFilter = SkoleFilterEkspandert
+    , navnFilter = ""
+    , skoleFilter = Dict.empty
+    , aktivitetsTypeFilter = Dict.empty
+    , utdanningsprogramFilter = Dict.empty
+    , trinnFilter = Dict.empty
+    , skoleAarFilter = Dict.empty
+    , fagFilter = Dict.empty
+    }
 
 
 view : Model -> Html Msg

@@ -79,14 +79,14 @@ type Msg
     | PagesMsg PageMsg
 
 
-init : Location -> String -> String -> ( Model, Cmd Msg )
-init location apiEndpoint logo =
+init : Location -> String -> String -> Taco -> ( Model, Cmd Msg )
+init location apiEndpoint logo taco =
     let
         route =
             parseLocation location
 
         ( pageModel, pageCmd ) =
-            urlUpdate apiEndpoint route
+            urlUpdate apiEndpoint route taco
     in
         ( { mdl = Material.model
           , selectedTab = 0
@@ -100,8 +100,8 @@ init location apiEndpoint logo =
         )
 
 
-update : Msg -> Model -> ( Model, Cmd Msg, TacoUpdate )
-update msg model =
+update : Msg -> Model -> Taco -> ( Model, Cmd Msg, TacoUpdate )
+update msg model taco =
     case msg of
         Mdl msg_ ->
             let
@@ -125,7 +125,7 @@ update msg model =
                     parseLocation location
 
                 ( pageModel, pageCmd ) =
-                    urlUpdate model.apiEndpoint route
+                    urlUpdate model.apiEndpoint route taco
             in
                 -- ( { model | route = route, currentPage = pageModel, snackbar = snackModel }
                 ( { model | route = route, currentPage = pageModel }
@@ -143,11 +143,11 @@ update msg model =
             )
 
         PagesMsg pageMsg ->
-            updatePage model pageMsg
+            updatePage model pageMsg taco
 
 
-urlUpdate : String -> Route -> ( Page, Cmd Msg )
-urlUpdate apiEndpoint route =
+urlUpdate : String -> Route -> Taco -> ( Page, Cmd Msg )
+urlUpdate apiEndpoint route taco =
     let
         ( pageModel, pageCmd ) =
             case route of
@@ -161,7 +161,7 @@ urlUpdate apiEndpoint route =
                 RouteAktivitetsListe ->
                     let
                         ( model_, cmd_ ) =
-                            Aktiviteter.init apiEndpoint
+                            Aktiviteter.init apiEndpoint taco.filter
                     in
                         ( AktiviteterPage model_, Cmd.map AktiviteterMsg cmd_ )
 
@@ -199,15 +199,15 @@ urlUpdate apiEndpoint route =
         ( pageModel, Cmd.map PagesMsg pageCmd )
 
 
-updatePage : Model -> PageMsg -> ( Model, Cmd Msg, TacoUpdate )
-updatePage model msg =
+updatePage : Model -> PageMsg -> Taco -> ( Model, Cmd Msg, TacoUpdate )
+updatePage model msg taco =
     let
         ( newPageModel, pageMsg, sharedMsg ) =
             case msg of
                 AktiviteterMsg msg_ ->
                     case model.currentPage of
                         AktiviteterPage pageModel ->
-                            updateAktiviteter model pageModel msg_
+                            updateAktiviteter model pageModel msg_ taco
 
                         _ ->
                             ( model.currentPage, Cmd.none, NoSharedMsg )
@@ -256,11 +256,11 @@ updatePage model msg =
             |> addSharedMsgToUpdate sharedMsg
 
 
-updateAktiviteter : Model -> Aktiviteter.Model -> Aktiviteter.Msg -> ( Page, Cmd PageMsg, SharedMsg )
-updateAktiviteter model aktiviteterModel aktiviteterMsg =
+updateAktiviteter : Model -> Aktiviteter.Model -> Aktiviteter.Msg -> Taco -> ( Page, Cmd PageMsg, SharedMsg )
+updateAktiviteter model aktiviteterModel aktiviteterMsg taco =
     let
         ( nextAktiviteterModel, aktiviteterCmd, sharedMsg ) =
-            Aktiviteter.update aktiviteterMsg aktiviteterModel
+            Aktiviteter.update aktiviteterMsg aktiviteterModel taco
     in
         ( AktiviteterPage nextAktiviteterModel
         , Cmd.map AktiviteterMsg aktiviteterCmd
@@ -361,6 +361,9 @@ addSharedMsgToUpdate sharedMsg ( model, msg, tacoUpdate ) =
 
         NavigerTilHjem ->
             ( model, Navigation.newUrl <| reverseRoute (RouteAktivitetsListe), tacoUpdate )
+
+        SharedTacoUpdate updatedTaco ->
+            ( model, msg, updatedTaco )
 
         NoSharedMsg ->
             ( model, msg, tacoUpdate )
