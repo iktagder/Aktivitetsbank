@@ -31,7 +31,6 @@ type alias Model =
     , statusText : String
     , aktivitetListe : WebData (List Aktivitet)
     , filtertAktivitetListe : List Aktivitet
-    , appMetadata : WebData AppMetadata
     , visFilter : Bool
     , filter : Filter
     }
@@ -43,12 +42,11 @@ init apiEndpoint =
       , apiEndpoint = apiEndpoint
       , statusText = ""
       , aktivitetListe = RemoteData.NotAsked
-      , appMetadata = RemoteData.NotAsked
       , visFilter = True
       , filtertAktivitetListe = []
       , filter = initFilter
       }
-    , Cmd.batch [ fetchAppMetadata apiEndpoint, fetchAktivitetListe apiEndpoint Nothing ]
+    , Cmd.batch [ fetchAktivitetListe apiEndpoint Nothing ]
     )
 
 
@@ -65,28 +63,6 @@ initFilter =
     , skoleAarFilter = Dict.empty
     , fagFilter = Dict.empty
     }
-
-
-fetchAppMetadata : String -> Cmd Msg
-fetchAppMetadata endPoint =
-    let
-        queryUrl =
-            endPoint ++ "AktivitetsbankMetadata"
-
-        req =
-            Http.request
-                { method = "GET"
-                , headers = []
-                , url = queryUrl
-                , body = Http.emptyBody
-                , expect = Http.expectJson Decoders.decodeAppMetadata
-                , timeout = Nothing
-                , withCredentials = True
-                }
-    in
-        req
-            |> RemoteData.sendRequest
-            |> Cmd.map AppMetadataResponse
 
 
 fetchAktivitetListe : String -> Maybe String -> Cmd Msg
@@ -118,7 +94,6 @@ fetchAktivitetListe endPoint filter =
 
 type Msg
     = Mdl (Material.Msg Msg)
-    | AppMetadataResponse (WebData AppMetadata)
     | AktivitetListeResponse (WebData (List Aktivitet))
     | VisAktivitetDetalj String
     | OpprettAktivitet
@@ -139,9 +114,6 @@ update msg model =
                     Material.update Mdl msg_ model
             in
                 ( model_, cmd_, NoSharedMsg )
-
-        AppMetadataResponse response ->
-            ( { model | appMetadata = response }, Cmd.none, NoSharedMsg )
 
         -- (Debug.log "metadata-response" { model | appMetadata = response}, Cmd.none, NoSharedMsg)
         AktivitetListeResponse response ->
@@ -370,7 +342,7 @@ view taco model =
                 ]
                 [ text "Aktiviteter" ]
             ]
-        , getFilterCell model
+        , getFilterCell model taco
         , cell
             [ size All (getAntallAktivietCeller model)
             , Elevation.e0
@@ -435,8 +407,8 @@ getAntallAktivietCeller model =
         12
 
 
-getFilterCell : Model -> Grid.Cell Msg
-getFilterCell model =
+getFilterCell : Model -> Taco -> Grid.Cell Msg
+getFilterCell model taco =
     case
         model.visFilter
     of
@@ -445,7 +417,7 @@ getFilterCell model =
                 [ size All 2
                 , Elevation.e0
                 ]
-                [ visFilter model
+                [ visFilter model taco
                 ]
 
         _ ->
@@ -454,8 +426,8 @@ getFilterCell model =
                 []
 
 
-visFilter : Model -> Html Msg
-visFilter model =
+visFilter : Model -> Taco -> Html Msg
+visFilter model taco =
     let
         konfigurasjon =
             { filterMsg = FilterMetadata
@@ -466,7 +438,7 @@ visFilter model =
             , mdlModel = model.mdl
             }
     in
-        visStandardFilter model.appMetadata model.filter konfigurasjon
+        visStandardFilter taco.appMetadata model.filter konfigurasjon
 
 
 viewMainContent : Model -> Html Msg

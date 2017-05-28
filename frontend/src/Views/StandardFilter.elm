@@ -41,7 +41,7 @@ tomtFilter filter =
         False
 
 
-visStandardFilter : WebData AppMetadata -> Filter -> KonfigurasjonStandardFilter msg -> Html msg
+visStandardFilter : AppMetadata -> Filter -> KonfigurasjonStandardFilter msg -> Html msg
 visStandardFilter metadata filter konfigurasjon =
     Options.div
         [ css "margin-top"
@@ -62,30 +62,12 @@ visStandardFilter metadata filter konfigurasjon =
             , Options.onInput (\input -> konfigurasjon.filterMsg (NavnFilter input))
             ]
             []
-        , visAvansertFilter metadata filter konfigurasjon
+        , visAvansertFilter filter konfigurasjon metadata
         ]
 
 
-visAvansertFilter : WebData AppMetadata -> Filter -> KonfigurasjonStandardFilter msg -> Html msg
-visAvansertFilter metadata filter konfigurasjon =
-    case metadata of
-        NotAsked ->
-            text "Venter på henting av metadata.."
-
-        Loading ->
-            Options.div []
-                [ Loading.spinner [ Loading.active True ]
-                ]
-
-        Failure err ->
-            text "Feil ved henting av data"
-
-        Success data ->
-            visStandardFilterSuksess filter konfigurasjon data
-
-
-visStandardFilterSuksess : Filter -> KonfigurasjonStandardFilter msg -> AppMetadata -> Html msg
-visStandardFilterSuksess model konfigurasjon metadata =
+visAvansertFilter : Filter -> KonfigurasjonStandardFilter msg -> AppMetadata -> Html msg
+visAvansertFilter model konfigurasjon metadata =
     Options.div []
         [ visAktivitetTypeFilter model metadata
             |> visAktivtFilter model AktivitetsTypeFilterEkspandert "Aktivitetstyper" konfigurasjon

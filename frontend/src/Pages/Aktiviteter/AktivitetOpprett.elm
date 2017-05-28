@@ -22,7 +22,6 @@ type alias Model =
     , apiEndpoint : String
     , statusText : String
     , visLagreKnapp : Bool
-    , appMetadata : WebData AppMetadata
     , aktivitet : AktivitetEdit
     , dropdownStateSkole : Dropdown.State
     , dropdownStateSkoleAar : Dropdown.State
@@ -32,7 +31,6 @@ type alias Model =
 
 type Msg
     = Mdl (Material.Msg Msg)
-    | AppMetadataResponse (WebData AppMetadata)
     | OnSelectSkole (Maybe Skole)
     | OnSelectSkoleAar (Maybe SkoleAar)
     | SkoleDropdown (Dropdown.Msg Skole)
@@ -53,13 +51,12 @@ init apiEndpoint =
       , apiEndpoint = apiEndpoint
       , statusText = ""
       , visLagreKnapp = False
-      , appMetadata = RemoteData.NotAsked
       , dropdownStateSkole = Dropdown.newState "1"
       , dropdownStateSkoleAar = Dropdown.newState "1"
       , dropdownStateAktivitetstype = Dropdown.newState "1"
       , aktivitet = initAktivitet
       }
-    , fetchAppMetadata apiEndpoint
+    , Cmd.none
     )
 
 
@@ -73,28 +70,6 @@ initAktivitet =
     , aktivitetsType = Nothing
     , skoleAar = Nothing
     }
-
-
-fetchAppMetadata : String -> Cmd Msg
-fetchAppMetadata endPoint =
-    let
-        queryUrl =
-            endPoint ++ "AktivitetsbankMetadata"
-
-        req =
-            Http.request
-                { method = "GET"
-                , headers = []
-                , url = queryUrl
-                , body = Http.emptyBody
-                , expect = Http.expectJson Decoders.decodeAppMetadata
-                , timeout = Nothing
-                , withCredentials = True
-                }
-    in
-        req
-            |> RemoteData.sendRequest
-            |> Cmd.map AppMetadataResponse
 
 
 postOpprettNyAktivitet : String -> AktivitetGyldigNy -> (Result Error NyAktivitet -> msg) -> Cmd msg
@@ -130,9 +105,6 @@ update msg model =
                     Material.update Mdl msg_ model
             in
                 ( model_, cmd_, NoSharedMsg )
-
-        AppMetadataResponse response ->
-            ( { model | appMetadata = response }, Cmd.none, NoSharedMsg )
 
         OnSelectSkole skole ->
             let
@@ -310,7 +282,7 @@ view : Taco -> Model -> Html Msg
 view taco model =
     grid []
         (visHeading
-            :: visOpprettAktivitet model model.aktivitet
+            :: visOpprettAktivitet model taco model.aktivitet
         )
 
 
@@ -327,8 +299,8 @@ visHeading =
         ]
 
 
-visOpprettAktivitet : Model -> AktivitetEdit -> List (Grid.Cell Msg)
-visOpprettAktivitet model aktivitet =
+visOpprettAktivitet : Model -> Taco -> AktivitetEdit -> List (Grid.Cell Msg)
+visOpprettAktivitet model taco aktivitet =
     [ cell
         [ size All 6
         , Elevation.e0
@@ -385,11 +357,11 @@ visOpprettAktivitet model aktivitet =
         [ Options.div
             []
             [ showText p Typo.menu "Skole"
-            , visSkole model aktivitet
+            , visSkole model taco aktivitet
             , showText p Typo.menu "Aktivitetstype"
-            , visAktivitetstype model aktivitet
+            , visAktivitetstype model taco aktivitet
             , showText p Typo.menu "Skoleår"
-            , visSkoleAar model aktivitet
+            , visSkoleAar model taco aktivitet
             ]
         ]
     , cell
@@ -427,81 +399,24 @@ visOpprettAktivitet model aktivitet =
     ]
 
 
-visSkole : Model -> AktivitetEdit -> Html Msg
-visSkole model aktivitet =
-    case model.appMetadata of
-        NotAsked ->
-            text "Initialising."
-
-        Loading ->
-            text "Loading."
-
-        Failure err ->
-            text ("Error: " ++ toString err)
-
-        Success data ->
-            visSkoleDropdown
-                aktivitet.skole
-                data.skoler
-                model.dropdownStateSkole
-
-
-visSkoleDropdown : Maybe Skole -> List Skole -> Dropdown.State -> Html Msg
-visSkoleDropdown selectedSkoleId model dropdownStateSkole =
+visSkole : Model -> Taco -> AktivitetEdit -> Html Msg
+visSkole model taco aktivitet =
     span []
-        [ Html.map SkoleDropdown (Dropdown.view dropdownConfigSkole dropdownStateSkole model selectedSkoleId)
+        [ Html.map SkoleDropdown (Dropdown.view dropdownConfigSkole model.dropdownStateSkole taco.appMetadata.skoler aktivitet.skole)
         ]
 
 
-visAktivitetstype : Model -> AktivitetEdit -> Html Msg
-visAktivitetstype model aktivitet =
-    case model.appMetadata of
-        NotAsked ->
-            text "Initialising."
-
-        Loading ->
-            text "Loading."
-
-        Failure err ->
-            text ("Error: " ++ toString err)
-
-        Success data ->
-            visAktivitetstypeDropdown
-                aktivitet.aktivitetsType
-                data.aktivitetstyper
-                model.dropdownStateAktivitetstype
-
-
-visAktivitetstypeDropdown : Maybe AktivitetsType -> List AktivitetsType -> Dropdown.State -> Html Msg
-visAktivitetstypeDropdown selectedAktivitetstypeId model dropdownStateAktivitetstype =
+visAktivitetstype : Model -> Taco -> AktivitetEdit -> Html Msg
+visAktivitetstype model taco aktivitet =
     span []
-        [ Html.map AktivitetstypeDropdown (Dropdown.view dropdownConfigAktivitetstype dropdownStateAktivitetstype model selectedAktivitetstypeId)
+        [ Html.map AktivitetstypeDropdown (Dropdown.view dropdownConfigAktivitetstype model.dropdownStateAktivitetstype taco.appMetadata.aktivitetstyper aktivitet.aktivitetsType)
         ]
 
 
-visSkoleAar : Model -> AktivitetEdit -> Html Msg
-visSkoleAar model aktivitet =
-    case model.appMetadata of
-        NotAsked ->
-            text "Initialising."
-
-        Loading ->
-            text "Loading."
-
-        Failure err ->
-            text ("Error: " ++ toString err)
-
-        Success data ->
-            visSkoleAarDropdown
-                aktivitet.skoleAar
-                data.skoleAar
-                model.dropdownStateSkoleAar
-
-
-visSkoleAarDropdown : Maybe SkoleAar -> List SkoleAar -> Dropdown.State -> Html Msg
-visSkoleAarDropdown selectedSkoleAarId model dropdownStateSkoleAar =
+visSkoleAar : Model -> Taco -> AktivitetEdit -> Html Msg
+visSkoleAar model taco aktivitet =
     span []
-        [ Html.map SkoleAarDropdown (Dropdown.view dropdownConfigSkoleAar dropdownStateSkoleAar model selectedSkoleAarId)
+        [ Html.map SkoleAarDropdown (Dropdown.view dropdownConfigSkoleAar model.dropdownStateSkoleAar taco.appMetadata.skoleAar aktivitet.skoleAar)
         ]
 
 

@@ -1,7 +1,6 @@
 module Pages.Aktiviteter.DeltakerOpprett exposing (..)
 
 import Html exposing (Html, text, div, span, p, a)
-import Html.Attributes exposing (class)
 import Material
 import Material.Grid as Grid exposing (grid, size, cell, Device(..))
 import Material.Elevation as Elevation
@@ -24,7 +23,6 @@ type alias Model =
     , apiEndpoint : String
     , statusText : String
     , visLagreKnapp : Bool
-    , appMetadata : WebData AppMetadata
     , aktivitetId : String
     , aktivitet : WebData Aktivitet
     , deltaker : DeltakerEdit
@@ -36,7 +34,6 @@ type alias Model =
 
 type Msg
     = Mdl (Material.Msg Msg)
-    | AppMetadataResponse (WebData AppMetadata)
     | AktivitetResponse (WebData Aktivitet)
     | OnSelectUtdanningsprogram (Maybe Utdanningsprogram)
     | OnSelectTrinn (Maybe Trinn)
@@ -57,7 +54,6 @@ init apiEndpoint id =
       , apiEndpoint = apiEndpoint
       , statusText = ""
       , visLagreKnapp = False
-      , appMetadata = RemoteData.NotAsked
       , aktivitetId = id
       , aktivitet = RemoteData.NotAsked
       , dropdownStateUtdanningsprogram = Dropdown.newState "1"
@@ -66,8 +62,7 @@ init apiEndpoint id =
       , deltaker = initDeltaker
       }
     , Cmd.batch
-        [ (fetchAppMetadata apiEndpoint)
-        , (hentAktivitetDetalj id apiEndpoint)
+        [ (hentAktivitetDetalj id apiEndpoint)
         ]
     )
 
@@ -106,28 +101,6 @@ hentAktivitetDetalj id endPoint =
             |> Cmd.map AktivitetResponse
 
 
-fetchAppMetadata : String -> Cmd Msg
-fetchAppMetadata endPoint =
-    let
-        queryUrl =
-            endPoint ++ "AktivitetsbankMetadata"
-
-        req =
-            Http.request
-                { method = "GET"
-                , headers = []
-                , url = queryUrl
-                , body = Http.emptyBody
-                , expect = Http.expectJson Decoders.decodeAppMetadata
-                , timeout = Nothing
-                , withCredentials = True
-                }
-    in
-        req
-            |> RemoteData.sendRequest
-            |> Cmd.map AppMetadataResponse
-
-
 postOpprettNyDeltaker : String -> String -> DeltakerGyldigNy -> (Result Error NyDeltaker -> msg) -> Cmd msg
 postOpprettNyDeltaker endPoint aktivitetId deltaker responseMsg =
     let
@@ -161,9 +134,6 @@ update msg model =
                     Material.update Mdl msg_ model
             in
                 ( model_, cmd_, NoSharedMsg )
-
-        AppMetadataResponse response ->
-            ( { model | appMetadata = response }, Cmd.none, NoSharedMsg )
 
         AktivitetResponse response ->
             let
@@ -350,7 +320,7 @@ showText elementType displayStyle text_ =
 vis : Taco -> Model -> Html Msg
 vis taco model =
     grid []
-        (visHeading model :: visAktivitet model ++ visOpprettDeltaker model model.deltaker)
+        (visHeading model :: visAktivitet model taco ++ visOpprettDeltaker model taco model.deltaker)
 
 
 visHeading : Model -> Grid.Cell Msg
@@ -366,8 +336,8 @@ visHeading model =
         ]
 
 
-visAktivitet : Model -> List (Grid.Cell Msg)
-visAktivitet model =
+visAktivitet : Model -> Taco -> List (Grid.Cell Msg)
+visAktivitet model taco =
     case model.aktivitet of
         NotAsked ->
             [ cell
@@ -402,11 +372,11 @@ visAktivitet model =
             ]
 
         Success data ->
-            visAktivitetSuksess model data
+            visAktivitetSuksess model taco data
 
 
-visAktivitetSuksess : Model -> Aktivitet -> List (Grid.Cell Msg)
-visAktivitetSuksess model aktivitet =
+visAktivitetSuksess : Model -> Taco -> Aktivitet -> List (Grid.Cell Msg)
+visAktivitetSuksess model taco aktivitet =
     [ cell
         [ size All 4
         , Elevation.e0
@@ -457,8 +427,8 @@ visAktivitetSuksess model aktivitet =
     ]
 
 
-visOpprettDeltaker : Model -> DeltakerEdit -> List (Grid.Cell Msg)
-visOpprettDeltaker model deltaker =
+visOpprettDeltaker : Model -> Taco -> DeltakerEdit -> List (Grid.Cell Msg)
+visOpprettDeltaker model taco deltaker =
     [ cell
         [ size All 4
         , Options.css "padding" "0px 32px"
@@ -466,9 +436,9 @@ visOpprettDeltaker model deltaker =
         [ Options.div
             [ css "width" "100%" ]
             [ showText p Typo.menu "Utdanningsprogram"
-            , visUtdanningsprogram model deltaker
+            , visUtdanningsprogram model taco deltaker
             , showText p Typo.menu "Trinn"
-            , visTrinn model deltaker
+            , visTrinn model taco deltaker
             , Textfield.render Mdl
                 [ 3 ]
                 model.mdl
@@ -480,7 +450,7 @@ visOpprettDeltaker model deltaker =
                 ]
                 []
             , showText p Typo.menu "Fag"
-            , visFag model deltaker
+            , visFag model taco deltaker
             ]
         ]
     , cell
@@ -544,76 +514,19 @@ visOpprettDeltaker model deltaker =
     ]
 
 
-visUtdanningsprogram : Model -> DeltakerEdit -> Html Msg
-visUtdanningsprogram model deltaker =
-    case model.appMetadata of
-        NotAsked ->
-            text "Initialising."
-
-        Loading ->
-            text "Loading."
-
-        Failure err ->
-            text ("Error: " ++ toString err)
-
-        Success data ->
-            visUtdanningsprogramDropdown
-                deltaker.utdanningsprogram
-                data.utdanningsprogrammer
-                model.dropdownStateUtdanningsprogram
+visUtdanningsprogram : Model -> Taco -> DeltakerEdit -> Html Msg
+visUtdanningsprogram model taco deltaker =
+    Html.map UtdanningsprogramDropdown (Dropdown.view dropdownConfigUtdanningsprogram model.dropdownStateUtdanningsprogram taco.appMetadata.utdanningsprogrammer deltaker.utdanningsprogram)
 
 
-visUtdanningsprogramDropdown : Maybe Utdanningsprogram -> List Utdanningsprogram -> Dropdown.State -> Html Msg
-visUtdanningsprogramDropdown selectedUtdanningsprogramId model dropdownStateUtdanningsprogram =
-    Html.map UtdanningsprogramDropdown (Dropdown.view dropdownConfigUtdanningsprogram dropdownStateUtdanningsprogram model selectedUtdanningsprogramId)
+visTrinn : Model -> Taco -> DeltakerEdit -> Html Msg
+visTrinn model taco deltaker =
+    Html.map TrinnDropdown (Dropdown.view dropdownConfigTrinn model.dropdownStateTrinn taco.appMetadata.trinnListe deltaker.trinn)
 
 
-visTrinn : Model -> DeltakerEdit -> Html Msg
-visTrinn model deltaker =
-    case model.appMetadata of
-        NotAsked ->
-            text "Initialising."
-
-        Loading ->
-            text "Loading."
-
-        Failure err ->
-            text ("Error: " ++ toString err)
-
-        Success data ->
-            visTrinnDropdown
-                deltaker.trinn
-                data.trinnListe
-                model.dropdownStateTrinn
-
-
-visTrinnDropdown : Maybe Trinn -> List Trinn -> Dropdown.State -> Html Msg
-visTrinnDropdown selectedTrinnId model dropdownStateTrinn =
-    Html.map TrinnDropdown (Dropdown.view dropdownConfigTrinn dropdownStateTrinn model selectedTrinnId)
-
-
-visFag : Model -> DeltakerEdit -> Html Msg
-visFag model deltaker =
-    case model.appMetadata of
-        NotAsked ->
-            text "Initialising."
-
-        Loading ->
-            text "Loading."
-
-        Failure err ->
-            text ("Error: " ++ toString err)
-
-        Success data ->
-            visFagDropdown
-                deltaker.fag
-                data.fagListe
-                model.dropdownStateFag
-
-
-visFagDropdown : Maybe Fag -> List Fag -> Dropdown.State -> Html Msg
-visFagDropdown selectedFagId model dropdownStateFag =
-    Html.map FagDropdown (Dropdown.view dropdownConfigFag dropdownStateFag model selectedFagId)
+visFag : Model -> Taco -> DeltakerEdit -> Html Msg
+visFag model taco deltaker =
+    Html.map FagDropdown (Dropdown.view dropdownConfigFag model.dropdownStateFag taco.appMetadata.fagListe deltaker.fag)
 
 
 dropdownConfigUtdanningsprogram : Dropdown.Config Msg Utdanningsprogram

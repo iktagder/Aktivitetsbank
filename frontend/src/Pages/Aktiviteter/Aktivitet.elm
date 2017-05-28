@@ -32,9 +32,6 @@ type alias Model =
     , aktivitetId : String
     , aktivitet : WebData Aktivitet
     , deltakere : WebData (List Deltaker)
-    , appMetadata : WebData AppMetadata
-    , dropdownStateSkole : Dropdown.State
-    , dropdownStateAktivitetstype : Dropdown.State
     , bekreftSletting : BekreftSlettingStatus
     }
 
@@ -43,13 +40,8 @@ type Msg
     = Mdl (Material.Msg Msg)
     | VisAktivitetDeltakerDetalj String
     | VisAktivitetEndre String
-    | AppMetadataResponse (WebData AppMetadata)
     | AktivitetResponse (WebData Aktivitet)
     | AktivitetDeltakereResponse (WebData (List Deltaker))
-    | OnSelectSkole (Maybe Skole)
-    | SkoleDropdown (Dropdown.Msg Skole)
-    | OnSelectAktivitetstype (Maybe AktivitetsType)
-    | AktivitetstypeDropdown (Dropdown.Msg AktivitetsType)
     | VisDeltakerOpprett
     | SlettAktivitet BekreftSlettingStatus
     | NavigerHjem
@@ -67,15 +59,11 @@ init apiEndpoint id =
       , aktivitetId = id
       , aktivitet = RemoteData.NotAsked
       , deltakere = RemoteData.NotAsked
-      , appMetadata = RemoteData.NotAsked
-      , dropdownStateSkole = Dropdown.newState "1"
-      , dropdownStateAktivitetstype = Dropdown.newState "1"
       , bekreftSletting = Av
       }
     , Cmd.batch
         [ (hentAktivitetDetalj id apiEndpoint)
         , (hentAktivitetDeltakere id apiEndpoint)
-        , fetchAppMetadata apiEndpoint
         ]
     )
 
@@ -122,28 +110,6 @@ hentAktivitetDeltakere id endPoint =
         req
             |> RemoteData.sendRequest
             |> Cmd.map AktivitetDeltakereResponse
-
-
-fetchAppMetadata : String -> Cmd Msg
-fetchAppMetadata endPoint =
-    let
-        queryUrl =
-            endPoint ++ "AktivitetsbankMetadata"
-
-        req =
-            Http.request
-                { method = "GET"
-                , headers = []
-                , url = queryUrl
-                , body = Http.emptyBody
-                , expect = Http.expectJson Decoders.decodeAppMetadata
-                , timeout = Nothing
-                , withCredentials = True
-                }
-    in
-        req
-            |> RemoteData.sendRequest
-            |> Cmd.map AppMetadataResponse
 
 
 postKopierAktivitet : String -> String -> AktivitetGyldigKopier -> (Result Error KopiertAktivitet -> msg) -> Cmd msg
@@ -204,9 +170,6 @@ update msg model =
             in
                 ( model_, cmd_, NoSharedMsg )
 
-        AppMetadataResponse response ->
-            ( { model | appMetadata = response }, Cmd.none, NoSharedMsg )
-
         VisAktivitetDeltakerDetalj id ->
             ( model, Cmd.none, NoSharedMsg )
 
@@ -230,44 +193,6 @@ update msg model =
 
         AktivitetResponse response ->
             ( Debug.log "aktivitet-item-response" { model | aktivitet = response }, Cmd.none, NoSharedMsg )
-
-        OnSelectSkole skole ->
-            let
-                oppdatertAktivitet =
-                    case model.aktivitet of
-                        Success data ->
-                            RemoteData.Success { data | skole = skole }
-
-                        _ ->
-                            model.aktivitet
-            in
-                ( { model | aktivitet = oppdatertAktivitet }, Cmd.none, NoSharedMsg )
-
-        SkoleDropdown skole ->
-            let
-                ( updated, cmd ) =
-                    Dropdown.update dropdownConfigSkole skole model.dropdownStateSkole
-            in
-                ( { model | dropdownStateSkole = updated }, cmd, NoSharedMsg )
-
-        OnSelectAktivitetstype aktivitetstype ->
-            let
-                oppdatertAktivitet =
-                    case model.aktivitet of
-                        Success data ->
-                            RemoteData.Success { data | aktivitetsType = aktivitetstype }
-
-                        _ ->
-                            model.aktivitet
-            in
-                ( { model | aktivitet = oppdatertAktivitet }, Cmd.none, NoSharedMsg )
-
-        AktivitetstypeDropdown aktivitetstype ->
-            let
-                ( updated, cmd ) =
-                    Dropdown.update dropdownConfigAktivitetstype aktivitetstype model.dropdownStateAktivitetstype
-            in
-                ( { model | dropdownStateAktivitetstype = updated }, cmd, NoSharedMsg )
 
         NavigerHjem ->
             ( model, Cmd.none, NavigerTilHjem )
@@ -512,84 +437,6 @@ visAktivitetSuksess model aktivitet =
     ]
 
 
-visSkole : Model -> Aktivitet -> Html Msg
-visSkole model aktivitet =
-    case model.appMetadata of
-        NotAsked ->
-            text "Initialising."
-
-        Loading ->
-            text "Loading."
-
-        Failure err ->
-            text ("Error: " ++ toString err)
-
-        Success data ->
-            visSkoleDropdown
-                aktivitet.skole
-                data.skoler
-                model.dropdownStateSkole
-
-
-visSkoleDropdown : Maybe Skole -> List Skole -> Dropdown.State -> Html Msg
-visSkoleDropdown selectedSkoleId model dropdownStateSkole =
-    span []
-        [ Html.map SkoleDropdown (Dropdown.view dropdownConfigSkole dropdownStateSkole model selectedSkoleId)
-        ]
-
-
-visAktivitetstype : Model -> Aktivitet -> Html Msg
-visAktivitetstype model aktivitet =
-    case model.appMetadata of
-        NotAsked ->
-            text "Initialising."
-
-        Loading ->
-            text "Loading."
-
-        Failure err ->
-            text ("Error: " ++ toString err)
-
-        Success data ->
-            visAktivitetstypeDropdown
-                aktivitet.aktivitetsType
-                data.aktivitetstyper
-                model.dropdownStateAktivitetstype
-
-
-visAktivitetstypeDropdown : Maybe AktivitetsType -> List AktivitetsType -> Dropdown.State -> Html Msg
-visAktivitetstypeDropdown selectedAktivitetstypeId model dropdownStateAktivitetstype =
-    span []
-        [ Html.map AktivitetstypeDropdown (Dropdown.view dropdownConfigAktivitetstype dropdownStateAktivitetstype model selectedAktivitetstypeId)
-        ]
-
-
-dropdownConfigSkole : Dropdown.Config Msg Skole
-dropdownConfigSkole =
-    Dropdown.newConfig OnSelectSkole .navn
-        |> Dropdown.withItemClass "border-bottom border-silver p1 gray"
-        |> Dropdown.withMenuClass "border border-gray"
-        |> Dropdown.withMenuStyles [ ( "background", "white" ) ]
-        |> Dropdown.withPrompt "Velg skole"
-        |> Dropdown.withPromptClass "silver"
-        |> Dropdown.withSelectedClass "bold"
-        |> Dropdown.withSelectedStyles [ ( "color", "black" ) ]
-        |> Dropdown.withTriggerClass "col-4 border bg-white p1"
-
-
-dropdownConfigAktivitetstype : Dropdown.Config Msg AktivitetsType
-dropdownConfigAktivitetstype =
-    Dropdown.newConfig OnSelectAktivitetstype .navn
-        |> Dropdown.withItemClass "border-bottom border-silver p1 gray"
-        |> Dropdown.withMenuClass "border border-gray"
-        |> Dropdown.withMenuStyles [ ( "background", "white" ) ]
-        |> Dropdown.withPrompt "Velg aktivitetstype"
-        |> Dropdown.withPromptClass "silver"
-        |> Dropdown.withSelectedClass "bold"
-        |> Dropdown.withSelectedStyles [ ( "color", "black" ) ]
-        |> Dropdown.withTriggerClass "col-4 border bg-white p1"
-
-
 visAktivitetDeltakere : Taco -> Model -> List (Grid.Cell Msg)
 visAktivitetDeltakere taco model =
     case model.deltakere of
@@ -810,7 +657,7 @@ visKopierAktivitetMeny model taco =
 
             -- , Menu.icon "keyboard_arrow_down"
             ]
-            (visKopiAktivitetSkoler model)
+            (visKopiAktivitetSkoler taco.appMetadata)
         , Tooltip.render Mdl
             [ 3124
             , 100
@@ -821,16 +668,11 @@ visKopierAktivitetMeny model taco =
         ]
 
 
-visKopiAktivitetSkoler : Model -> List (Menu.Item Msg)
-visKopiAktivitetSkoler model =
-    case model.appMetadata of
-        Success metadata ->
-            metadata.skoler
-                -- |> List.filter (\availableLanguage -> not (List.any (\language -> language == availableLanguage.name) displayLanguages))
-                |> List.map (\skole -> visKopierAktivitetSkole skole)
-
-        _ ->
-            []
+visKopiAktivitetSkoler : AppMetadata -> List (Menu.Item Msg)
+visKopiAktivitetSkoler metadata =
+    metadata.skoler
+        -- |> List.filter (\availableLanguage -> not (List.any (\language -> language == availableLanguage.name) displayLanguages))
+        |> List.map (\skole -> visKopierAktivitetSkole skole)
 
 
 visKopierAktivitetSkole : Skole -> Menu.Item Msg

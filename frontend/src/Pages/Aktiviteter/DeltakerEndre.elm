@@ -26,7 +26,6 @@ type alias Model =
     , apiEndpoint : String
     , statusText : String
     , visLagreKnapp : Bool
-    , appMetadata : WebData AppMetadata
     , aktivitetId : String
     , deltakerId : String
     , aktivitet : WebData Aktivitet
@@ -40,7 +39,6 @@ type alias Model =
 
 type Msg
     = Mdl (Material.Msg Msg)
-    | AppMetadataResponse (WebData AppMetadata)
     | AktivitetResponse (WebData Aktivitet)
     | DeltakerResponse (WebData DeltakerEdit)
     | OnSelectUtdanningsprogram (Maybe Utdanningsprogram)
@@ -64,7 +62,6 @@ init apiEndpoint aktivitetId deltakerId =
       , apiEndpoint = apiEndpoint
       , statusText = ""
       , visLagreKnapp = False
-      , appMetadata = RemoteData.NotAsked
       , aktivitetId = aktivitetId
       , deltakerId = deltakerId
       , aktivitet = RemoteData.NotAsked
@@ -75,8 +72,7 @@ init apiEndpoint aktivitetId deltakerId =
       , bekreftSletting = Av
       }
     , Cmd.batch
-        [ (fetchAppMetadata apiEndpoint)
-        , (hentAktivitetDetalj aktivitetId apiEndpoint)
+        [ (hentAktivitetDetalj aktivitetId apiEndpoint)
         , (hentDeltaker aktivitetId deltakerId apiEndpoint)
         ]
     )
@@ -124,28 +120,6 @@ hentDeltaker aktivitetId deltakerId endPoint =
         req
             |> RemoteData.sendRequest
             |> Cmd.map DeltakerResponse
-
-
-fetchAppMetadata : String -> Cmd Msg
-fetchAppMetadata endPoint =
-    let
-        queryUrl =
-            endPoint ++ "AktivitetsbankMetadata"
-
-        req =
-            Http.request
-                { method = "GET"
-                , headers = []
-                , url = queryUrl
-                , body = Http.emptyBody
-                , expect = Http.expectJson Decoders.decodeAppMetadata
-                , timeout = Nothing
-                , withCredentials = True
-                }
-    in
-        req
-            |> RemoteData.sendRequest
-            |> Cmd.map AppMetadataResponse
 
 
 putEndreDeltaker : String -> String -> String -> DeltakerGyldigEndre -> (Result Error () -> msg) -> Cmd msg
@@ -205,9 +179,6 @@ update msg model =
                     Material.update Mdl msg_ model
             in
                 ( model_, cmd_, NoSharedMsg )
-
-        AppMetadataResponse response ->
-            ( { model | appMetadata = response }, Cmd.none, NoSharedMsg )
 
         AktivitetResponse aktivitet ->
             ( { model | aktivitet = aktivitet }, Cmd.none, NoSharedMsg )
@@ -456,7 +427,7 @@ showText elementType displayStyle text_ =
 vis : Taco -> Model -> Html Msg
 vis taco model =
     grid []
-        (visHeading taco model :: visAktivitet model ++ visDeltaker model)
+        (visHeading taco model :: visAktivitet model taco ++ visDeltaker model taco)
 
 
 visHeading : Taco -> Model -> Grid.Cell Msg
@@ -474,8 +445,8 @@ visHeading taco model =
         ]
 
 
-visAktivitet : Model -> List (Grid.Cell Msg)
-visAktivitet model =
+visAktivitet : Model -> Taco -> List (Grid.Cell Msg)
+visAktivitet model taco =
     case model.aktivitet of
         NotAsked ->
             [ cell
@@ -510,11 +481,11 @@ visAktivitet model =
             ]
 
         Success data ->
-            visAktivitetSuksess model data
+            visAktivitetSuksess model taco data
 
 
-visAktivitetSuksess : Model -> Aktivitet -> List (Grid.Cell Msg)
-visAktivitetSuksess model aktivitet =
+visAktivitetSuksess : Model -> Taco -> Aktivitet -> List (Grid.Cell Msg)
+visAktivitetSuksess model taco aktivitet =
     [ cell
         [ size All 4
         , Elevation.e0
@@ -565,8 +536,8 @@ visAktivitetSuksess model aktivitet =
     ]
 
 
-visDeltaker : Model -> List (Grid.Cell Msg)
-visDeltaker model =
+visDeltaker : Model -> Taco -> List (Grid.Cell Msg)
+visDeltaker model taco =
     case model.deltaker of
         NotAsked ->
             [ cell
@@ -601,11 +572,11 @@ visDeltaker model =
             ]
 
         Success data ->
-            visOpprettDeltakerSuksess model data
+            visOpprettDeltakerSuksess model taco data
 
 
-visOpprettDeltakerSuksess : Model -> DeltakerEdit -> List (Grid.Cell Msg)
-visOpprettDeltakerSuksess model deltaker =
+visOpprettDeltakerSuksess : Model -> Taco -> DeltakerEdit -> List (Grid.Cell Msg)
+visOpprettDeltakerSuksess model taco deltaker =
     [ cell
         [ size All 4
         , Options.css "padding" "0px 32px"
@@ -613,9 +584,9 @@ visOpprettDeltakerSuksess model deltaker =
         [ Options.div
             [ css "width" "100%" ]
             [ showText p Typo.menu "Utdanningsprogram"
-            , visUtdanningsprogram model deltaker
+            , visUtdanningsprogram model taco deltaker
             , showText p Typo.menu "Trinn"
-            , visTrinn model deltaker
+            , visTrinn model taco deltaker
             , Textfield.render Mdl
                 [ 3 ]
                 model.mdl
@@ -627,7 +598,7 @@ visOpprettDeltakerSuksess model deltaker =
                 ]
                 []
             , showText p Typo.menu "Fag"
-            , visFag model deltaker
+            , visFag model taco deltaker
             ]
         ]
     , cell
@@ -691,76 +662,19 @@ visOpprettDeltakerSuksess model deltaker =
     ]
 
 
-visUtdanningsprogram : Model -> DeltakerEdit -> Html Msg
-visUtdanningsprogram model deltaker =
-    case model.appMetadata of
-        NotAsked ->
-            text "Initialising."
-
-        Loading ->
-            text "Loading."
-
-        Failure err ->
-            text ("Error: " ++ toString err)
-
-        Success data ->
-            visUtdanningsprogramDropdown
-                deltaker.utdanningsprogram
-                data.utdanningsprogrammer
-                model.dropdownStateUtdanningsprogram
+visUtdanningsprogram : Model -> Taco -> DeltakerEdit -> Html Msg
+visUtdanningsprogram model taco deltaker =
+    Html.map UtdanningsprogramDropdown (Dropdown.view dropdownConfigUtdanningsprogram model.dropdownStateUtdanningsprogram taco.appMetadata.utdanningsprogrammer deltaker.utdanningsprogram)
 
 
-visUtdanningsprogramDropdown : Maybe Utdanningsprogram -> List Utdanningsprogram -> Dropdown.State -> Html Msg
-visUtdanningsprogramDropdown selectedUtdanningsprogramId model dropdownStateUtdanningsprogram =
-    Html.map UtdanningsprogramDropdown (Dropdown.view dropdownConfigUtdanningsprogram dropdownStateUtdanningsprogram model selectedUtdanningsprogramId)
+visTrinn : Model -> Taco -> DeltakerEdit -> Html Msg
+visTrinn model taco deltaker =
+    Html.map TrinnDropdown (Dropdown.view dropdownConfigTrinn model.dropdownStateTrinn taco.appMetadata.trinnListe deltaker.trinn)
 
 
-visTrinn : Model -> DeltakerEdit -> Html Msg
-visTrinn model deltaker =
-    case model.appMetadata of
-        NotAsked ->
-            text "Initialising."
-
-        Loading ->
-            text "Loading."
-
-        Failure err ->
-            text ("Error: " ++ toString err)
-
-        Success data ->
-            visTrinnDropdown
-                deltaker.trinn
-                data.trinnListe
-                model.dropdownStateTrinn
-
-
-visTrinnDropdown : Maybe Trinn -> List Trinn -> Dropdown.State -> Html Msg
-visTrinnDropdown selectedTrinnId model dropdownStateTrinn =
-    Html.map TrinnDropdown (Dropdown.view dropdownConfigTrinn dropdownStateTrinn model selectedTrinnId)
-
-
-visFag : Model -> DeltakerEdit -> Html Msg
-visFag model deltaker =
-    case model.appMetadata of
-        NotAsked ->
-            text "Initialising."
-
-        Loading ->
-            text "Loading."
-
-        Failure err ->
-            text ("Error: " ++ toString err)
-
-        Success data ->
-            visFagDropdown
-                deltaker.fag
-                data.fagListe
-                model.dropdownStateFag
-
-
-visFagDropdown : Maybe Fag -> List Fag -> Dropdown.State -> Html Msg
-visFagDropdown selectedFagId model dropdownStateFag =
-    Html.map FagDropdown (Dropdown.view dropdownConfigFag dropdownStateFag model selectedFagId)
+visFag : Model -> Taco -> DeltakerEdit -> Html Msg
+visFag model taco deltaker =
+    Html.map FagDropdown (Dropdown.view dropdownConfigFag model.dropdownStateFag taco.appMetadata.fagListe deltaker.fag)
 
 
 dropdownConfigUtdanningsprogram : Dropdown.Config Msg Utdanningsprogram
