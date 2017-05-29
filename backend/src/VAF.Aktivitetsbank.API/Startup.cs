@@ -82,7 +82,6 @@ namespace VAF.Aktivitetsbank.API
 
             services.AddMvc(opts =>
             {
-                opts.Filters.Add(new CustomAuthorize(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build()));
                 var policy = new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
                     .Build();
