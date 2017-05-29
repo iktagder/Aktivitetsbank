@@ -64,7 +64,7 @@ namespace VAF.Aktivitetsbank.API.Controllers
             return Ok();
         }
 
-        [Authorize(Policy = "CanChangePhoneNumbers")]
+        [Authorize(Policy = "KanRedigereAktiviteter")]
         [HttpPost("{aktivitetId}/opprettDeltaker")]
         public IActionResult OpprettDeltaker(Guid aktivitetId, [FromBody] OpprettDeltakerDto opprettDeltakerDto)
         {
@@ -102,7 +102,7 @@ namespace VAF.Aktivitetsbank.API.Controllers
             }
         }
 
-        [Authorize(Policy = "CanChangePhoneNumbers")]
+        [Authorize(Policy = "KanRedigereAktiviteter")]
         [HttpPut("{aktivitetId}/deltakere/{deltakerId}")]
         public IActionResult EndreDeltaker(Guid aktivitetId, Guid deltakerId, [FromBody] EndreDeltakerDto endreDeltakerDto)
         {
@@ -138,7 +138,7 @@ namespace VAF.Aktivitetsbank.API.Controllers
             }
         }
 
-        [Authorize(Policy = "CanChangePhoneNumbers")]
+        [Authorize(Policy = "KanRedigereAktiviteter")]
         [HttpDelete("{aktivitetId}/deltakere/{deltakerId}")]
         public IActionResult SlettDeltaker(Guid aktivitetId, Guid deltakerId)
         {

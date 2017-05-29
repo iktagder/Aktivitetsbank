@@ -64,7 +64,7 @@ namespace VAF.Aktivitetsbank.API
 
             services.AddAuthorization(options =>
             {
-                options.AddPolicy("CanChangePhoneNumbers", policyBuilder => policyBuilder.AddRequirements(new ErAktivitetsbankRedigererRequirement()));
+                options.AddPolicy("KanRedigereAktiviteter", policyBuilder => policyBuilder.AddRequirements(new ErAktivitetsbankRedigererRequirement()));
             });
 
 
