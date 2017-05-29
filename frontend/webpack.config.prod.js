@@ -58,7 +58,7 @@ module.exports = {
     }),
     new HtmlWebpackPlugin({
       inject: true,
-      title: "VAF Aktivitetsbank - Test",
+      title: "VAF Aktivitetsbank",
       template: paths.template,
       favicon: paths.favicon,
       minify: {
