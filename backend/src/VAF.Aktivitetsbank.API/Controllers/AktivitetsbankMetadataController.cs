@@ -20,6 +20,8 @@ namespace VAF.Aktivitetsbank.API.Controllers
         private readonly IQueryDispatcher _queryDispatcher;
         private readonly ICommandDispatcher _commandDispatcher;
         private readonly ILogger<AktivitetsbankMetadataController> _logger;
+        private readonly int _eventIdRead = 40000;
+        private readonly int _eventIdModify = 41000;
 
         public AktivitetsbankMetadataController(IQueryDispatcher queryDispatcher, ICommandDispatcher commandDispatcher, ILogger<AktivitetsbankMetadataController> logger)
         {
@@ -34,10 +36,10 @@ namespace VAF.Aktivitetsbank.API.Controllers
         {
             Stopwatch watch = new Stopwatch();
             watch.Start();
-            _logger.LogInformation("Henter metadata. Brukernavn: {Brukernavn}", HttpContext.User.Identity.Name);
+            _logger.LogInformation(_eventIdRead + 1, "Henter metadata. Brukernavn: {Brukernavn}", HttpContext.User.Identity.Name);
             var result = _queryDispatcher.Query<AktivitetsbankMetadataQuery, AktivitetsbankMetadata>(new AktivitetsbankMetadataQuery());
             watch.Stop();
-            _logger.LogInformation("Henter metadata - ferdig på {Tidsbruk:000} ms. Brukernavn: {Brukernavn}", watch.Elapsed.Milliseconds, HttpContext.User.Identity.Name);
+            _logger.LogInformation(_eventIdRead + 2, "Henter metadata - ferdig på {Tidsbruk:000} ms. Brukernavn: {Brukernavn}", watch.Elapsed.Milliseconds, HttpContext.User.Identity.Name);
             return result;
         }
     }

@@ -24,6 +24,8 @@ namespace VAF.Aktivitetsbank.API.Controllers
         private readonly ICommandDispatcher _commandDispatcher;
         private readonly ILogger<UserController> _logger;
         private readonly AppOptions _options;
+        private readonly int _eventIdRead = 20000;
+        private readonly int _eventIdModify = 21000;
 
         public AktivitetController(IQueryDispatcher queryDispatcher, ICommandDispatcher commandDispatcher, IOptions<AppOptions> options, ILogger<UserController> logger )
         {
@@ -39,13 +41,13 @@ namespace VAF.Aktivitetsbank.API.Controllers
         {
             Stopwatch watch = new Stopwatch();
             watch.Start();
-            _logger.LogInformation("Lister ut aktiviteter. Brukernavn: {Brukernavn}", HttpContext.User.Identity.Name);
+            _logger.LogInformation(_eventIdRead + 1, "Lister ut aktiviteter. Brukernavn: {Brukernavn}", HttpContext.User.Identity.Name);
             var query = HttpContext.Request.QueryString.Value;
-            _logger.LogInformation("Lister ut aktiviteter - Spørring: {Query}. Brukernavn: {Brukernavn}", query, HttpContext.User.Identity.Name);
+            _logger.LogInformation(_eventIdRead + 2, "Lister ut aktiviteter - Spørring: {Query}. Brukernavn: {Brukernavn}", query, HttpContext.User.Identity.Name);
             var filter = OpprettFilter(query);
             var result = _queryDispatcher.Query<AktivitetSearchQuery, IList<AktivitetDto>>(new AktivitetSearchQuery(filter)).ToList();
             watch.Stop();
-            _logger.LogInformation("Lister ut aktiviteter - ferdig på {Tidsbruk:000} ms. Brukernavn: {Brukernavn}", watch.ElapsedMilliseconds, HttpContext.User.Identity.Name);
+            _logger.LogInformation(_eventIdRead + 3, "Lister ut aktiviteter - ferdig på {Tidsbruk:000} ms. Brukernavn: {Brukernavn}", watch.ElapsedMilliseconds, HttpContext.User.Identity.Name);
             return result;
         }
 
@@ -98,10 +100,10 @@ namespace VAF.Aktivitetsbank.API.Controllers
         {
             Stopwatch watch = new Stopwatch();
             watch.Start();
-            _logger.LogInformation("Aktivitet detalj {AktivitetId}. Brukernavn: {Brukernavn}", id, HttpContext.User.Identity.Name);
+            _logger.LogInformation(_eventIdRead + 10, "Aktivitet detalj {AktivitetId}. Brukernavn: {Brukernavn}", id, HttpContext.User.Identity.Name);
             var result = _queryDispatcher.Query<AktivitetQuery, AktivitetDto>(new AktivitetQuery(id));
             watch.Stop();
-            _logger.LogInformation("Aktivitet detalj {AktivitetId} - ferdig på {Tidsbruk:000} ms. Brukernavn: {Brukernavn}", id, watch.ElapsedMilliseconds, HttpContext.User.Identity.Name);
+            _logger.LogInformation(_eventIdRead + 11, "Aktivitet detalj {AktivitetId} - ferdig på {Tidsbruk:000} ms. Brukernavn: {Brukernavn}", id, watch.ElapsedMilliseconds, HttpContext.User.Identity.Name);
             return result;
         }
 
@@ -120,7 +122,7 @@ namespace VAF.Aktivitetsbank.API.Controllers
         {
             Stopwatch watch = new Stopwatch();
             watch.Start();
-            _logger.LogInformation("Aktivitet oppretting. Brukernavn: {Brukernavn}", HttpContext.User.Identity.Name);
+            _logger.LogInformation(_eventIdModify + 1, "Aktivitet oppretting. Brukernavn: {Brukernavn}", HttpContext.User.Identity.Name);
             if (opprettAktivitetDto == null)
             {
                 _logger.LogError("Feil data ved oppretting av aktivitet. Mangler input data. Brukernavn: {Brukernavn}", HttpContext.User.Identity.Name);
@@ -141,7 +143,7 @@ namespace VAF.Aktivitetsbank.API.Controllers
                 _commandDispatcher.Execute(new OpprettAktivitetCommand(opprettAktivitetDto));
                 //return new NoContentResult();
                 watch.Stop();
-                _logger.LogInformation("Aktivitet oppretting {AktivitetId} - ferdig på {Tidsbruk:000} ms. Brukernavn: {Brukernavn}", opprettAktivitetDto.Id, watch.ElapsedMilliseconds, HttpContext.User.Identity.Name);
+                _logger.LogInformation(_eventIdModify + 2, "Aktivitet oppretting {AktivitetId} - ferdig på {Tidsbruk:000} ms. Brukernavn: {Brukernavn}", opprettAktivitetDto.Id, watch.ElapsedMilliseconds, HttpContext.User.Identity.Name);
                 return new CreatedAtRouteResult("opprettaktivitet", new {id = opprettAktivitetDto.Id});
 
             }
@@ -160,7 +162,7 @@ namespace VAF.Aktivitetsbank.API.Controllers
         {
             Stopwatch watch = new Stopwatch();
             watch.Start();
-            _logger.LogInformation("Aktivitet kopiering fra {AktivitetId}. Brukernavn: {Brukernavn}", aktivitetId, HttpContext.User.Identity.Name);
+            _logger.LogInformation(_eventIdModify + 10, "Aktivitet kopiering fra {AktivitetId}. Brukernavn: {Brukernavn}", aktivitetId, HttpContext.User.Identity.Name);
             if (kopierAktivitetDto == null || kopierAktivitetDto.Id != aktivitetId)
             {
                 _logger.LogError("Feil data ved kopiering av aktivitet. Mangler input data. Brukernavn: {Brukernavn}", HttpContext.User.Identity.Name);
@@ -178,7 +180,7 @@ namespace VAF.Aktivitetsbank.API.Controllers
             {
                 _commandDispatcher.Execute(new KopierAktivitetCommand(kopierAktivitetDto));
                 watch.Stop();
-                _logger.LogInformation("Aktivitet kopiering fra {AktivitetId} til {KopiertTilAktivitetId} - ferdig på {Tidsbruk:000} ms. Brukernavn: {Brukernavn}", aktivitetId, kopierAktivitetDto.NyAktivitetId, watch.ElapsedMilliseconds, HttpContext.User.Identity.Name);
+                _logger.LogInformation(_eventIdModify + 11, "Aktivitet kopiering fra {AktivitetId} til {KopiertTilAktivitetId} - ferdig på {Tidsbruk:000} ms. Brukernavn: {Brukernavn}", aktivitetId, kopierAktivitetDto.NyAktivitetId, watch.ElapsedMilliseconds, HttpContext.User.Identity.Name);
                 return new CreatedAtRouteResult("kopier", new {id = kopierAktivitetDto.NyAktivitetId});
 
             }
@@ -197,7 +199,7 @@ namespace VAF.Aktivitetsbank.API.Controllers
         {
             Stopwatch watch = new Stopwatch();
             watch.Start();
-            _logger.LogInformation("Aktivitet endring {AktivitetId}. Brukernavn: {Brukernavn}", id, HttpContext.User.Identity.Name);
+            _logger.LogInformation(_eventIdModify + 20, "Aktivitet endring {AktivitetId}. Brukernavn: {Brukernavn}", id, HttpContext.User.Identity.Name);
             if (endreAktivitetDto == null || endreAktivitetDto.Id != id)
             {
                 _logger.LogError("Feil data ved endring av aktivitet. Mangler input data. Brukernavn: {Brukernavn}", HttpContext.User.Identity.Name);
@@ -214,7 +216,7 @@ namespace VAF.Aktivitetsbank.API.Controllers
             {
                 _commandDispatcher.Execute(new EndreAktivitetCommand(endreAktivitetDto));
                 watch.Stop();
-                _logger.LogInformation("Aktivitet endring {AktivitetId} - ferdig på {Tidsbruk:000} ms. Brukernavn: {Brukernavn}", id, watch.ElapsedMilliseconds, HttpContext.User.Identity.Name);
+                _logger.LogInformation(_eventIdModify + 21, "Aktivitet endring {AktivitetId} - ferdig på {Tidsbruk:000} ms. Brukernavn: {Brukernavn}", id, watch.ElapsedMilliseconds, HttpContext.User.Identity.Name);
                 return new NoContentResult();
 
             }
@@ -231,7 +233,7 @@ namespace VAF.Aktivitetsbank.API.Controllers
         {
             Stopwatch watch = new Stopwatch();
             watch.Start();
-            _logger.LogInformation("Aktivitet sletting {AktivitetId}. Brukernavn: {Brukernavn}", id, HttpContext.User.Identity.Name);
+            _logger.LogInformation(_eventIdModify + 30, "Aktivitet sletting {AktivitetId}. Brukernavn: {Brukernavn}", id, HttpContext.User.Identity.Name);
             //validere guid? nullable?
             if (id == Guid.Empty)
             {
@@ -247,7 +249,7 @@ namespace VAF.Aktivitetsbank.API.Controllers
             {
                 _commandDispatcher.Execute(new SlettAktivitetCommand(slettAktivitetDto));
                 watch.Stop();
-                _logger.LogInformation("Aktivitet sletting {AktivitetId} - ferdig på {Tidsbruk:000} ms. Brukernavn: {Brukernavn}", id, watch.ElapsedMilliseconds, HttpContext.User.Identity.Name);
+                _logger.LogInformation(_eventIdModify + 31, "Aktivitet sletting {AktivitetId} - ferdig på {Tidsbruk:000} ms. Brukernavn: {Brukernavn}", id, watch.ElapsedMilliseconds, HttpContext.User.Identity.Name);
                 return new NoContentResult();
 
             }
