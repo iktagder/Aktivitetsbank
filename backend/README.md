@@ -9,7 +9,7 @@ For å legge til migrering:
 dotnet ef migrations add parentUtdanningsprogram -s ..\VAF.Aktivitetsbank.Data.UI\
 ´´´
 
-For å oppdatere databasen:
+For å oppdatere databasen / kjøre første migrering: (Første migrering vil også legge inn metadata)
 ´´´
 dotnet ef database update -s ..\VAF.Aktivitetsbank.Data.UI\
 ´´´

@@ -2,37 +2,11 @@
 
 namespace VAF.Aktivitetsbank.Data.UI
 {
+    // Dummy prosjekt for å kunne håndtere EF migrations. Skal slettes når mulig.
     class Program
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Seeding av database");
-
-            Console.WriteLine("Trykk en knapp for å starte seeding..");
-            Console.ReadLine();
-            Console.WriteLine("Seeding av fag");
-            SeedAktivitetsbank.SeedFag();
-            Console.WriteLine("Skrevet fag til db");
-
-            Console.WriteLine("Seeding av trinn");
-            SeedAktivitetsbank.SeedTrinn();
-            Console.WriteLine("Skrevet trinn til db");
-
-            Console.WriteLine("Seeding av skole");
-            SeedAktivitetsbank.SeedSkole();
-            Console.WriteLine("Skrevet skole til db");
-
-            Console.WriteLine("Seeding av aktivitetstype");
-            SeedAktivitetsbank.SeedAktivitetsType();
-            Console.WriteLine("Skrevet aktivitetstype til db");
-
-            Console.WriteLine("Seeding av utdanningsprogram");
-            SeedAktivitetsbank.SeedUtdanningsprogram();
-            Console.WriteLine("Skrevet utdanningsprogram til db");
-
-            Console.WriteLine("Seeding av aktiviteter");
-            SeedAktivitetsbank.SeedAktiviteterOgDeltakere();
-            Console.WriteLine("Skrevet aktiviteter og deltakere");
             Console.ReadLine();
         }
     }
