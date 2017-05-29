@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -31,56 +32,13 @@ namespace VAF.Aktivitetsbank.API.Controllers
         [HttpGet]
         public AktivitetsbankMetadata Get()
         {
-            return _queryDispatcher.Query<AktivitetsbankMetadataQuery, AktivitetsbankMetadata>(new AktivitetsbankMetadataQuery());
+            Stopwatch watch = new Stopwatch();
+            watch.Start();
+            _logger.LogInformation("Henter metadata. Brukernavn: {Brukernavn}", HttpContext.User.Identity.Name);
+            var result = _queryDispatcher.Query<AktivitetsbankMetadataQuery, AktivitetsbankMetadata>(new AktivitetsbankMetadataQuery());
+            watch.Stop();
+            _logger.LogInformation("Henter metadata - ferdig på {Tidsbruk:000} ms. Brukernavn: {Brukernavn}", watch.Elapsed.Milliseconds, HttpContext.User.Identity.Name);
+            return result;
         }
-        //[HttpGet] public IEnumerable<Employee> Get()
-        //{
-        //    return _queryDispatcher.Query<AktivitetsbankMetadataQuery, IList<Employee>>(new AktivitetsbankMetadataQuery()).ToList();
-        //}
-
-        //[HttpGet("{id}")]
-        //public IActionResult Get(string id)
-        //{
-        //    _logger.LogDebug("Test log - henter bruker");
-        //    var result = _queryDispatcher.Query<EmployeeQuery, Employee>(new EmployeeQuery() {Id = id});
-        //    if (result != null)
-        //    {
-        //        return new ObjectResult(result);
-        //    }
-        //    else
-        //    {
-        //        return NotFound();
-        //    }
-        //}
-
-        //[AllowAnonymous]
-        //[HttpOptions("{id}/changephone")]
-        //public IActionResult GetOptions()
-        //{
-        //    Response.Headers.Add("Allow", "GET, OPTIONS, POST");
-        //    return Ok();
-        //}
-
-        //[HttpPost("{id}/changephone")]
-        //public IActionResult Post(string id, [FromBody] Employee employee)
-        //{
-        //    if (employee == null || employee.Id != id)
-        //    {
-        //        return BadRequest();
-        //    }
-        //    try
-        //    {
-        //        _commandDispatcher.Execute(new UpdatePhoneNumberCommand(employee.Id, employee.PhoneNumber, string.Empty, string.Empty));
-        //        return new NoContentResult();
-
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        Console.WriteLine(e);
-        //        return new StatusCodeResult(500);
-        //    }
-        //}
-
-
     }
 }

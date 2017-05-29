@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -35,15 +36,25 @@ namespace VAF.Aktivitetsbank.API.Controllers
         [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
         public IEnumerable<DeltakerDto> Get(Guid aktivitetId)
         {
-            _logger.LogInformation("Lister ut deltakere for aktivitet");
-            return _queryDispatcher.Query<DeltakereSearchQuery, IList<DeltakerDto>>(new DeltakereSearchQuery(aktivitetId)).ToList();
+            Stopwatch watch = new Stopwatch();
+            watch.Start();
+            _logger.LogInformation("Lister ut deltakere for aktivitet {AktivitetId}. Brukernavn: {Brukernavn}", aktivitetId, HttpContext.User.Identity.Name);
+            var result = _queryDispatcher.Query<DeltakereSearchQuery, IList<DeltakerDto>>(new DeltakereSearchQuery(aktivitetId)).ToList();
+            watch.Stop();
+            _logger.LogInformation("Lister ut deltakere for aktivitet {AktivitetId} - ferdig på {Tidsbruk:000} ms. Brukernavn: {Brukernavn}", aktivitetId, watch.ElapsedMilliseconds, HttpContext.User.Identity.Name);
+            return result;
         }
         [HttpGet("{aktivitetId}/deltakere/{deltakerId}")]
         [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
         public DeltakerDto Get(Guid aktivitetId, Guid deltakerId)
         {
-            _logger.LogInformation("Henter deltaker");
-            return _queryDispatcher.Query<DeltakerQuery, DeltakerDto>(new DeltakerQuery(aktivitetId, deltakerId));
+            Stopwatch watch = new Stopwatch();
+            watch.Start();
+            _logger.LogInformation("Henter deltaker {DeltakerId}. Brukernavn: {Brukernavn}", deltakerId, HttpContext.User.Identity.Name);
+            var result = _queryDispatcher.Query<DeltakerQuery, DeltakerDto>(new DeltakerQuery(aktivitetId, deltakerId));
+            watch.Stop();
+            _logger.LogInformation("Henter deltaker {DeltakerId} - ferdig på {Tidsbruk:000} ms. Brukernavn: {Brukernavn}", deltakerId, watch.ElapsedMilliseconds, HttpContext.User.Identity.Name);
+            return result;
         }
         //[AllowAnonymous]
         [HttpOptions("{aktivitetId}/opprettDeltaker")]
@@ -57,9 +68,13 @@ namespace VAF.Aktivitetsbank.API.Controllers
         [HttpPost("{aktivitetId}/opprettDeltaker")]
         public IActionResult OpprettDeltaker(Guid aktivitetId, [FromBody] OpprettDeltakerDto opprettDeltakerDto)
         {
+            Stopwatch watch = new Stopwatch();
+            watch.Start();
+            _logger.LogInformation("Opprett deltaker. Brukernavn: {Brukernavn}", HttpContext.User.Identity.Name);
             if (opprettDeltakerDto == null || opprettDeltakerDto.AktivitetId != aktivitetId)
             {
-                _logger.LogError("Feil data ved oppretting av deltaker. Mangler eller feil i input data.");
+                _logger.LogError("Feil data ved oppretting av deltaker. Mangler eller feil i input data. Brukernavn: {0}", HttpContext.User.Identity.Name);
+
                 return BadRequest();
             }
             opprettDeltakerDto.Id = Guid.NewGuid();
@@ -74,6 +89,8 @@ namespace VAF.Aktivitetsbank.API.Controllers
             {
                 _commandDispatcher.Execute(new OpprettDeltakerCommand(opprettDeltakerDto));
                 //return new NoContentResult();
+                watch.Stop();
+                _logger.LogInformation("Opprett deltaker {DeltakerId} - ferdig på {Tidsbruk:000} ms. Brukernavn: {Brukernavn}", opprettDeltakerDto.Id, watch.ElapsedMilliseconds, HttpContext.User.Identity.Name);
                 return new CreatedAtRouteResult("opprettDeltaker", new {id = opprettDeltakerDto.Id});
 
             }
@@ -89,9 +106,13 @@ namespace VAF.Aktivitetsbank.API.Controllers
         [HttpPut("{aktivitetId}/deltakere/{deltakerId}")]
         public IActionResult EndreDeltaker(Guid aktivitetId, Guid deltakerId, [FromBody] EndreDeltakerDto endreDeltakerDto)
         {
+            Stopwatch watch = new Stopwatch();
+            watch.Start();
+            _logger.LogInformation("Endre deltaker {DeltakerId}. Brukernavn: {Brukernavn}", deltakerId, HttpContext.User.Identity.Name);
             if (endreDeltakerDto == null || endreDeltakerDto.Id != deltakerId || endreDeltakerDto.AktivitetId != aktivitetId)
             {
-                _logger.LogError("Feil data ved endring av deltaker. Mangler input data.");
+                _logger.LogError("Feil data ved endring av deltaker. Mangler input data. Brukernavn: {Brukernavn}", HttpContext.User.Identity.Name);
+
                 return BadRequest();
             }
             if (!ModelState.IsValid)
@@ -104,6 +125,8 @@ namespace VAF.Aktivitetsbank.API.Controllers
             try
             {
                 _commandDispatcher.Execute(new EndreDeltakerCommand(endreDeltakerDto));
+                watch.Stop();
+                _logger.LogInformation("Endre deltaker {DeltakerId} - ferdig på {Tidsbruk:000} ms. Brukernavn: {Brukernavn}", deltakerId, watch.ElapsedMilliseconds, HttpContext.User.Identity.Name);
                 return new NoContentResult();
 
             }
@@ -119,9 +142,13 @@ namespace VAF.Aktivitetsbank.API.Controllers
         [HttpDelete("{aktivitetId}/deltakere/{deltakerId}")]
         public IActionResult SlettDeltaker(Guid aktivitetId, Guid deltakerId)
         {
+            Stopwatch watch = new Stopwatch();
+            watch.Start();
+            _logger.LogInformation("Slett deltaker {DeltakerId}. Brukernavn: {Brukernavn}", deltakerId, HttpContext.User.Identity.Name);
             if (aktivitetId == Guid.Empty || deltakerId == Guid.Empty)
             {
-                _logger.LogError("Feil data ved sletting av deltaker. Mangler input data.");
+                _logger.LogError("Feil data ved sletting av deltaker. Mangler input data. Brukernavn: {Brukernavn}", HttpContext.User.Identity.Name);
+
                 return BadRequest();
             }
             var slettDeltakerDto = new SlettDeltakerDto()
@@ -133,6 +160,8 @@ namespace VAF.Aktivitetsbank.API.Controllers
             try
             {
                 _commandDispatcher.Execute(new SlettDeltakerCommand(slettDeltakerDto));
+                watch.Stop();
+                _logger.LogInformation("Slett deltaker {DeltakerId} - ferdig på {Tidsbruk:000} ms. Brukernavn: {Brukernavn}", deltakerId, watch.ElapsedMilliseconds, HttpContext.User.Identity.Name);
                 return new NoContentResult();
 
             }

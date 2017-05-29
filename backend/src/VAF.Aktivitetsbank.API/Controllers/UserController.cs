@@ -42,6 +42,7 @@ namespace VAF.Aktivitetsbank.API.Controllers
         [HttpGet()]
         public async Task<dynamic> Get()
         {
+            _logger.LogInformation("Bruker pålogging startet.");
             var userInfo = new UserInfo();
             userInfo.brukernavn = HttpContext.User.Identity.Name;
             if (await _authorizationService.AuthorizeAsync(HttpContext.User, "", new ErAktivitetsbankRedigererRequirement()))
@@ -52,9 +53,8 @@ namespace VAF.Aktivitetsbank.API.Controllers
             {
                 userInfo.rolle = "Les";
             }
-            _logger.LogInformation("Current ad api:{0}", _options.AdApi);
-            _logger.LogInformation("Current ad api path:{0}", _options.AdApiPath);
-            _logger.LogWarning("user logged in: {0}", userInfo.brukernavn);
+            _logger.LogWarning("Pålogget brukernavn: {Brukernavn}", userInfo.brukernavn);
+            _logger.LogWarning("Pålogget bruker rolle: {BrukerRolle}", userInfo.rolle);
 
             return userInfo;
         }
