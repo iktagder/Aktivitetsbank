@@ -433,7 +433,7 @@ visAktivitetEndreSuksess model taco aktivitet =
                 [ Textfield.label "Omfang (klokketimer)"
                 , Textfield.floatingLabel
                 , Textfield.text_
-                , Textfield.value <| Maybe.withDefault "0" <| Maybe.map toString aktivitet.omfangTimer
+                , Textfield.value <| Maybe.withDefault "" <| Maybe.map toString aktivitet.omfangTimer
                 , Options.onInput EndretAktivitetsOmfangTimer
                 ]
                 []

@@ -584,7 +584,7 @@ visOpprettDeltakerSuksess model taco deltaker =
                 [ Textfield.label "Timer (klokketimer)"
                 , Textfield.floatingLabel
                 , Textfield.text_
-                , Textfield.value <| Maybe.withDefault "0" <| Maybe.map toString deltaker.timer
+                , Textfield.value <| Maybe.withDefault "" <| Maybe.map toString deltaker.timer
                 , Options.onInput EndretTimer
                 ]
                 []
