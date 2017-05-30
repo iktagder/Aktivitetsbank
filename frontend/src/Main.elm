@@ -13,6 +13,7 @@ import Http
 import Decoders
 import Material.Progress as Loading
 import Material.Options as Options exposing (when, css, cs, Style, onClick)
+import Material.Typography as Typo
 import Dict
 
 
@@ -376,12 +377,33 @@ view model =
         NotReady _ ->
             Options.div
                 [ css "display" "flex"
+                , css "flex-direction" "column"
                 , css "width" "100%"
                 , css "height" "100vh"
                 , css "align-items" "center"
                 , css "justify-content" "center"
                 ]
-                [ Loading.indeterminate ]
+                [ Options.span [ Typo.headline ] [ text "Klargjør Aktivitetsbank" ]
+                , Loading.indeterminate
+                , Options.span []
+                    [ text "Henter brukerdata.."
+                    ]
+                    |> (\x ->
+                            if RemoteData.isSuccess model.userInformation then
+                                text ""
+                            else
+                                x
+                       )
+                , Options.span []
+                    [ text "Henter metadata.."
+                    ]
+                    |> (\x ->
+                            if RemoteData.isSuccess model.appMetadata then
+                                text ""
+                            else
+                                x
+                       )
+                ]
 
         Unauthorized ->
             Options.div
