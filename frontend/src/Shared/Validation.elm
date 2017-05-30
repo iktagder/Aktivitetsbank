@@ -1,6 +1,5 @@
 module Shared.Validation exposing (..)
 
-
 {-| Simple tools for validation. See also [Richard Feldman's elm-validate](http://package.elm-lang.org/packages/rtfeldman/elm-validate/latest).
 
 @docs Validator
@@ -11,6 +10,7 @@ module Shared.Validation exposing (..)
 @docs matches
 @docs email
 @docs emailRegex
+
 -}
 
 import Regex exposing (Regex, caseInsensitive, regex, contains)
@@ -43,6 +43,7 @@ either returns an error message, or a form that is definitely valid. For example
         |: required "Age is required" form.age
 
 An error message is typically a `String`, but may be any type you choose.
+
 -}
 type alias Validator e a b =
     Maybe a -> Result e b
@@ -51,6 +52,7 @@ type alias Validator e a b =
 {-| Chain validators together.
 
 (Hat tip to CircuitHub, who inspired the syntax and guided the code with their [elm-json-extra](http://package.elm-lang.org/packages/circuithub/elm-json-extra/latest) library.)
+
 -}
 apply : Result e (a -> b) -> Result e a -> Result e b
 apply f aResult =
@@ -84,7 +86,12 @@ notBlank err str =
             Err err
 
         Just x ->
-            Ok x
+            case String.trim x of
+                "" ->
+                    Err err
+
+                _ ->
+                    Ok x
 
 
 {-| A field that must match the given regex.
@@ -107,6 +114,7 @@ included for convenience.
 
 Remember that the only real way to validate an email address is to
 send something to it and get a reply.
+
 -}
 email : e -> Validator e String String
 email =
