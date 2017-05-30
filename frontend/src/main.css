@@ -43,3 +43,11 @@ white-space: normal;
 .mdl-layout__content {
     z-index: 0;
 }
+
+
+.mdl-switch__ripple-container {
+    top: -2px;
+    left: -4px;
+    width: 26px;
+    height: 26px;
+}
