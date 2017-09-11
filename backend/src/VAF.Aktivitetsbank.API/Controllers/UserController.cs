@@ -19,7 +19,7 @@ namespace VAF.Aktivitetsbank.API.Controllers
 {
     public class UserInfo
     {
-        public string navn = "test";
+        public string navn = "testU";
         public string brukernavn = "test";
         public string rolle = "test2";
     }
