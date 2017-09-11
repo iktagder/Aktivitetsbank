@@ -46,6 +46,7 @@ type Msg
     | EndreAktivitet
     | EndreAktivitetRespons (Result Error ())
     | NavigerTilbake
+    | ValiderAktivitet
 
 
 init : String -> String -> ( Model, Cmd Msg )
@@ -121,6 +122,18 @@ update msg model =
                     Material.update Mdl msg_ model
             in
                 ( model_, cmd_, NoSharedMsg )
+
+        ValiderAktivitet ->
+            let
+                ( visLagreKnapp, statusTekst ) =
+                    case model.aktivitet of
+                        Success data ->
+                            valideringsInfo data
+
+                        _ ->
+                            ( model.visLagreKnapp, model.statusText )
+            in
+                ( { model | statusText = statusTekst, visLagreKnapp = visLagreKnapp }, Cmd.none, NoSharedMsg )
 
         AktivitetResponse response ->
             ( { model | aktivitet = response }, Cmd.none, NoSharedMsg )
@@ -204,23 +217,10 @@ update msg model =
                 ( { model | dropdownStateAktivitetstype = updated }, cmd, NoSharedMsg )
 
         EndretAktivitetsNavn endretNavn ->
-            let
-                ( oppdatertAktivitet, visLagreKnapp, statusTekst ) =
-                    case model.aktivitet of
-                        Success data ->
-                            let
-                                oppdatertAktivitet_ =
-                                    { data | navn = Just endretNavn }
-
-                                ( visLagreKnapp_, statusTekst_ ) =
-                                    valideringsInfo oppdatertAktivitet_
-                            in
-                                ( RemoteData.Success oppdatertAktivitet_, visLagreKnapp_, statusTekst_ )
-
-                        _ ->
-                            ( model.aktivitet, model.visLagreKnapp, model.statusText )
-            in
-                ( { model | aktivitet = oppdatertAktivitet, statusText = statusTekst, visLagreKnapp = visLagreKnapp }, Cmd.none, NoSharedMsg )
+            model.aktivitet
+                |> RemoteData.map (\aktivitet -> { aktivitet | navn = Just endretNavn })
+                |> (\aktivitet -> { model | aktivitet = aktivitet })
+                |> update ValiderAktivitet
 
         EndretAktivitetsBeskrivelse endretBeskrivelse ->
             let
