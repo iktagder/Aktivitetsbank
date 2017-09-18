@@ -32,7 +32,7 @@ namespace VAF.Aktivitetsbank.API.Controllers
         private readonly IAuthorizationService _authorizationService;
         private readonly AppOptions _options;
         private readonly int _eventIdRead = 50000;
-        private readonly int _eventIdModify = 51000;
+        //private readonly int _eventIdModify = 51000;
 
         public UserController(ILogger<UserController> logger, IOptions<AppOptions> options, IAuthorizationService authorizationService)
         {
@@ -47,7 +47,7 @@ namespace VAF.Aktivitetsbank.API.Controllers
             _logger.LogInformation(_eventIdRead + 1, "Bruker pålogging startet.");
             var userInfo = new UserInfo();
             userInfo.brukernavn = HttpContext.User.Identity.Name;
-            if (await _authorizationService.AuthorizeAsync(HttpContext.User, "", new ErAktivitetsbankRedigererRequirement()))
+            if ((await _authorizationService.AuthorizeAsync(HttpContext.User, "", new ErAktivitetsbankRedigererRequirement())).Succeeded)
             {
                 userInfo.rolle = "Rediger";
             }

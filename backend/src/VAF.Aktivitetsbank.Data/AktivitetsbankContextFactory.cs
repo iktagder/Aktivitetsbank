@@ -4,36 +4,27 @@ using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Configuration;
+using Microsoft.EntityFrameworkCore.Design;
+using System.Diagnostics;
 
 namespace VAF.Aktivitetsbank.Data
 {
-    public class AktivitetsbankContextFactory : IDbContextFactory<AktivitetsbankContext>
+    public class AktivitetsbankContextFactory : IDesignTimeDbContextFactory<AktivitetsbankContext>
     {
-        private IConfigurationRoot _configuration;
-
-        public AktivitetsbankContextFactory()
+        public AktivitetsbankContext CreateDbContext(string[] args)
         {
-            var builder = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
-                .SetBasePath(System.AppContext.BaseDirectory)
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+            var builder = new DbContextOptionsBuilder<AktivitetsbankContext>();
+            IConfigurationRoot configuration = new ConfigurationBuilder()
+              .SetBasePath(System.AppContext.BaseDirectory)
+              //.SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+              .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+              .Build();
+            Console.WriteLine("Henter connection string:");
+            Console.WriteLine(configuration.GetConnectionString("DefaultConnection"));
+            Console.WriteLine("Henter connection.. ferdig");
 
-            _configuration = builder.Build();
-        }
-
-        public AktivitetsbankContext Create()
-        {
-            var optionsBuilder = new DbContextOptionsBuilder<AktivitetsbankContext>();
-            optionsBuilder.UseSqlServer(_configuration.GetConnectionString("DefaultConnection"), m => { m.EnableRetryOnFailure(); });
-
-            return new AktivitetsbankContext(optionsBuilder.Options);
-        }
-
-        public AktivitetsbankContext Create(DbContextFactoryOptions options)
-        {
-            var optionsBuilder = new DbContextOptionsBuilder<AktivitetsbankContext>();
-            optionsBuilder.UseSqlServer(_configuration.GetConnectionString("DefaultConnection"), m => { m.EnableRetryOnFailure(); });
-
-            return new AktivitetsbankContext(optionsBuilder.Options);
+            builder.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
+            return new AktivitetsbankContext(builder.Options);
         }
     }
 }

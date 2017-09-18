@@ -1,13 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.6
+VisualStudioVersion = 15.0.26730.15
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A59B302C-5FCC-49F8-8487-7C766864B04C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{67244008-54D0-4D0E-B7E1-6BBC82CF1A46}"
 	ProjectSection(SolutionItems) = preProject
-		global.json = global.json
 		README.md = README.md
 	EndProjectSection
 EndProject
@@ -19,9 +18,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VAF.Aktivitetsbank.Domain",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VAF.Aktivitetsbank.Infrastructure", "src\VAF.Aktivitetsbank.Infrastructure\VAF.Aktivitetsbank.Infrastructure.csproj", "{53733DAF-19CC-4FE9-B87B-18171BAEB679}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VAF.Aktivitetsbank.Data", "src\VAF.Aktivitetsbank.Data\VAF.Aktivitetsbank.Data.csproj", "{BD07AD0F-5822-48B0-BDAF-5C9FFF617ADE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VAF.Aktivitetsbank.Data", "src\VAF.Aktivitetsbank.Data\VAF.Aktivitetsbank.Data.csproj", "{BD07AD0F-5822-48B0-BDAF-5C9FFF617ADE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VAF.Aktivitetsbank.Data.UI", "src\VAF.Aktivitetsbank.Data.UI\VAF.Aktivitetsbank.Data.UI.csproj", "{FE7976C1-94B2-4445-B864-F316A439BC98}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VAF.Aktivitetsbank.Data.UI", "src\VAF.Aktivitetsbank.Data.UI\VAF.Aktivitetsbank.Data.UI.csproj", "{FE7976C1-94B2-4445-B864-F316A439BC98}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VAF.Aktivitetsbank.Data.Migrations", "src\VAF.Aktivitetsbank.Data.Migrations\VAF.Aktivitetsbank.Data.Migrations.csproj", "{FB202F1F-54F1-4B94-AAC4-81F14D1D1F7E}"
 EndProject
@@ -70,5 +69,8 @@ Global
 		{BD07AD0F-5822-48B0-BDAF-5C9FFF617ADE} = {A59B302C-5FCC-49F8-8487-7C766864B04C}
 		{FE7976C1-94B2-4445-B864-F316A439BC98} = {A59B302C-5FCC-49F8-8487-7C766864B04C}
 		{FB202F1F-54F1-4B94-AAC4-81F14D1D1F7E} = {A59B302C-5FCC-49F8-8487-7C766864B04C}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1019C47E-3882-46A5-AA9A-9097C26DD31C}
 	EndGlobalSection
 EndGlobal

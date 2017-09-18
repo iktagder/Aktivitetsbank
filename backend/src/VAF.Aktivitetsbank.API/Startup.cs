@@ -25,6 +25,8 @@ using VAF.Aktivitetsbank.Data;
 using VAF.Aktivitetsbank.Data.Entiteter;
 using VAF.Aktivitetsbank.Domain;
 using VAF.Aktivitetsbank.Infrastructure;
+using Microsoft.AspNetCore.Server.IISIntegration;
+using System.IO;
 
 namespace VAF.Aktivitetsbank.API
 {
@@ -35,7 +37,8 @@ namespace VAF.Aktivitetsbank.API
         public Startup(IHostingEnvironment env)
         {
             var builder = new ConfigurationBuilder()
-                .SetBasePath(env.ContentRootPath)
+                //.SetBasePath(env.ContentRootPath)
+                .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
                 .AddEnvironmentVariables();
@@ -57,10 +60,12 @@ namespace VAF.Aktivitetsbank.API
         {
             services.Configure<AppOptions>(Configuration.GetSection("VafOptions"));
             // Add framework services.
-            services.Configure<IISOptions>(options =>
-            {
-                options.ForwardWindowsAuthentication = true;
-            });
+            //services.Configure<IISOptions>(options =>
+            //{
+            //    options.ForwardWindowsAuthentication = true;
+            //});
+
+            services.AddAuthentication(IISDefaults.AuthenticationScheme);
 
             services.AddAuthorization(options =>
             {
@@ -115,7 +120,7 @@ namespace VAF.Aktivitetsbank.API
             builder.RegisterType<EndreDeltakerCommandHandler>().As<ICommandHandler<EndreDeltakerCommand>>();
             builder.RegisterType<SlettDeltakerCommandHandler>().As<ICommandHandler<SlettDeltakerCommand>>();
             builder.RegisterType<AktivitetsbankService>().As<IAktivitetsbankService>();
-            builder.RegisterType<RabbitMqNotificationService>().As<INotificationService<NumberChangedEvent>>();
+            //builder.RegisterType<RabbitMqNotificationService>().As<INotificationService<NumberChangedEvent>>();
 
 
             builder.Populate(services);

@@ -21,7 +21,7 @@ namespace VAF.Aktivitetsbank.API.Controllers
         private readonly ICommandDispatcher _commandDispatcher;
         private readonly ILogger<AktivitetsbankMetadataController> _logger;
         private readonly int _eventIdRead = 40000;
-        private readonly int _eventIdModify = 41000;
+        //private readonly int _eventIdModify = 41000;
 
         public AktivitetsbankMetadataController(IQueryDispatcher queryDispatcher, ICommandDispatcher commandDispatcher, ILogger<AktivitetsbankMetadataController> logger)
         {
