@@ -46,7 +46,6 @@ type Msg
     | EndreAktivitet
     | EndreAktivitetRespons (Result Error ())
     | NavigerTilbake
-    | ValiderAktivitet
 
 
 init : String -> String -> ( Model, Cmd Msg )
@@ -123,58 +122,22 @@ update msg model =
             in
                 ( model_, cmd_, NoSharedMsg )
 
-        ValiderAktivitet ->
-            let
-                ( visLagreKnapp, statusTekst ) =
-                    case model.aktivitet of
-                        Success data ->
-                            valideringsInfo data
-
-                        _ ->
-                            ( model.visLagreKnapp, model.statusText )
-            in
-                ( { model | statusText = statusTekst, visLagreKnapp = visLagreKnapp }, Cmd.none, NoSharedMsg )
-
         AktivitetResponse response ->
             ( { model | aktivitet = response }, Cmd.none, NoSharedMsg )
 
         OnSelectSkole skole ->
-            let
-                ( oppdatertAktivitet, visLagreKnapp, statusTekst ) =
-                    case model.aktivitet of
-                        Success data ->
-                            let
-                                oppdatertAktivitet_ =
-                                    { data | skole = skole }
-
-                                ( visLagreKnapp_, statusTekst_ ) =
-                                    valideringsInfo oppdatertAktivitet_
-                            in
-                                ( RemoteData.Success oppdatertAktivitet_, visLagreKnapp_, statusTekst_ )
-
-                        _ ->
-                            ( model.aktivitet, model.visLagreKnapp, model.statusText )
-            in
-                ( { model | aktivitet = oppdatertAktivitet, statusText = statusTekst, visLagreKnapp = visLagreKnapp }, Cmd.none, NoSharedMsg )
+            model.aktivitet
+                |> RemoteData.map (\aktivitet -> { aktivitet | skole = skole })
+                |> (\aktivitet -> { model | aktivitet = aktivitet })
+                |> validerAktivitet
+                |> (\nyModell -> ( nyModell, Cmd.none, NoSharedMsg ))
 
         OnSelectSkoleAar skoleAar ->
-            let
-                ( oppdatertAktivitet, visLagreKnapp, statusTekst ) =
-                    case model.aktivitet of
-                        Success data ->
-                            let
-                                oppdatertAktivitet_ =
-                                    { data | skoleAar = skoleAar }
-
-                                ( visLagreKnapp_, statusTekst_ ) =
-                                    valideringsInfo oppdatertAktivitet_
-                            in
-                                ( RemoteData.Success oppdatertAktivitet_, visLagreKnapp_, statusTekst_ )
-
-                        _ ->
-                            ( model.aktivitet, model.visLagreKnapp, model.statusText )
-            in
-                ( { model | aktivitet = oppdatertAktivitet, statusText = statusTekst, visLagreKnapp = visLagreKnapp }, Cmd.none, NoSharedMsg )
+            model.aktivitet
+                |> RemoteData.map (\aktivitet -> { aktivitet | skoleAar = skoleAar })
+                |> (\aktivitet -> { model | aktivitet = aktivitet })
+                |> validerAktivitet
+                |> (\nyModell -> ( nyModell, Cmd.none, NoSharedMsg ))
 
         SkoleDropdown skole ->
             let
@@ -191,23 +154,11 @@ update msg model =
                 ( { model | dropdownStateSkoleAar = updated }, cmd, NoSharedMsg )
 
         OnSelectAktivitetstype aktivitetstype ->
-            let
-                ( oppdatertAktivitet, visLagreKnapp, statusTekst ) =
-                    case model.aktivitet of
-                        Success data ->
-                            let
-                                oppdatertAktivitet_ =
-                                    { data | aktivitetsType = aktivitetstype }
-
-                                ( visLagreKnapp_, statusTekst_ ) =
-                                    valideringsInfo oppdatertAktivitet_
-                            in
-                                ( RemoteData.Success oppdatertAktivitet_, visLagreKnapp_, statusTekst_ )
-
-                        _ ->
-                            ( model.aktivitet, model.visLagreKnapp, model.statusText )
-            in
-                ( { model | aktivitet = oppdatertAktivitet, statusText = statusTekst, visLagreKnapp = visLagreKnapp }, Cmd.none, NoSharedMsg )
+            model.aktivitet
+                |> RemoteData.map (\aktivitet -> { aktivitet | aktivitetsType = aktivitetstype })
+                |> (\aktivitet -> { model | aktivitet = aktivitet })
+                |> validerAktivitet
+                |> (\nyModell -> ( nyModell, Cmd.none, NoSharedMsg ))
 
         AktivitetstypeDropdown aktivitetstype ->
             let
@@ -220,45 +171,22 @@ update msg model =
             model.aktivitet
                 |> RemoteData.map (\aktivitet -> { aktivitet | navn = Just endretNavn })
                 |> (\aktivitet -> { model | aktivitet = aktivitet })
-                |> update ValiderAktivitet
+                |> validerAktivitet
+                |> (\nyModell -> ( nyModell, Cmd.none, NoSharedMsg ))
 
         EndretAktivitetsBeskrivelse endretBeskrivelse ->
-            let
-                ( oppdatertAktivitet, visLagreKnapp, statusTekst ) =
-                    case model.aktivitet of
-                        Success data ->
-                            let
-                                oppdatertAktivitet_ =
-                                    { data | beskrivelse = Just endretBeskrivelse }
-
-                                ( visLagreKnapp_, statusTekst_ ) =
-                                    valideringsInfo oppdatertAktivitet_
-                            in
-                                ( RemoteData.Success oppdatertAktivitet_, visLagreKnapp_, statusTekst_ )
-
-                        _ ->
-                            ( model.aktivitet, model.visLagreKnapp, model.statusText )
-            in
-                ( { model | aktivitet = oppdatertAktivitet, statusText = statusTekst, visLagreKnapp = visLagreKnapp }, Cmd.none, NoSharedMsg )
+            model.aktivitet
+                |> RemoteData.map (\aktivitet -> { aktivitet | beskrivelse = Just endretBeskrivelse })
+                |> (\aktivitet -> { model | aktivitet = aktivitet })
+                |> validerAktivitet
+                |> (\nyModell -> ( nyModell, Cmd.none, NoSharedMsg ))
 
         EndretAktivitetsOmfangTimer endretOmfangTimer ->
-            let
-                ( oppdatertAktivitet, visLagreKnapp, statusTekst ) =
-                    case model.aktivitet of
-                        Success data ->
-                            let
-                                oppdatertAktivitet_ =
-                                    { data | omfangTimer = Just <| Result.withDefault 0 (String.toInt endretOmfangTimer) }
-
-                                ( visLagreKnapp_, statusTekst_ ) =
-                                    valideringsInfo oppdatertAktivitet_
-                            in
-                                ( RemoteData.Success oppdatertAktivitet_, visLagreKnapp_, statusTekst_ )
-
-                        _ ->
-                            ( model.aktivitet, model.visLagreKnapp, model.statusText )
-            in
-                ( { model | aktivitet = oppdatertAktivitet, statusText = statusTekst, visLagreKnapp = visLagreKnapp }, Cmd.none, NoSharedMsg )
+            model.aktivitet
+                |> RemoteData.map (\aktivitet -> { aktivitet | omfangTimer = Just <| Result.withDefault 0 (String.toInt endretOmfangTimer) })
+                |> (\aktivitet -> { model | aktivitet = aktivitet })
+                |> validerAktivitet
+                |> (\nyModell -> ( nyModell, Cmd.none, NoSharedMsg ))
 
         EndreAktivitet ->
             let
@@ -303,6 +231,20 @@ update msg model =
 
         NavigerTilbake ->
             ( model, Cmd.none, NavigateToAktivitet model.aktivitetId )
+
+
+validerAktivitet : Model -> Model
+validerAktivitet model =
+    let
+        ( visLagreKnapp, statusTekst ) =
+            case model.aktivitet of
+                Success data ->
+                    valideringsInfo data
+
+                _ ->
+                    ( model.visLagreKnapp, model.statusText )
+    in
+        { model | statusText = statusTekst, visLagreKnapp = visLagreKnapp }
 
 
 valideringsInfo : AktivitetEdit -> ( Bool, String )
