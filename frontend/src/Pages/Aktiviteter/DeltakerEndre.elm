@@ -186,61 +186,25 @@ update msg model =
             ( { model | deltaker = response }, Cmd.none, NoSharedMsg )
 
         OnSelectUtdanningsprogram valg ->
-            let
-                ( oppdatertDeltaker, visLagreKnapp, statusTekst ) =
-                    case model.deltaker of
-                        Success data ->
-                            let
-                                oppdatertDeltaker_ =
-                                    { data | utdanningsprogram = valg }
-
-                                ( visLagreKnapp_, statusTekst_ ) =
-                                    valideringsInfo oppdatertDeltaker_
-                            in
-                                ( RemoteData.Success oppdatertDeltaker_, visLagreKnapp_, statusTekst_ )
-
-                        _ ->
-                            ( model.deltaker, model.visLagreKnapp, model.statusText )
-            in
-                ( { model | deltaker = oppdatertDeltaker, statusText = statusTekst, visLagreKnapp = visLagreKnapp }, Cmd.none, NoSharedMsg )
+            model.deltaker
+                |> RemoteData.map (\deltaker -> { deltaker | utdanningsprogram = valg })
+                |> (\deltaker -> { model | deltaker = deltaker })
+                |> validerDeltaker
+                |> (\nyModell -> ( nyModell, Cmd.none, NoSharedMsg ))
 
         OnSelectTrinn valg ->
-            let
-                ( oppdatertDeltaker, visLagreKnapp, statusTekst ) =
-                    case model.deltaker of
-                        Success data ->
-                            let
-                                oppdatertDeltaker_ =
-                                    { data | trinn = valg }
-
-                                ( visLagreKnapp_, statusTekst_ ) =
-                                    valideringsInfo oppdatertDeltaker_
-                            in
-                                ( RemoteData.Success oppdatertDeltaker_, visLagreKnapp_, statusTekst_ )
-
-                        _ ->
-                            ( model.deltaker, model.visLagreKnapp, model.statusText )
-            in
-                ( { model | deltaker = oppdatertDeltaker, statusText = statusTekst, visLagreKnapp = visLagreKnapp }, Cmd.none, NoSharedMsg )
+            model.deltaker
+                |> RemoteData.map (\deltaker -> { deltaker | trinn = valg })
+                |> (\deltaker -> { model | deltaker = deltaker })
+                |> validerDeltaker
+                |> (\nyModell -> ( nyModell, Cmd.none, NoSharedMsg ))
 
         OnSelectFag valg ->
-            let
-                ( oppdatertDeltaker, visLagreKnapp, statusTekst ) =
-                    case model.deltaker of
-                        Success data ->
-                            let
-                                oppdatertDeltaker_ =
-                                    { data | fag = valg }
-
-                                ( visLagreKnapp_, statusTekst_ ) =
-                                    valideringsInfo oppdatertDeltaker_
-                            in
-                                ( RemoteData.Success oppdatertDeltaker_, visLagreKnapp_, statusTekst_ )
-
-                        _ ->
-                            ( model.deltaker, model.visLagreKnapp, model.statusText )
-            in
-                ( { model | deltaker = oppdatertDeltaker, statusText = statusTekst, visLagreKnapp = visLagreKnapp }, Cmd.none, NoSharedMsg )
+            model.deltaker
+                |> RemoteData.map (\deltaker -> { deltaker | fag = valg })
+                |> (\deltaker -> { model | deltaker = deltaker })
+                |> validerDeltaker
+                |> (\nyModell -> ( nyModell, Cmd.none, NoSharedMsg ))
 
         UtdanningsprogramDropdown utdanningsprogram ->
             let
@@ -263,43 +227,19 @@ update msg model =
             in
                 ( { model | dropdownStateFag = updated }, cmd, NoSharedMsg )
 
-        EndretKompetansemaal endretKompetansemaal ->
-            let
-                ( oppdatertDeltaker, visLagreKnapp, statusTekst ) =
-                    case model.deltaker of
-                        Success data ->
-                            let
-                                oppdatertDeltaker_ =
-                                    { data | kompetansemaal = Just endretKompetansemaal }
-
-                                ( visLagreKnapp_, statusTekst_ ) =
-                                    valideringsInfo oppdatertDeltaker_
-                            in
-                                ( RemoteData.Success oppdatertDeltaker_, visLagreKnapp_, statusTekst_ )
-
-                        _ ->
-                            ( model.deltaker, model.visLagreKnapp, model.statusText )
-            in
-                ( { model | deltaker = oppdatertDeltaker, statusText = statusTekst, visLagreKnapp = visLagreKnapp }, Cmd.none, NoSharedMsg )
+        EndretKompetansemaal valg ->
+            model.deltaker
+                |> RemoteData.map (\deltaker -> { deltaker | kompetansemaal = Just valg })
+                |> (\deltaker -> { model | deltaker = deltaker })
+                |> validerDeltaker
+                |> (\nyModell -> ( nyModell, Cmd.none, NoSharedMsg ))
 
         EndretTimer endretOmfangTimer ->
-            let
-                ( oppdatertDeltaker, visLagreKnapp, statusTekst ) =
-                    case model.deltaker of
-                        Success data ->
-                            let
-                                oppdatertDeltaker_ =
-                                    { data | timer = Just <| Result.withDefault 0 (String.toInt endretOmfangTimer) }
-
-                                ( visLagreKnapp_, statusTekst_ ) =
-                                    valideringsInfo oppdatertDeltaker_
-                            in
-                                ( RemoteData.Success oppdatertDeltaker_, visLagreKnapp_, statusTekst_ )
-
-                        _ ->
-                            ( model.deltaker, model.visLagreKnapp, model.statusText )
-            in
-                ( { model | deltaker = oppdatertDeltaker, statusText = statusTekst, visLagreKnapp = visLagreKnapp }, Cmd.none, NoSharedMsg )
+            model.deltaker
+                |> RemoteData.map (\deltaker -> { deltaker | timer = Just <| Result.withDefault 0 (String.toInt endretOmfangTimer) })
+                |> (\deltaker -> { model | deltaker = deltaker })
+                |> validerDeltaker
+                |> (\nyModell -> ( nyModell, Cmd.none, NoSharedMsg ))
 
         EndreDeltaker ->
             let
@@ -386,6 +326,20 @@ update msg model =
                             ( Cmd.none, "Nettverksfeil - timet ut ved kall til API.", 0 )
             in
                 ( { model | statusText = statusText }, cmd, NoSharedMsg )
+
+
+validerDeltaker : Model -> Model
+validerDeltaker model =
+    let
+        ( visLagreKnapp, statusTekst ) =
+            case model.deltaker of
+                Success data ->
+                    valideringsInfo data
+
+                _ ->
+                    ( model.visLagreKnapp, model.statusText )
+    in
+        { model | statusText = statusTekst, visLagreKnapp = visLagreKnapp }
 
 
 valideringsInfo : DeltakerEdit -> ( Bool, String )
