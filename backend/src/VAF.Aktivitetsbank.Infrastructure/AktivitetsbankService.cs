@@ -15,12 +15,10 @@ namespace VAF.Aktivitetsbank.Infrastructure
     public class AktivitetsbankService : IAktivitetsbankService
     {
         private readonly AktivitetsbankContext _context;
-        private readonly ILogger<AktivitetsbankService> _logger;
 
-        public AktivitetsbankService(AktivitetsbankContext context, ILogger<AktivitetsbankService> logger )
+        public AktivitetsbankService(AktivitetsbankContext context)
         {
             _context = context;
-            _logger = logger;
         }
         public AktivitetsbankMetadata HenteAlleMetadata()
         {
@@ -167,7 +165,7 @@ namespace VAF.Aktivitetsbank.Infrastructure
             }
             catch (Exception e)
             {
-                _logger.LogError("Kunne ikke opprette aktivitet til databasen.", e); 
+                //_logger.LogError("Kunne ikke opprette aktivitet til databasen.", e); 
                 throw;
             }
         }
@@ -196,7 +194,7 @@ namespace VAF.Aktivitetsbank.Infrastructure
             }
             catch (Exception e)
             {
-                _logger.LogError("Kunne ikke opprette deltaker til databasen.", e); 
+                //_logger.LogError("Kunne ikke opprette deltaker til databasen.", e); 
                 throw;
             }
         }
@@ -221,14 +219,14 @@ namespace VAF.Aktivitetsbank.Infrastructure
                 }
                 else
                 {
-                    _logger.LogError("Kunne ikke lagre endret aktivitet til databasen.", commandEndreAktivitetDto); 
+                    //_logger.LogError("Kunne ikke lagre endret aktivitet til databasen.", commandEndreAktivitetDto); 
                     throw new NullReferenceException();
                 }
 
             }
             catch (Exception e)
             {
-                _logger.LogError("Kunne ikke lagre endret aktivitet til databasen.", e); 
+                //_logger.LogError("Kunne ikke lagre endret aktivitet til databasen.", e); 
                 throw;
             }
         }
@@ -251,14 +249,14 @@ namespace VAF.Aktivitetsbank.Infrastructure
                 }
                 else
                 {
-                    _logger.LogError("Kunne ikke lagre endret deltaker til databasen.", commandEndreDeltakerDto); 
+                    //_logger.LogError("Kunne ikke lagre endret deltaker til databasen.", commandEndreDeltakerDto); 
                     throw new NullReferenceException();
                 }
 
             }
             catch (Exception e)
             {
-                _logger.LogError("Kunne ikke lagre endret deltaker til databasen.", e); 
+                //_logger.LogError("Kunne ikke lagre endret deltaker til databasen.", e); 
                 throw;
             }
         }
@@ -311,14 +309,14 @@ namespace VAF.Aktivitetsbank.Infrastructure
                 }
                 else
                 {
-                    _logger.LogError("Kunne ikke kopiere aktivitet til databasen.", commandKopierAktivitetDto); 
+                    //_logger.LogError("Kunne ikke kopiere aktivitet til databasen.", commandKopierAktivitetDto); 
                     throw new NullReferenceException();
                 }
 
             }
             catch (Exception e)
             {
-                _logger.LogError("Kunne ikke kopiere aktivitet til databasen.", e);
+                //_logger.LogError("Kunne ikke kopiere aktivitet til databasen.", e);
                 throw;
             }
         }
@@ -337,14 +335,14 @@ namespace VAF.Aktivitetsbank.Infrastructure
                 }
                 else
                 {
-                    _logger.LogError("Kunne ikke deaktivere aktivitet i databasen.", commandSlettAktivitetDto); 
+                    //_logger.LogError("Kunne ikke deaktivere aktivitet i databasen.", commandSlettAktivitetDto); 
                     throw new NullReferenceException();
                 }
 
             }
             catch (Exception e)
             {
-                _logger.LogError("Kunne ikke deaktivere aktivitet i databasen.", e); 
+                //_logger.LogError("Kunne ikke deaktivere aktivitet i databasen.", e); 
                 throw;
             }
         }
@@ -363,14 +361,14 @@ namespace VAF.Aktivitetsbank.Infrastructure
                 }
                 else
                 {
-                    _logger.LogError("Kunne ikke deaktivere deltaker i databasen.", commandSlettDeltakerDto); 
+                    //_logger.LogError("Kunne ikke deaktivere deltaker i databasen.", commandSlettDeltakerDto); 
                     throw new NullReferenceException();
                 }
 
             }
             catch (Exception e)
             {
-                _logger.LogError("Kunne ikke deaktivere deltaker i databasen.", e); 
+                //_logger.LogError("Kunne ikke deaktivere deltaker i databasen.", e); 
                 throw;
             }
         }

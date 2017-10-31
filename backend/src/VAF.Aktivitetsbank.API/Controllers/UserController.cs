@@ -36,7 +36,6 @@ namespace VAF.Aktivitetsbank.API.Controllers
 
         public UserController(ILogger<UserController> logger, IOptions<AppOptions> options, IAuthorizationService authorizationService)
         {
-            _logger = logger;
             _authorizationService = authorizationService;
             _options = options.Value;
         }
@@ -44,7 +43,6 @@ namespace VAF.Aktivitetsbank.API.Controllers
         [HttpGet()]
         public async Task<dynamic> Get()
         {
-            _logger.LogInformation(_eventIdRead + 1, "Bruker pålogging startet.");
             var userInfo = new UserInfo();
             userInfo.brukernavn = HttpContext.User.Identity.Name;
             if ((await _authorizationService.AuthorizeAsync(HttpContext.User, "", new ErAktivitetsbankRedigererRequirement())).Succeeded)
@@ -55,8 +53,6 @@ namespace VAF.Aktivitetsbank.API.Controllers
             {
                 userInfo.rolle = "Les";
             }
-            _logger.LogWarning(_eventIdRead + 2, "Pålogget brukernavn: {Brukernavn}", userInfo.brukernavn);
-            _logger.LogWarning(_eventIdRead + 3, "Pålogget bruker rolle: {BrukerRolle}", userInfo.rolle);
 
             return userInfo;
         }

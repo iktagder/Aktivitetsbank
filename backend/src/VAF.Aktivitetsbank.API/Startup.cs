@@ -28,6 +28,8 @@ using VAF.Aktivitetsbank.Infrastructure;
 using Microsoft.AspNetCore.Server.IISIntegration;
 using System.IO;
 
+
+
 namespace VAF.Aktivitetsbank.API
 {
     public class Startup
@@ -180,7 +182,10 @@ namespace VAF.Aktivitetsbank.API
                 cfg.CreateMap<SkoleAar, SkoleAarDto>();
 
             });
-            
+
+
+            app.UseMiddleware<SerilogMiddleware>();
+
             app.UseMvc();
 
 
