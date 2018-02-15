@@ -2,8 +2,9 @@ name: $(Year:yyyy).$(Month)$(Rev:.r)
 
 phases:
 
-
+################################################################################
 - phase: DATABASE
+################################################################################
   queue: Biztalk Agent Pool
   steps:
   - task: NuGetRestore@1
@@ -29,9 +30,10 @@ phases:
       OctoConnectedServiceName: 'octopus.vaf.no'
       Package: '$(Build.ArtifactStagingDirectory)\VAF.Aktivitetsbank.Database.Migrations.$(Build.BuildNumber).nupkg'
 
-
+################################################################################
 - phase: BACKEND
-  DependsOn: DATABASE
+################################################################################
+  dependsOn: DATABASE
   queue: Biztalk Agent Pool
   steps:
   - task: CmdLine@1
@@ -59,9 +61,10 @@ phases:
       Package: '$(Build.ArtifactStagingDirectory)\VAF.Aktivitetsbank.API.$(Build.BuildNumber).nupkg'
       Replace: 'true'
 
-
+################################################################################
 - phase: FRONTEND
-  DependsOn: BACKEND
+################################################################################
+  dependsOn: BACKEND
   queue: Biztalk Agent Pool
   steps:
   - task: Npm@0
