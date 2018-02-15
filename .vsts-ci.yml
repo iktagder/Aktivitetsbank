@@ -4,11 +4,7 @@ phases:
 
 
 - phase: DATABASE
-  queue:
-    name: Hosted VS2017
-    demands: 
-      - msbuild
-      - DotNetFramework
+  queue: Biztalk Agent Pool
   steps:
   - task: NuGetRestore@1
     inputs:
@@ -35,9 +31,8 @@ phases:
 
 
 - phase: BACKEND
-  queue:
-    name: Hosted VS2017
-    demands: DotNetFramework
+  DependsOn: DATABASE
+  queue: Biztalk Agent Pool
   steps:
   - task: CmdLine@1
     inputs:
@@ -66,7 +61,8 @@ phases:
 
 
 - phase: FRONTEND
-  queue: Hosted
+  DependsOn: BACKEND
+  queue: Biztalk Agent Pool
   steps:
   - task: Npm@0
     inputs:
