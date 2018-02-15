@@ -5,7 +5,7 @@ phases:
 ################################################################################
 - phase: DATABASE
 ################################################################################
-  queue: Biztalk Agent Pool
+  queue: Hosted VS2017
   steps:
   - task: NuGetRestore@1
     inputs:
@@ -34,7 +34,7 @@ phases:
 - phase: BACKEND
 ################################################################################
   dependsOn: DATABASE
-  queue: Biztalk Agent Pool
+  queue: Hosted VS2017
   steps:
   - task: CmdLine@1
     inputs:
@@ -65,7 +65,7 @@ phases:
 - phase: FRONTEND
 ################################################################################
   dependsOn: BACKEND
-  queue: Biztalk Agent Pool
+  queue: Hosted
   steps:
   - task: Npm@0
     inputs:
