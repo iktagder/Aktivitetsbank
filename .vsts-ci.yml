@@ -45,7 +45,7 @@ phases:
   - task: CmdLine@1
     inputs:
       filename: 'dotnet'
-      arguments: 'publish -c $(BuildConfiguration) -o $(Build.ArtifactStagingDirectory)'
+      arguments: 'publish -c Release -o $(Build.ArtifactStagingDirectory)'
       workingFolder: 'backend'
 
   - task: octopusdeploy.octopus-deploy-build-release-tasks.octopus-pack.OctopusPack@2
