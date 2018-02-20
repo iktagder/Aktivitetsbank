@@ -579,7 +579,7 @@ visAktivitetDeltakerTabellRad idx taco aktivitetId model outerMdl =
                         , ( "font-size", "13px" )
                         ]
                     ]
-                    [ text (String.left 600 (model.kompetansemaal)) ]
+                    [ text model.kompetansemaal ]
                 ]
             , aksjon
             ]
