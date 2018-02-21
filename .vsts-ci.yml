@@ -5,7 +5,7 @@ phases:
 ################################################################################
 - phase: DATABASE
 ################################################################################
-  queue: Hosted VS2017
+  queue: Build Agent Pool
   steps:
   - task: NuGetRestore@1
     inputs:
@@ -34,7 +34,7 @@ phases:
 - phase: BACKEND
 ################################################################################
   dependsOn: DATABASE
-  queue: Hosted VS2017
+  queue: Build Agent Pool
   steps:
   - task: CmdLine@1
     inputs:
@@ -65,7 +65,7 @@ phases:
 - phase: FRONTEND
 ################################################################################
   dependsOn: BACKEND
-  queue: Hosted
+  queue: Build Agent Pool
   steps:
   - task: Npm@0
     inputs:
