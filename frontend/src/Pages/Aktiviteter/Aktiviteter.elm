@@ -1,6 +1,7 @@
 module Pages.Aktiviteter.Aktiviteter exposing (..)
 
 import Html exposing (Html, text, div, span, p, a)
+import Html.Attributes as Attr
 import Material
 import Material.Grid as Grid exposing (grid, size, cell, Device(..))
 import Material.Elevation as Elevation
@@ -340,8 +341,27 @@ view taco model =
             , Options.css "padding" "16px 32px"
             ]
             [ visGjeldendeFilter taco.filter FjernGjeldendeFilter
+            , visAntallAktiviteter model
             , viewMainContent model
             ]
+        ]
+
+
+visAntallAktiviteter : Model -> Html Msg
+visAntallAktiviteter model =
+    div [ Attr.style [ ( "float", "right" ) ] ]
+        [ case model.aktivitetListe of
+            NotAsked ->
+                text ""
+
+            Loading ->
+                text ""
+
+            Failure err ->
+                text ""
+
+            Success data ->
+                text <| "Antall: " ++ toString (List.length data)
         ]
 
 
