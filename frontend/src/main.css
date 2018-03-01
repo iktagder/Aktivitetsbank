@@ -55,3 +55,23 @@ white-space: normal;
 .mdl-checkbox {
   height: auto!important; 
 }
+
+
+
+@media print {
+
+  .mdl-layout, #elm-mdl-layout-main {
+    overflow-x: visible!important;
+    overflow-y: visible!important;
+  }
+
+  .filtrer {
+    display: none;
+    height: 0px;
+  }
+
+  table {
+    font-size: 7pt!important;
+  }
+  
+}

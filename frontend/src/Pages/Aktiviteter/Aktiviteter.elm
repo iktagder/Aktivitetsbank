@@ -427,6 +427,7 @@ getFilterCell model taco =
             cell
                 [ size All 2
                 , Elevation.e0
+                , cs "filtrer"
                 ]
                 [ visFilter model taco
                 ]
