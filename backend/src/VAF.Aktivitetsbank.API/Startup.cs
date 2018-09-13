@@ -74,6 +74,7 @@ namespace VAF.Aktivitetsbank.API
                 options.AddPolicy("KanRedigereAktiviteter", policyBuilder => policyBuilder.AddRequirements(new ErAktivitetsbankRedigererRequirement()));
             });
 
+            services.AddSingleton<IConfiguration>(Configuration);
 
             // Tilgang avhenging av miljø
             if (currentEnvironment.IsDevelopment())

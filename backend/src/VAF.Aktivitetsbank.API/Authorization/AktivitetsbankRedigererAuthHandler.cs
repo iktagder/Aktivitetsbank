@@ -2,6 +2,7 @@
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace VAF.Aktivitetsbank.API.Authorization
@@ -9,11 +10,12 @@ namespace VAF.Aktivitetsbank.API.Authorization
     public class AktivitetsbankRedigererAuthHandler : AuthorizationHandler<ErAktivitetsbankRedigererRequirement>
     {
         private readonly ILogger _logger;
+        private IConfiguration _configuration;
 
-        public AktivitetsbankRedigererAuthHandler(ILoggerFactory loggerFactory)
+        public AktivitetsbankRedigererAuthHandler(ILoggerFactory loggerFactory, IConfiguration Configuration)
         {
             _logger = loggerFactory.CreateLogger(this.GetType().Name);
-
+            _configuration = Configuration;
         }
 
         protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, ErAktivitetsbankRedigererRequirement requirement)
@@ -27,7 +29,7 @@ namespace VAF.Aktivitetsbank.API.Authorization
 
             //context.Succeed(requirement);
             //return Task.CompletedTask;
-            if (context.User.HasClaim(c => c.Type == ClaimTypes.Name) && context.User.IsInRole("ADM\\RES_Aktivitetsbank"))
+            if (context.User.HasClaim(c => c.Type == ClaimTypes.Name) && context.User.IsInRole(_configuration["AdGroupForWriteAccess"]))
             {
                 context.Succeed(requirement);
             }
