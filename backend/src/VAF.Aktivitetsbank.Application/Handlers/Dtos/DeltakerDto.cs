@@ -14,6 +14,7 @@ namespace VAF.Aktivitetsbank.Application.Handlers.Dtos
         public Guid FagId { get; set; }
         public string FagNavn { get; set; }
         public int Timer { get; set; }
+        public int Larertimer { get; set; }
         public string Kompetansemaal { get; set; }
     }
 }

@@ -42,6 +42,7 @@ namespace VAF.Aktivitetsbank.Data.Entiteter
         public Guid FagId { get; set; }
         public Fag Fag { get; set; }
         public int Timer { get; set; }
+        public int Larertimer { get; set; }
         [Required]
         public string Kompetansemaal { get; set; }
         [Required]

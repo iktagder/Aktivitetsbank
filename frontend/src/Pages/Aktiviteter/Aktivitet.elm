@@ -534,7 +534,10 @@ visAktivitetDeltakerTabell taco model deltakere =
                     [ showText span Typo.body2 "Fag"
                     ]
                 , Table.th [ css "width" "10%", css "text-align" "left" ]
-                    [ showText span Typo.body2 "Timer"
+                    [ showText span Typo.body2 "Elevtimer"
+                    ]
+                , Table.th [ css "width" "10%", css "text-align" "left" ]
+                    [ showText span Typo.body2 "Lærertimer"
                     ]
                 , Table.th [ css "width" "40%", css "text-align" "left" ]
                     [ showText span Typo.body2 "Kompetansemål"
@@ -569,6 +572,7 @@ visAktivitetDeltakerTabellRad idx taco aktivitetId model outerMdl =
             , Table.td [ css "text-align" "left", cs "wrapword" ] [ text model.trinnNavn ]
             , Table.td [ css "text-align" "left", cs "wrapword" ] [ text model.fagNavn ]
             , Table.td [ Table.numeric ] [ text <| toString model.timer ]
+            , Table.td [ Table.numeric ] [ text <| toString model.larertimer ]
             , Table.td [ css "text-align" "left", cs "wrapword" ]
                 [ Html.pre
                     [ style

@@ -106,5 +106,8 @@
   <ItemGroup>
     <EmbeddedResource Include="Scripts\Script00007 - SkoleAar - Aktivitet.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Scripts\Script00008 - Larertimer - Deltaker.sql" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

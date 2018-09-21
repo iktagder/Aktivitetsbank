@@ -177,6 +177,7 @@ type alias Deltaker =
     , fagNavn : String
     , fag : Maybe Fag
     , timer : Int
+    , larertimer : Int
     , kompetansemaal : String
     }
 
@@ -188,6 +189,7 @@ type alias DeltakerEdit =
     , trinn : Maybe Trinn
     , fag : Maybe Fag
     , timer : Maybe Int
+    , larertimer : Maybe Int
     , kompetansemaal : Maybe String
     }
 
@@ -197,6 +199,7 @@ type alias DeltakerGyldigNy =
     , utdanningsprogram : Utdanningsprogram
     , trinn : Trinn
     , timer : Int
+    , larertimer : Int
     , fag : Fag
     , kompetansemaal : String
     }
@@ -208,6 +211,7 @@ type alias DeltakerGyldigEndre =
     , utdanningsprogram : Utdanningsprogram
     , trinn : Trinn
     , timer : Int
+    , larertimer : Int
     , fag : Fag
     , kompetansemaal : String
     }

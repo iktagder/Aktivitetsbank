@@ -43,6 +43,7 @@ type Msg
     | FagDropdown (Dropdown.Msg Fag)
     | EndretKompetansemaal String
     | EndretTimer String
+    | EndretLarertimer String
     | OpprettNyDeltaker
     | NyDeltakerRespons (Result Error NyDeltaker)
     | NavigerTilbake
@@ -75,6 +76,7 @@ initDeltaker =
     , trinn = Nothing
     , fag = Nothing
     , timer = Nothing
+    , larertimer = Nothing
     , kompetansemaal = Nothing
     }
 
@@ -236,6 +238,19 @@ update msg model =
             in
                 ( { model | deltaker = oppdatertDeltaker, statusText = statusTekst, visLagreKnapp = visLagreKnapp }, Cmd.none, NoSharedMsg )
 
+        EndretLarertimer endretOmfangTimer ->
+            let
+                gammelDeltaker =
+                    model.deltaker
+
+                oppdatertDeltaker =
+                    { gammelDeltaker | larertimer = Just <| Result.withDefault 0 (String.toInt endretOmfangTimer) }
+
+                ( visLagreKnapp, statusTekst ) =
+                    valideringsInfo oppdatertDeltaker
+            in
+                ( { model | deltaker = oppdatertDeltaker, statusText = statusTekst, visLagreKnapp = visLagreKnapp }, Cmd.none, NoSharedMsg )
+
         OpprettNyDeltaker ->
             let
                 validering =
@@ -304,7 +319,8 @@ validerDeltakerGyldigNy form =
         |: required "Mangler gyldig aktivitet" form.aktivitetId
         |: required "Velg utdanningsprogram" form.utdanningsprogram
         |: required "Velg trinn" form.trinn
-        |: required "Timer må fylles ut." form.timer
+        |: required "Elevtimer må fylles ut." form.timer
+        |: required "Lærertimer må fylles ut." form.larertimer
         |: required "Velg fag" form.fag
         |: notBlank "Kompetansemål må fylles ut." form.kompetansemaal
 
@@ -439,11 +455,21 @@ visOpprettDeltaker model taco deltaker =
             , Textfield.render Mdl
                 [ 3 ]
                 model.mdl
-                [ Textfield.label "Timer (klokketimer)"
+                [ Textfield.label "Elevtimer (klokketimer)"
                 , Textfield.floatingLabel
                 , Textfield.text_
                 , Textfield.value <| Maybe.withDefault "" <| Maybe.map toString deltaker.timer
                 , Options.onInput EndretTimer
+                ]
+                []
+            , Textfield.render Mdl
+                [ 3 ]
+                model.mdl
+                [ Textfield.label "Lærertimer (klokketimer)"
+                , Textfield.floatingLabel
+                , Textfield.text_
+                , Textfield.value <| Maybe.withDefault "" <| Maybe.map toString deltaker.larertimer
+                , Options.onInput EndretLarertimer
                 ]
                 []
             , showText p Typo.menu "Fag"

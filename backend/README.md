@@ -14,12 +14,15 @@ For å oppdatere databasen / kjøre første migrering: (Første migrering vil også l
 dotnet ef database update -s ..\VAF.Aktivitetsbank.API\
 ´´´
 
-For å lage databasescript:
+For å lage databasescript (bruk forrige migrration):
 ´´´
-dotnet ef migrations script -s ..\VAF.Aktivitetsbank.API\ -o c:\tmp\dbscript.sql
 dotnet ef migrations script 20170514210915_required_user -s ..\VAF.Aktivitetsbank.API\ -o c:\tmp\dbscript_aktivt_felt.sql
-
 ´´´
+Lag ny SQL-fil i sciptsmappa. Husk å sette sql-fila til `Embedded Resource`!
+
+Hele db: `dotnet ef migrations script -s ..\VAF.Aktivitetsbank.API\ -o c:\tmp\dbscript.sql`
+
+
 
 
 Hvordan endre mellom lese/skriverettighet i utviklingsmodus:
