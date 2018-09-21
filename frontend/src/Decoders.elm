@@ -207,6 +207,7 @@ encodeOpprettNyDeltaker aktivitetId model =
             , ( "kompetansemaal", Json.Encode.string model.kompetansemaal )
             , ( "timer", Json.Encode.int model.timer )
             , ( "larertimer", Json.Encode.int model.larertimer )
+            , ( "elevgrupper", Json.Encode.int model.elevgrupper )
             , ( "utdanningsprogramId", Json.Encode.string model.utdanningsprogram.id )
             , ( "trinnId", Json.Encode.string model.trinn.id )
             , ( "fagId", Json.Encode.string model.fag.id )
@@ -225,6 +226,7 @@ encodeEndreDeltaker aktivitetId model =
             , ( "kompetansemaal", Json.Encode.string model.kompetansemaal )
             , ( "timer", Json.Encode.int model.timer )
             , ( "larertimer", Json.Encode.int model.larertimer )
+            , ( "elevgrupper", Json.Encode.int model.elevgrupper )
             , ( "utdanningsprogramId", Json.Encode.string model.utdanningsprogram.id )
             , ( "trinnId", Json.Encode.string model.trinn.id )
             , ( "fagId", Json.Encode.string model.fag.id )
@@ -268,6 +270,7 @@ decodeDeltaker =
         |> Json.Decode.Pipeline.custom ((decodeDeltakerFag) |> Json.andThen (\x -> Json.succeed <| Just x))
         |> Json.Decode.Pipeline.required "timer" (Json.int)
         |> Json.Decode.Pipeline.required "larertimer" (Json.int)
+        |> Json.Decode.Pipeline.required "elevgrupper" (Json.int)
         |> Json.Decode.Pipeline.required "kompetansemaal" (Json.string)
 
 
@@ -281,6 +284,7 @@ decodeDeltakerEdit =
         |> Json.Decode.Pipeline.custom ((decodeDeltakerFag) |> Json.andThen (\x -> Json.succeed <| Just x))
         |> Json.Decode.Pipeline.custom ((field "timer" Json.int) |> Json.andThen (\x -> Json.succeed <| Just x))
         |> Json.Decode.Pipeline.custom ((field "larertimer" Json.int) |> Json.andThen (\x -> Json.succeed <| Just x))
+        |> Json.Decode.Pipeline.custom ((field "elevgrupper" Json.int) |> Json.andThen (\x -> Json.succeed <| Just x))
         |> Json.Decode.Pipeline.custom ((field "kompetansemaal" Json.string) |> Json.andThen (\x -> Json.succeed <| Just x))
 
 

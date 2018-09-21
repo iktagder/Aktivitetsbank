@@ -19,6 +19,10 @@ namespace VAF.Aktivitetsbank.Application.Handlers.Dtos
         public int Timer { get; set; }
         [Required]
         public int Larertimer { get; set; }
+
+        [Required]
+        public int Elevgrupper { get; set; }
+
         [Required]
         [StringLength(4000, ErrorMessage = "Kompetansemål må være mindre enn 4000 tegn.")]
         public string Kompetansemaal { get; set; }

@@ -15,6 +15,7 @@ namespace VAF.Aktivitetsbank.Application.Handlers.Dtos
         public string FagNavn { get; set; }
         public int Timer { get; set; }
         public int Larertimer { get; set; }
+        public int Elevgrupper { get; set; }
         public string Kompetansemaal { get; set; }
     }
 }

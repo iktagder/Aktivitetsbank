@@ -11,9 +11,10 @@ using VAF.Aktivitetsbank.Data;
 namespace VAF.Aktivitetsbank.Data.Migrations
 {
     [DbContext(typeof(AktivitetsbankContext))]
-    partial class AktivitetsbankContextModelSnapshot : ModelSnapshot
+    [Migration("20180921122515_deltaker_elevgrupper")]
+    partial class deltaker_elevgrupper
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

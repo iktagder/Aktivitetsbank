@@ -44,6 +44,7 @@ type Msg
     | EndretKompetansemaal String
     | EndretTimer String
     | EndretLarertimer String
+    | EndretElevgrupper String
     | OpprettNyDeltaker
     | NyDeltakerRespons (Result Error NyDeltaker)
     | NavigerTilbake
@@ -77,6 +78,7 @@ initDeltaker =
     , fag = Nothing
     , timer = Nothing
     , larertimer = Nothing
+    , elevgrupper = Nothing
     , kompetansemaal = Nothing
     }
 
@@ -251,6 +253,19 @@ update msg model =
             in
                 ( { model | deltaker = oppdatertDeltaker, statusText = statusTekst, visLagreKnapp = visLagreKnapp }, Cmd.none, NoSharedMsg )
 
+        EndretElevgrupper antall ->
+            let
+                gammelDeltaker =
+                    model.deltaker
+
+                oppdatertDeltaker =
+                    { gammelDeltaker | elevgrupper = Just <| Result.withDefault 0 (String.toInt antall) }
+
+                ( visLagreKnapp, statusTekst ) =
+                    valideringsInfo oppdatertDeltaker
+            in
+                ( { model | deltaker = oppdatertDeltaker, statusText = statusTekst, visLagreKnapp = visLagreKnapp }, Cmd.none, NoSharedMsg )
+
         OpprettNyDeltaker ->
             let
                 validering =
@@ -321,6 +336,7 @@ validerDeltakerGyldigNy form =
         |: required "Velg trinn" form.trinn
         |: required "Elevtimer må fylles ut." form.timer
         |: required "Lærertimer må fylles ut." form.larertimer
+        |: required "Elevgrupper må fylles ut." form.elevgrupper
         |: required "Velg fag" form.fag
         |: notBlank "Kompetansemål må fylles ut." form.kompetansemaal
 
@@ -470,6 +486,16 @@ visOpprettDeltaker model taco deltaker =
                 , Textfield.text_
                 , Textfield.value <| Maybe.withDefault "" <| Maybe.map toString deltaker.larertimer
                 , Options.onInput EndretLarertimer
+                ]
+                []
+            , Textfield.render Mdl
+                [ 3 ]
+                model.mdl
+                [ Textfield.label "Elevgrupper (antall)"
+                , Textfield.floatingLabel
+                , Textfield.text_
+                , Textfield.value <| Maybe.withDefault "" <| Maybe.map toString deltaker.elevgrupper
+                , Options.onInput EndretElevgrupper
                 ]
                 []
             , showText p Typo.menu "Fag"

@@ -183,6 +183,7 @@ namespace VAF.Aktivitetsbank.Infrastructure
                     UtdanningsprogramId = commandOpprettDeltakerDto.UtdanningsprogramId,
                     Timer = commandOpprettDeltakerDto.Timer,
                     Larertimer = commandOpprettDeltakerDto.Larertimer,
+                    Elevgrupper = commandOpprettDeltakerDto.Elevgrupper,
                     Kompetansemaal = commandOpprettDeltakerDto.Kompetansemaal,
                     Opprettet = DateTime.Now,
                     Endret = DateTime.Now,
@@ -241,6 +242,7 @@ namespace VAF.Aktivitetsbank.Infrastructure
                 {
                     gammelDeltaker.Timer = commandEndreDeltakerDto.Timer;
                     gammelDeltaker.Larertimer = commandEndreDeltakerDto.Larertimer;
+                    gammelDeltaker.Elevgrupper = commandEndreDeltakerDto.Elevgrupper;
                     gammelDeltaker.Kompetansemaal = commandEndreDeltakerDto.Kompetansemaal;
                     gammelDeltaker.UtdanningsprogramId = commandEndreDeltakerDto.UtdanningsprogramId;
                     gammelDeltaker.TrinnId = commandEndreDeltakerDto.TrinnId;
@@ -299,6 +301,7 @@ namespace VAF.Aktivitetsbank.Infrastructure
                                 UtdanningsprogramId = deltaker.UtdanningsprogramId,
                                 Timer = deltaker.Timer,
                                 Larertimer = deltaker.Larertimer,
+                                Elevgrupper = deltaker.Elevgrupper,
                                 Kompetansemaal = deltaker.Kompetansemaal,
                                 Aktiv = true,
                                 OpprettetAv = commandKopierAktivitetDto.BrukerId,

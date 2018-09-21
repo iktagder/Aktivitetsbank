@@ -109,5 +109,8 @@
   <ItemGroup>
     <EmbeddedResource Include="Scripts\Script00008 - Larertimer - Deltaker.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Scripts\Script00009 - Elevtimer - Deltaker.sql" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
