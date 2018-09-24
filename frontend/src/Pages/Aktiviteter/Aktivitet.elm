@@ -374,58 +374,100 @@ visAktivitet model =
 
 visAktivitetSuksess : Model -> Aktivitet -> List (Grid.Cell Msg)
 visAktivitetSuksess model aktivitet =
-    [ cell
-        [ size All 4
-        , Elevation.e0
-        , Options.css "padding" "0px 32px"
+    let
+        sumElevtimer =
+            case model.deltakere of
+                NotAsked ->
+                    "Ikke klar..."
 
-        -- , Options.css "display" "flex"
-        -- , Options.css "flex-direction" "column"
-        -- , Options.css "align-items" "left"
-        ]
-        [ Options.div
-            [ css "width" "100%"
-            ]
-            [ p []
-                [ Options.styled div [ Typo.title ] [ text aktivitet.navn ]
-                ]
-            , p []
-                [ Options.styled div [ Typo.caption ] [ text "Beskrivelse: " ]
-                , Options.styled div [ Typo.subhead ] [ text (aktivitet.beskrivelse) ]
-                ]
-            , p []
-                [ Options.styled div [ Typo.caption ] [ text "Skoleår: " ]
-                , Options.styled div [ Typo.subhead ] [ text (aktivitet.skoleAarNavn) ]
-                ]
-            ]
-        ]
-    , cell
-        [ size All 8
-        , Elevation.e0
-        , Options.css "padding" "16px 32px"
+                Loading ->
+                    "Loading..."
 
-        -- , Options.css "display" "flex"
-        -- , Options.css "flex-direction" "column"
-        -- , Options.css "align-items" "left"
-        ]
-        [ Options.div
-            [ css "width" "100%"
+                Failure err ->
+                    "Feil..."
+
+                Success data ->
+                    toString <| List.sum <| List.map (\d -> d.elevgrupper * d.timer) data
+
+        sumLarertimer =
+            case model.deltakere of
+                NotAsked ->
+                    "Ikke klar..."
+
+                Loading ->
+                    "Loading..."
+
+                Failure err ->
+                    "Feil..."
+
+                Success data ->
+                    toString <| List.sum <| List.map (\d -> d.larertimer) data
+    in
+        [ cell
+            [ size All 4
+            , Elevation.e0
+            , Options.css "padding" "0px 32px"
+
+            -- , Options.css "display" "flex"
+            -- , Options.css "flex-direction" "column"
+            -- , Options.css "align-items" "left"
             ]
-            [ p []
-                [ Options.styled div [ Typo.caption ] [ text "Klokketimer: " ]
-                , Options.styled div [ Typo.subhead ] [ text (toString aktivitet.omfangTimer) ]
+            [ Options.div
+                [ css "width" "100%"
                 ]
-            , p []
-                [ Options.styled div [ Typo.caption ] [ text "Skole: " ]
-                , Options.styled div [ Typo.subhead ] [ text (aktivitet.skoleNavn) ]
+                [ p []
+                    [ Options.styled div [ Typo.title ] [ text aktivitet.navn ]
+                    ]
+                , p []
+                    [ Options.styled div [ Typo.caption ] [ text "Beskrivelse: " ]
+                    , Options.styled div [ Typo.subhead ] [ text (aktivitet.beskrivelse) ]
+                    ]
+                , p []
+                    [ Options.styled div [ Typo.caption ] [ text "Skoleår: " ]
+                    , Options.styled div [ Typo.subhead ] [ text (aktivitet.skoleAarNavn) ]
+                    ]
                 ]
-            , p []
-                [ Options.styled div [ Typo.caption ] [ text "Aktivitetstype" ]
-                , Options.styled div [ Typo.subhead ] [ text aktivitet.aktivitetsTypeNavn ]
+            ]
+        , cell
+            [ size All 4
+            , Elevation.e0
+            , Options.css "padding" "16px 32px"
+
+            -- , Options.css "display" "flex"
+            -- , Options.css "flex-direction" "column"
+            -- , Options.css "align-items" "left"
+            ]
+            [ Options.div
+                [ css "width" "100%"
+                ]
+                [ p []
+                    [ Options.styled div [ Typo.caption ] [ text "Klokketimer: " ]
+                    , Options.styled div [ Typo.subhead ] [ text (toString aktivitet.omfangTimer) ]
+                    ]
+                , p []
+                    [ Options.styled div [ Typo.caption ] [ text "Skole: " ]
+                    , Options.styled div [ Typo.subhead ] [ text (aktivitet.skoleNavn) ]
+                    ]
+                , p []
+                    [ Options.styled div [ Typo.caption ] [ text "Aktivitetstype" ]
+                    , Options.styled div [ Typo.subhead ] [ text aktivitet.aktivitetsTypeNavn ]
+                    ]
+                ]
+            ]
+        , cell
+            [ size All 4
+            , Elevation.e0
+            ]
+            [ Options.div []
+                [ Options.div []
+                    [ text <| "Elevtimer: " ++ sumElevtimer
+                    ]
+                , Options.div []
+                    [ text <| "Lærertimer: " ++ sumLarertimer
+                    ]
                 ]
             ]
         ]
-    ]
 
 
 visAktivitetDeltakere : Taco -> Model -> List (Grid.Cell Msg)
