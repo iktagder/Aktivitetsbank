@@ -460,10 +460,10 @@ visAktivitetSuksess model aktivitet =
             ]
             [ Options.div []
                 [ Options.div []
-                    [ text <| "Elevtimer: " ++ sumElevtimer
+                    [ text <| "Totalt antall elevtimer: " ++ sumElevtimer
                     ]
                 , Options.div []
-                    [ text <| "Lærertimer: " ++ sumLarertimer
+                    [ text <| "Totalt antall lærertimer: " ++ sumLarertimer
                     ]
                 ]
             ]
@@ -566,28 +566,28 @@ visAktivitetDeltakerTabell taco model deltakere =
             []
             [ Table.tr []
                 [ Table.th
-                    [ css "width" "20%" ]
+                    []
                     [ showText div Typo.body2 "Utdanningsprogram"
                     ]
-                , Table.th [ css "width" "10%" ]
+                , Table.th []
                     [ showText div Typo.body2 "Årstrinn"
                     ]
-                , Table.th [ css "width" "15%", css "text-align" "left" ]
+                , Table.th [ css "text-align" "left" ]
                     [ showText span Typo.body2 "Fag"
                     ]
-                , Table.th [ css "width" "10%", css "text-align" "left" ]
-                    [ showText span Typo.body2 "Elevgrupper"
+                , Table.th [ css "text-align" "center", cs "wrapword" ]
+                    [ showText span Typo.body2 "Antall elevgrupper"
                     ]
-                , Table.th [ css "width" "10%", css "text-align" "left" ]
-                    [ showText span Typo.body2 "Elevtimer"
+                , Table.th [ css "text-align" "center", cs "wrapword" ]
+                    [ showText span Typo.body2 "Elevtimer pr gruppe"
                     ]
-                , Table.th [ css "width" "10%", css "text-align" "left" ]
-                    [ showText span Typo.body2 "Lærertimer"
+                , Table.th [ css "text-align" "center", cs "wrapword" ]
+                    [ showText span Typo.body2 "Totalt antall lærertimer"
                     ]
                 , Table.th [ css "width" "40%", css "text-align" "left" ]
                     [ showText span Typo.body2 "Kompetansemål"
                     ]
-                , Table.th [ css "width" "5%" ]
+                , Table.th [ css "width" "6%" ]
                     [ if kanRedigere taco then
                         showText div Typo.body2 "Handling"
                       else
@@ -595,7 +595,7 @@ visAktivitetDeltakerTabell taco model deltakere =
                     ]
                 ]
             ]
-        , Table.tbody []
+        , Table.tbody [] <|
             (deltakere
                 |> List.indexedMap (\idx item -> visAktivitetDeltakerTabellRad idx taco model.aktivitetId item model.mdl)
             )
@@ -616,9 +616,9 @@ visAktivitetDeltakerTabellRad idx taco aktivitetId model outerMdl =
             [ Table.td [ css "text-align" "left", cs "wrapword" ] [ text model.utdanningsprogramNavn ]
             , Table.td [ css "text-align" "left", cs "wrapword" ] [ text model.trinnNavn ]
             , Table.td [ css "text-align" "left", cs "wrapword" ] [ text model.fagNavn ]
-            , Table.td [ Table.numeric ] [ text <| toString model.elevgrupper ]
-            , Table.td [ Table.numeric ] [ text <| toString model.timer ]
-            , Table.td [ Table.numeric ] [ text <| toString model.larertimer ]
+            , Table.td [ css "text-align" "center", Table.numeric ] [ text <| toString model.elevgrupper ]
+            , Table.td [ css "text-align" "center", Table.numeric ] [ text <| toString model.timer ]
+            , Table.td [ css "text-align" "center", Table.numeric ] [ text <| toString model.larertimer ]
             , Table.td [ css "text-align" "left", cs "wrapword" ]
                 [ Html.pre
                     [ style

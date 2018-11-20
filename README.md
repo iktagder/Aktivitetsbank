@@ -1,12 +1,14 @@
 # Aktivitetsbank for videregående skoler
 
+[![Build Status](https://vaf.visualstudio.com/VAF.Aktivitetsbank/_apis/build/status/vest-agder.VAF.Aktivitetsbank)](https://vaf.visualstudio.com/VAF.Aktivitetsbank/_build/latest?definitionId=41)
+
 ## Består av følgende deler
 
-|                                   | Status    |
-|-----------------------------------|-----------|
-| [Frontend](./frontend/README.md)  | |
-| [Backend](./backend/README.md)    | |
-| Database Migration                | |
+|                                   | 
+|-----------------------------------|
+| [Frontend](./frontend/README.md)  |
+| [Backend](./backend/README.md)    |
+| Database Migration                |
 
 ## Requirements
 
