@@ -1,0 +1,90 @@
+name: $(Year:yyyy).$(Month)$(Rev:.r)
+
+phases:
+
+################################################################################
+- phase: DATABASE
+################################################################################
+  queue: Build Agent Pool
+  steps:
+  - task: NuGetRestore@1
+    inputs:
+      solution: 'backend/src/VAF.Aktivitetsbank.Data.Migrations/packages.config'
+      packagesDirectory: '..\..\packages'
+
+  - task: MSBuild@1
+    inputs:
+      solution: 'backend/src/VAF.Aktivitetsbank.Data.Migrations/VAF.Aktivitetsbank.Data.Migrations.csproj'
+      msbuildVersion: '15.0'
+      clean: 'true'
+
+  - task: octopusdeploy.octopus-deploy-build-release-tasks.octopus-pack.OctopusPack@2
+    inputs:
+      PackageId: 'VAF.Aktivitetsbank.Database.Migrations'
+      PackageVersion: '$(Build.BuildNumber)'
+      SourcePath: 'backend/src/VAF.Aktivitetsbank.Data.Migrations/bin/debug'
+      OutputPath: '$(Build.ArtifactStagingDirectory)'
+
+  - task: octopusdeploy.octopus-deploy-build-release-tasks.octopus-push.OctopusPush@2
+    inputs:
+      OctoConnectedServiceName: 'octopus.vaf.no'
+      Package: '$(Build.ArtifactStagingDirectory)\VAF.Aktivitetsbank.Database.Migrations.$(Build.BuildNumber).nupkg'
+
+################################################################################
+- phase: FRONTEND
+################################################################################
+  dependsOn: DATABASE
+  queue: Build Agent Pool
+  steps:
+  - task: Npm@0
+    inputs:
+      cwd: 'frontend'
+      arguments: '--force'
+
+  - task: Npm@0
+    inputs:
+      cwd: 'frontend'
+      command: 'run'
+      arguments: 'build'
+
+  - task: ArchiveFiles@1
+    inputs:
+      rootFolder: '$(System.DefaultWorkingDirectory)/frontend/dist'
+      includeRootFolder: 'false'
+      archiveFile: '$(Build.ArtifactStagingDirectory)\Aktivitetsbank.Frontend.$(Build.BuildNumber).zip'
+
+  - task: octopusdeploy.octopus-deploy-build-release-tasks.octopus-push.OctopusPush@2
+    inputs:
+      OctoConnectedServiceName: 'octopus.vaf.no'
+      Package: '$(Build.ArtifactStagingDirectory)\Aktivitetsbank.Frontend.$(Build.BuildNumber).zip'
+
+################################################################################
+- phase: BACKEND
+################################################################################
+  dependsOn: FRONTEND
+  queue: Build Agent Pool
+  steps:
+  - task: CmdLine@1
+    inputs:
+      filename: 'dotnet'
+      arguments: 'restore'
+      workingFolder: 'backend'
+
+  - task: CmdLine@1
+    inputs:
+      filename: 'dotnet'
+      arguments: 'publish -c Release -o $(Build.ArtifactStagingDirectory)'
+      workingFolder: 'backend'
+
+  - task: octopusdeploy.octopus-deploy-build-release-tasks.octopus-pack.OctopusPack@2
+    inputs:
+      PackageId: 'VAF.Aktivitetsbank.API'
+      PackageVersion: '$(Build.BuildNumber)'
+      SourcePath: '$(Build.ArtifactStagingDirectory)'
+      OutputPath: '$(Build.ArtifactStagingDirectory)'
+
+  - task: octopusdeploy.octopus-deploy-build-release-tasks.octopus-push.OctopusPush@2
+    inputs:
+      OctoConnectedServiceName: 'octopus.vaf.no'
+      Package: '$(Build.ArtifactStagingDirectory)\VAF.Aktivitetsbank.API.$(Build.BuildNumber).nupkg'
+      Replace: 'true'
